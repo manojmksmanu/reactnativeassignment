@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
@@ -13,7 +13,7 @@ const AppNavigator: React.FC = () => {
       <Stack.Navigator>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="ChatList" component={ChatListScreen} />
-        <Stack.Screen name="ChatWindow" component={ChatWindow} />
+        <Stack.Screen name="ChatWindow" options={{title:"chat"}} component={ChatWindow} />
       </Stack.Navigator>
     </NavigationContainer>
   );
