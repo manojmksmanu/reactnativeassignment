@@ -43,6 +43,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
       <Text style={styles.title}>Login</Text>
       <TextInput
         placeholder="Username"
+        placeholderTextColor="#808080"
         value={username}
         onChangeText={setUsername}
         style={styles.input}
@@ -50,6 +51,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
       />
       <TextInput
         placeholder="Password"
+        placeholderTextColor="#808080"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -74,12 +76,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    color :"blue",
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
   input: {
     borderBottomWidth: 1,
+    color:"black",
     marginBottom: 20,
     padding: 10,
     backgroundColor: '#fff',

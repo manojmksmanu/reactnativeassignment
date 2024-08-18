@@ -45,12 +45,50 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   }, [users, userId]);
 
   useEffect(() => {
-    if (currentChat) {
+   
       navigation.setOptions({
-        title: `${currentChat.username}`, // Set the title to the username
+        headerTitle: () => (
+          <View style={styles.headerTitleContainer}>
+            <Image
+              source={require('../assets/man.png')}
+              style={{width: 40, height: 40,marginRight:10}}
+            />
+            <Text style={styles.usernameText}>
+              {currentChat && currentChat.username}
+            </Text>
+          </View>
+        ),
+        headerRight: () => (
+          <View style={styles.headerRightContainer}>
+            <TouchableOpacity onPress={() => handleVideoCall()}>
+              {/* <Image
+                source={require('../assets/cam-recorder.png')}
+                style={{width: 20, height: 20}}
+              /> */}
+              {/* <Ionicons name="videocam" size={24} color="black" /> */}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleMoreOptions()}>
+              <Image
+                source={require('../assets/dots.png')}
+                style={{width: 20, height: 20}}
+              />
+              {/* <Ionicons name="ellipsis-vertical" size={24} color="black" /> */}
+            </TouchableOpacity>
+          </View>
+        ),
       });
-    }
+ 
   }, [navigation, currentChat]);
+    const handleVideoCall = () => {
+      // Handle video call logic here
+      console.log('Video call icon pressed');
+    };
+
+    const handleMoreOptions = () => {
+      // Handle more options logic here
+      console.log('More options icon pressed');
+    };
+
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -108,10 +146,21 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
         ]}>
         <Text
           style={
-            !isSender ? styles.sendermessageText : styles.receivermessageText
+            !isSender ? styles.receivermessageText : styles.sendermessageText
           }>
           {item.message}
         </Text>
+        <View style={styles.messageInfoContainer}>
+          <Text style={styles.timeText}>
+            {/* {messageTime} */}2:40AM
+            </Text>
+          {/* {isSender && item.isRead && ( */}
+            <Image
+              source={require('../assets/double-check.png')}
+              style={styles.tickIcon}
+            />
+          {/* )} */}
+        </View>
       </View>
     );
   };
@@ -137,13 +186,52 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
         />
       )}
       <View style={styles.inputContainer}>
-        <TextInput
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Type a message"
-          style={styles.input}
-          multiline
-        />
+        <View style={{width: '90%', position: 'relative'}}>
+          <Image
+            source={require('../assets/happiness.png')}
+            style={{
+              width: 22,
+              height: 22,
+              position: 'absolute',
+              zIndex: 10,
+              top: 9,
+              left: 10,
+              opacity: 0.6,
+            }}
+          />
+          <TextInput
+            value={message}
+            onChangeText={setMessage}
+            placeholder="Type a message"
+            placeholderTextColor="#808080"
+            style={styles.input}
+            multiline
+          />
+          <Image
+            source={require('../assets/attach-file.png')}
+            style={{
+              width: 22,
+              height: 22,
+              position: 'absolute',
+              zIndex: 10,
+              top: 9,
+              right: 50,
+              opacity: 0.6,
+            }}
+          />
+          <Image
+            source={require('../assets/photo-camera.png')}
+            style={{
+              width: 24,
+              height: 24,
+              position: 'absolute',
+              zIndex: 10,
+              top: 9,
+              right: 23,
+              opacity: 0.6,
+            }}
+          />
+        </View>
         <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
           <Image
             source={require('../assets/send-message.png')}
@@ -156,6 +244,22 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
 };
 
 const styles = StyleSheet.create({
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  usernameText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  headerRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: 70, // Adjust as needed
+    marginRight: 10,
+  },
   container: {
     flex: 1,
     padding: 10,
@@ -173,17 +277,35 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     maxWidth: '75%',
+    display: 'flex',
+    flexDirection: 'row',
   },
   senderContainer: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007bff',
+    backgroundColor: '#dcf8c6',
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0, // Horizontal offset
+      height: 1, // Vertical offset
+    },
+    shadowOpacity: 0.2, // Shadow opacity
+    shadowRadius: 1, // Shadow blur radius
+    elevation: 1, // Android shadow
   },
   receiverContainer: {
     alignSelf: 'flex-start',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0, // Horizontal offset
+      height: 1, // Vertical offset
+    },
+    shadowOpacity: 0.2, // Shadow opacity
+    shadowRadius: 1, // Shadow blur radius
+    elevation: 1, // Android shadow
   },
   sendermessageText: {
-    color: '#fff',
+    color: '#000',
   },
   receivermessageText: {
     color: '#000',
@@ -191,31 +313,69 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
+    padding: 5,
+    // backgroundColor: '#fff',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    color: '#363737',
+    paddingLeft: 40,
+    paddingRight: 60,
+    fontSize: 20,
+    borderWidth: 0.05,
+
+    borderColor: '#363737',
+    borderRadius: 35,
     paddingVertical: 8,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     marginRight: 10,
     backgroundColor: '#f9f9f9',
+    textDecorationLine: 'none',
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0, // Horizontal offset
+      height: 1, // Vertical offset
+    },
+    shadowOpacity: 0.2, // Shadow opacity
+    shadowRadius: 1, // Shadow blur radius
+    elevation: 1, // Android shadow
   },
   sendButton: {
-    backgroundColor: '#fff',
-    color: 'white',
+    backgroundColor: '#25d366',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0, // Horizontal offset
+      height: 1, // Vertical offset
+    },
+    shadowOpacity: 0.2, // Shadow opacity
+    shadowRadius: 1, // Shadow blur radius
+    elevation: 1, // Android shadow
   },
   image: {
-    width: 25,
-    height: 25,
+    width: 20,
+    height: 20,
     resizeMode: 'contain', // Resizes the image to maintain aspect ratio
+  },
+  messageInfoContainer: {
+    marginTop: 5,
+    paddingLeft: 8,
+    display: 'flex',
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+  },
+  timeText: {
+    color: '#808080',
+    fontSize: 12,
+    marginRight: 5,
+  },
+  tickIcon: {
+    width: 10,
+    height: 10,
+    marginBottom: 2,
   },
 });
 
