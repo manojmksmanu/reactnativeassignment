@@ -8,11 +8,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import {getMessages, getUsers, sendMessage} from '../services/authService';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import EmojiSelector from 'react-native-emoji-selector';
 
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
+  const [isEmojiSelectorVisible, setEmojiSelectorVisible] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const navigation = useNavigation();
   const {userId} = route.params;
   const [messages, setMessages] = useState<any[]>([]);
@@ -21,7 +25,16 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const flatListRef = useRef<FlatList<any>>(null); // Create ref for FlatList
+  const toggleEmojiSelector = () => {
+    setEmojiSelectorVisible(!isEmojiSelectorVisible);
+  };
 
+  const handleEmojiSelect = (emoji: string) => {
+    setSelectedEmoji(emoji);
+    setMessage(prevMessage => prevMessage + emoji);
+    setEmojiSelectorVisible(false);
+  };
+  console.log(EmojiSelector);
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true); // Start loading
@@ -45,50 +58,47 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   }, [users, userId]);
 
   useEffect(() => {
-   
-      navigation.setOptions({
-        headerTitle: () => (
-          <View style={styles.headerTitleContainer}>
-            <Image
-              source={require('../assets/man.png')}
-              style={{width: 40, height: 40,marginRight:10}}
-            />
-            <Text style={styles.usernameText}>
-              {currentChat && currentChat.username}
-            </Text>
-          </View>
-        ),
-        headerRight: () => (
-          <View style={styles.headerRightContainer}>
-            <TouchableOpacity onPress={() => handleVideoCall()}>
-              {/* <Image
+    navigation.setOptions({
+      headerTitle: () => (
+        <View style={styles.headerTitleContainer}>
+          <Image
+            source={require('../assets/man.png')}
+            style={{width: 40, height: 40, marginRight: 10}}
+          />
+          <Text style={styles.usernameText}>
+            {currentChat && currentChat.username}
+          </Text>
+        </View>
+      ),
+      headerRight: () => (
+        <View style={styles.headerRightContainer}>
+          <TouchableOpacity onPress={() => handleVideoCall()}>
+            {/* <Image
                 source={require('../assets/cam-recorder.png')}
                 style={{width: 20, height: 20}}
               /> */}
-              {/* <Ionicons name="videocam" size={24} color="black" /> */}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleMoreOptions()}>
-              <Image
-                source={require('../assets/dots.png')}
-                style={{width: 20, height: 20}}
-              />
-              {/* <Ionicons name="ellipsis-vertical" size={24} color="black" /> */}
-            </TouchableOpacity>
-          </View>
-        ),
-      });
- 
+            {/* <Ionicons name="videocam" size={24} color="black" /> */}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleMoreOptions()}>
+            <Image
+              source={require('../assets/dots.png')}
+              style={{width: 20, height: 20}}
+            />
+            {/* <Ionicons name="ellipsis-vertical" size={24} color="black" /> */}
+          </TouchableOpacity>
+        </View>
+      ),
+    });
   }, [navigation, currentChat]);
-    const handleVideoCall = () => {
-      // Handle video call logic here
-      console.log('Video call icon pressed');
-    };
+  const handleVideoCall = () => {
+    // Handle video call logic here
+    console.log('Video call icon pressed');
+  };
 
-    const handleMoreOptions = () => {
-      // Handle more options logic here
-      console.log('More options icon pressed');
-    };
-
+  const handleMoreOptions = () => {
+    // Handle more options logic here
+    console.log('More options icon pressed');
+  };
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -127,8 +137,8 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       return null;
     }
     try {
-      await sendMessage(userId, message);
       setMessage('');
+      await sendMessage(userId, message);
       const updatedMessages = await getMessages(userId);
       setMessages(updatedMessages);
     } catch (error) {
@@ -151,14 +161,14 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
           {item.message}
         </Text>
         <View style={styles.messageInfoContainer}>
-          <Text style={styles.timeText}>
-            {/* {messageTime} */}2:40AM
-            </Text>
+          <Text style={styles.timeText}>{/* {messageTime} */}2:40AM</Text>
           {/* {isSender && item.isRead && ( */}
+          {!isSender && (
             <Image
               source={require('../assets/double-check.png')}
               style={styles.tickIcon}
             />
+          )}
           {/* )} */}
         </View>
       </View>
@@ -166,80 +176,96 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   };
 
   return (
-    <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#007bff"
-          style={styles.loadingIndicator}
-        />
-      ) : (
-        <FlatList
-          ref={flatListRef} // Attach ref to FlatList
-          data={messages}
-          keyExtractor={item => item._id}
-          renderItem={renderMessage}
-          contentContainerStyle={styles.messageList}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({animated: true})
-          }
-        />
-      )}
-      <View style={styles.inputContainer}>
-        <View style={{width: '90%', position: 'relative'}}>
-          <Image
-            source={require('../assets/happiness.png')}
-            style={{
-              width: 22,
-              height: 22,
-              position: 'absolute',
-              zIndex: 10,
-              top: 9,
-              left: 10,
-              opacity: 0.6,
-            }}
+    <ImageBackground
+      source={require('../assets/b9qk3w41sqf1l0ccujfh.webp')}
+      style={styles.background}>
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="#007bff"
+            style={styles.loadingIndicator}
           />
-          <TextInput
-            value={message}
-            onChangeText={setMessage}
-            placeholder="Type a message"
-            placeholderTextColor="#808080"
-            style={styles.input}
-            multiline
+        ) : (
+          <FlatList
+            ref={flatListRef} // Attach ref to FlatList
+            data={messages}
+            keyExtractor={item => item._id}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messageList}
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToEnd({animated: true})
+            }
           />
-          <Image
-            source={require('../assets/attach-file.png')}
-            style={{
-              width: 22,
-              height: 22,
-              position: 'absolute',
-              zIndex: 10,
-              top: 9,
-              right: 50,
-              opacity: 0.6,
-            }}
-          />
-          <Image
-            source={require('../assets/photo-camera.png')}
-            style={{
-              width: 24,
-              height: 24,
-              position: 'absolute',
-              zIndex: 10,
-              top: 9,
-              right: 23,
-              opacity: 0.6,
-            }}
-          />
+        )}
+        <View style={styles.inputContainer}>
+          <View style={{width: '90%', position: 'relative'}}>
+            <TouchableOpacity style={{position:'absolute',zIndex:50}} onPress={toggleEmojiSelector}>
+              <Image
+                source={require('../assets/happiness.png')}
+                style={{
+                  width: 22,
+                  height: 22,
+                  position: 'relative',
+                  zIndex: 10,
+                  top: 9,
+                  left: 10,
+                  opacity: 0.6,
+                }}
+              />
+            </TouchableOpacity>
+
+            <TextInput
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Type a message"
+              placeholderTextColor="#808080"
+              style={styles.input}
+              multiline
+            />
+            <Image
+              source={require('../assets/attach-file.png')}
+              style={{
+                width: 22,
+                height: 22,
+                position: 'absolute',
+                zIndex: 10,
+                top: 9,
+                right: 50,
+                opacity: 0.6,
+              }}
+            />
+            <Image
+              source={require('../assets/photo-camera.png')}
+              style={{
+                width: 24,
+                height: 24,
+                position: 'absolute',
+                zIndex: 10,
+                top: 9,
+                right: 23,
+                opacity: 0.6,
+              }}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSendMessage}
+            style={styles.sendButton}>
+            <Image
+              source={require('../assets/send-message.png')}
+              style={styles.image}
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
-          <Image
-            source={require('../assets/send-message.png')}
-            style={styles.image}
+        {isEmojiSelectorVisible && (
+          <EmojiSelector
+            onEmojiSelected={handleEmojiSelect}
+            style={styles.emojiSelector}
           />
-        </TouchableOpacity>
+        )}
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -259,6 +285,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: 70, // Adjust as needed
     marginRight: 10,
+  },
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // or 'contain'
   },
   container: {
     flex: 1,
@@ -309,6 +339,9 @@ const styles = StyleSheet.create({
   },
   receivermessageText: {
     color: '#000',
+  },
+  emojiSelector: {
+    height: 350,
   },
   inputContainer: {
     flexDirection: 'row',
