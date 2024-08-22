@@ -1,8 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'https://reactnativeassignment.onrender.com/api';
-
+// const API_URL = 'https://reactnativeassignment.onrender.com/api';
+const API_URL = 'http://10.0.2.2:5000/api';
 
 export const login = async (
   username: string,
@@ -28,20 +28,26 @@ export const login = async (
 // New function to get the current user's details
 export const getCurrentUser = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
+  console.log(token, 'get user token');
   try {
-    const response = await axios.get(`${API_URL}/auth/me`, { // Assuming /auth/me endpoint exists
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.get(`${API_URL}/auth/me`, {
+      // Assuming /auth/me endpoint exists
+      headers: {Authorization: `Bearer ${token}`},
     });
+    console.log(response, 'response');
     return response.data;
   } catch (error) {
-    console.error('Failed to fetch current user:', error.response ? error.response.data : error.message);
+    console.error(
+      'Failed to fetch current user:',
+      error.response ? error.response.data : error.message,
+    );
     throw error;
   }
 };
 
-
-export const getUsers = async (): Promise<any[]> => {
+export const getUsers = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
+  console.log(token);
   try {
     const response = await axios.get(`${API_URL}/chat/users`, {
       headers: {Authorization: `Bearer ${token}`},
@@ -72,7 +78,7 @@ export const sendMessage = async (
   const token = await AsyncStorage.getItem('token');
   await axios.post(
     `${API_URL}/chat/message`,
-    {receiverId:userId, message:content},
+    {receiverId: userId, message: content},
     {
       headers: {Authorization: `Bearer ${token}`},
     },

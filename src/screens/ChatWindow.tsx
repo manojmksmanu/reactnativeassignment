@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
+import {io} from 'socket.io-client';
 import {
   View,
   Text,
@@ -10,13 +11,20 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
-import {getMessages, getUsers, sendMessage} from '../services/authService';
+import {
+  getCurrentUser,
+  getMessages,
+  getUsers,
+  sendMessage,
+} from '../services/authService';
 import {useNavigation} from '@react-navigation/native';
 import EmojiSelector from 'react-native-emoji-selector';
+import { useAuth } from '../context/userContext';
+
+const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [isEmojiSelectorVisible, setEmojiSelectorVisible] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const navigation = useNavigation();
   const {userId} = route.params;
   const [messages, setMessages] = useState<any[]>([]);
@@ -25,16 +33,41 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const flatListRef = useRef<FlatList<any>>(null); // Create ref for FlatList
-  const toggleEmojiSelector = () => {
-    setEmojiSelectorVisible(!isEmojiSelectorVisible);
-  };
+  const [socket, setSocket] = useState<any>();
+  const [isConnected, setIsConnected] = useState(true);
+const {loggedUser}=useAuth();
+  // ----socket connection--
+  useEffect(() => {
+    const socketInstance = io(base_url, {
+      transports: ['websocket'], // Forces WebSocket transport
+    });
+    setSocket(socketInstance);
 
-  const handleEmojiSelect = (emoji: string) => {
-    setSelectedEmoji(emoji);
-    setMessage(prevMessage => prevMessage + emoji);
-    setEmojiSelectorVisible(false);
-  };
-  console.log(EmojiSelector);
+    socketInstance.on('connect', () => {
+      console.log('Socket connected with ID:', socketInstance.id);
+      setIsConnected(true);
+    });
+
+    // Send unsent messages when connected
+    socketInstance.on('receiveMessage', messageData => {
+      console.log('Received message:', messageData.sender);
+      // If the sender of the message is the logged-in user, do not set the message
+      console.log(messageData.sender, loggedUser, 'details');
+      if (messageData.sender !== loggedUser) {
+        // If the sender is not the logged-in user, add the message to the state
+        setMessages(prevMessages => [...prevMessages, messageData]);
+      }
+    
+    });
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+        setIsConnected(false);
+      }
+    };
+  }, []);
+  // --socket connection end--
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true); // Start loading
@@ -99,7 +132,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     // Handle more options logic here
     console.log('More options icon pressed');
   };
-
+// ---fetchMessages function -- 
   useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true); // Start loading
@@ -114,12 +147,11 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     };
     fetchMessages();
   }, [userId]);
-
+// ---fetch messages function end -- 
   useEffect(() => {
     // Scroll to the bottom whenever messages change
     flatListRef.current?.scrollToEnd({animated: true});
   }, [messages]);
-
   // Ensure scrolling happens on initial load
   useEffect(() => {
     const scrollToBottom = () => {
@@ -132,20 +164,36 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     return () => clearTimeout(timer);
   }, []); // Empty dependency array ensures this runs only once
 
-  const handleSendMessage = async () => {
-    if (message === '') {
-      return null;
-    }
-    try {
-      setMessage('');
-      await sendMessage(userId, message);
-      const updatedMessages = await getMessages(userId);
-      setMessages(updatedMessages);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    }
+const handleSendMessage = async () => {
+  if (message === '') return;
+
+  const messageId = Date.now().toString(); // Unique ID for the message
+  const messageData = {
+    sender: loggedUser,
+    receiver: currentChat._id,
+    message,
+    messageId,
   };
 
+  if (socket) {
+    socket.emit('sendMessage', messageData);
+    // Clear unsent messages list if socket is connected
+    setMessages(prevMessages => [...prevMessages, messageData]);
+    // if (isConnected) {
+    //   setUnsentMessages([]);
+    // } else {
+    //   setUnsentMessages(prevMessages => [...prevMessages, messageData]);
+    // }
+  } else {
+    // setUnsentMessages(prevMessages => [...prevMessages, messageData]);
+  }
+
+  setMessage('');
+};
+
+// const handleInputChange=(e:any)=>{
+// setMessage(e.target.value)
+// } 
   const renderMessage = ({item}: {item: any}) => {
     const isSender = item.sender._id === userId;
     return (
@@ -174,7 +222,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       </View>
     );
   };
-
+console.log('bhagwan kya galti kar rhe h hum bus bhot hua bata do abb ')
   return (
     <ImageBackground
       source={require('../assets/b9qk3w41sqf1l0ccujfh.webp')}
@@ -200,7 +248,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
         )}
         <View style={styles.inputContainer}>
           <View style={{width: '90%', position: 'relative'}}>
-            <TouchableOpacity style={{position:'absolute',zIndex:50}} onPress={toggleEmojiSelector}>
+            <TouchableOpacity style={{position: 'absolute', zIndex: 50}}>
               <Image
                 source={require('../assets/happiness.png')}
                 style={{

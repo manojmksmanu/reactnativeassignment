@@ -8,16 +8,19 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {getUsers} from '../services/authService';
+import {useAuth} from '../context/userContext';
 
 const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-
+  const {loggedUser} = useAuth();
+  console.log(loggedUser,'loginm');
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true); // Start loading
       try {
         const response = await getUsers();
+        console.log(response, response);
         setUsers(response);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -25,7 +28,6 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
         setLoading(false); // Stop loading
       }
     };
-
     fetchUsers();
   }, []);
 
