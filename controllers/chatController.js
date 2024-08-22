@@ -76,6 +76,7 @@ exports.getUsers = async (req, res) => {
       // Normal users can only see admins except themselves
       const admins = await User.find({ isAdmin: true, _id: { $ne: user._id } }).select('-password');
       res.json(admins);
+      console.log(admins)
     }
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });

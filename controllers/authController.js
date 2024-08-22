@@ -49,3 +49,13 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+// Controller function to get the current user's details
+exports.getLoggedUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
