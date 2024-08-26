@@ -50,12 +50,25 @@ exports.login = async (req, res) => {
   }
 };
 
-// Controller function to get the current user's details
+// Controller function to get the logged user details
 exports.getLoggedUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    const user = req.user;
+    console.log(user, 'user');
+
+    // Use findOne instead of find to get a single user document
+    const loggedUser = await User.findOne({
+      _id: user._id,
+    }).select("-password"); // Exclude the password field
+
+    if (!loggedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(loggedUser);
+    console.log(loggedUser);
+  } catch (error) {
+    console.error('Error fetching logged user:', error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

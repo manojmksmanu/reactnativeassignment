@@ -2,11 +2,10 @@ const express = require("express");
 // const http = require("http");
 const { Server } = require("socket.io");
 const connectDB = require("./config/db");
-const Message= require('./models/messageModel')
+const Message = require("./models/messageModel");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const cors = require("cors");
-
 
 connectDB();
 const app = express();
@@ -19,7 +18,6 @@ app.use(
     credentials: true, // Allow cookies to be sent
   })
 );
-
 
 app.get("/", (req, res) => {
   res.send("API is running");
@@ -34,30 +32,30 @@ const io = require("socket.io")(http);
 
 io.on("connection", (socket) => {
   console.log("a user is connected", socket.id);
-   socket.on("sendMessage", async (messageData) => {
+
+  socket.on("sendMessage", async (messageData) => {
     console.log(messageData)
-     try {
-       const { sender, receiver, message } = messageData;
+    try {
+      const { sender, receiver, message, replyingMessage } = messageData;
+      // Save message to database
+      const newMessage = new Message({
+        sender,
+        receiver,
+        message,
+        replyingMessage,
+      });
+      await newMessage.save();
 
-       // Save message to database
-       const newMessage = new Message({
-         sender,
-         receiver,
-         message,
-       });
-       await newMessage.save();
+      // Emit message to the specific receiver
+      socket.to(receiver).emit("receiveMessage", messageData);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  });
 
-       // Emit message to the receiver
-         io.emit("receiveMessage", messageData);
-       console.log(messageData,'messaage')
-     } catch (error) {
-       console.error("Error saving message:", error);
-     }
-   });
-
-   socket.on("disconnect", () => {
-     console.log("User disconnected", socket.id);
-   });
+  socket.on("disconnect", () => {
+    console.log("user disconnected", socket.id);
+  });
 });
 
 http.listen(5000, () => {
