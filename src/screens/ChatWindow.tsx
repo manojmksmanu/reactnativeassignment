@@ -33,20 +33,19 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [replyingMessage, setReplyingMessage] = useState<any>(null);
   const [isReplying, setIsReplying] = useState<boolean>(false); // Track if replying
   const textInputRef = useRef<TextInput>(null); // Ref for TextInput
-  const [shouldScroll, setShouldScroll] = useState(true);
 
-  const scrollViewRef = useRef(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  // Scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
-  }, []);
+      scrollToBottom();
+  }, [messages]);
+
   const scrollToBottom = () => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current?.scrollToEnd({animated: true});
-    }
+    scrollViewRef.current?.scrollToEnd({animated: false});
   };
   // Handle content size change to scroll to bottom
   const hanldeContentSizeChange = () => {
-    scrollViewRef.current?.scrollToEnd({animated: true});
+    scrollViewRef.current?.scrollToEnd({animated: false});
   };
   // ----socket connection--
   useEffect(() => {
