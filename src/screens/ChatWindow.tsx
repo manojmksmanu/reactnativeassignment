@@ -156,6 +156,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
       sender: loggedUserId,
+      senderName: loggedUser.username,
       receiver: currentChat._id,
       message,
       messageId,
@@ -228,7 +229,12 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
             <View style={styles.inputContainer}>
               {replyingMessage && (
                 <View style={styles.replyingMessage}>
-                  <Text style={{fontSize: 18}}>
+                  <Text style={{fontSize: 18, color: '#25d366'}}>
+                    {replyingMessage.senderName !== loggedUser.username
+                      ? replyingMessage.senderName
+                      : 'You'}
+                  </Text>
+                  <Text style={{fontSize: 16}}>
                     {replyingMessage && replyingMessage.message}
                   </Text>
                   <TouchableOpacity

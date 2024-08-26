@@ -74,9 +74,18 @@ const RenderMessage = ({
             animatedStyle,
           ]}>
           {item.replyingMessage && (
-            <Text style={styles.renderRepyingMessage}>
-              {item.replyingMessage.message}
-            </Text>
+            <View style={styles.renderRepyingMessage}>
+              {item.replyingMessage.senderName ? (
+                <Text style={{color: '#25d366'}}>
+                  {item.replyingMessage.senderName}
+                </Text>
+              ) : (
+                <Text style={{color: '#25d366'}}>
+                 You
+                </Text>
+              )}
+              <Text>{item.replyingMessage.message}</Text>
+            </View>
           )}
           <View style={styles.message}>
             <Text
@@ -166,15 +175,19 @@ const styles = StyleSheet.create({
   sendermessageText: {
     color: '#000',
     fontSize: 16,
+    margin:2
   },
   receivermessageText: {
     color: '#000',
     fontSize: 16,
+    margin:2
   },
   renderRepyingMessage: {
     backgroundColor: '#F3F8EF',
     borderRadius: 5,
     padding: 10,
+    display: 'flex',
+    flexDirection: 'column',
   },
 });
 
