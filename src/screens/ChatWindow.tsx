@@ -16,7 +16,7 @@ import {getMessages, getUsers} from '../services/authService';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
-const base_url = 'http://localhost:5000';
+const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const navigation = useNavigation();
@@ -29,15 +29,15 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const flatListRef = useRef<FlatList<any>>(null); // Create ref for FlatList
   const [socket, setSocket] = useState<any>();
   const [isConnected, setIsConnected] = useState(true);
-  const {loggedUser} = useAuth();
+  const {loggedUserId, loggedUser} = useAuth();
   const [replyingMessage, setReplyingMessage] = useState<any>(null);
   const [isReplying, setIsReplying] = useState<boolean>(false); // Track if replying
   const textInputRef = useRef<TextInput>(null); // Ref for TextInput
-
   const scrollViewRef = useRef<ScrollView>(null);
   // Scroll to bottom when messages change
   useEffect(() => {
-      scrollToBottom();
+    scrollToBottom();
+    console.log(loggedUser);
   }, [messages]);
 
   const scrollToBottom = () => {
@@ -61,7 +61,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       setIsConnected(true);
     });
     socketInstance.on('receiveMessage', messageData => {
-      if (messageData.sender !== loggedUser) {
+      if (messageData.sender !== loggedUserId) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
     });
@@ -151,13 +151,15 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   // ---fetch messages function end --
 
   const handleSendMessage = async () => {
+    setReplyingMessage('');
     if (message === '') return;
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
-      sender: loggedUser,
+      sender: loggedUserId,
       receiver: currentChat._id,
       message,
       messageId,
+      replyingMessage,
     };
 
     if (socket) {
@@ -172,16 +174,14 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   };
   const handleSwipeLeft = (item: any) => {
     console.log('Left swipe on item:', item);
-    // Implement action for left swipe (e.g., reply)
     setReplyingMessage(item);
-    setIsReplying(true); // Trigger the focus
+    setIsReplying(true);
   };
 
   const handleSwipeRight = (item: any) => {
     console.log('Right swipe on item:', item);
-    // Implement action for right swipe (e.g., react or delete)
     setReplyingMessage(item);
-    setIsReplying(true); // Trigger the focus
+    setIsReplying(true);
   };
 
   const handleRemoveReplying = () => {
@@ -228,7 +228,9 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
             <View style={styles.inputContainer}>
               {replyingMessage && (
                 <View style={styles.replyingMessage}>
-                  <Text>{replyingMessage && replyingMessage.message}</Text>
+                  <Text style={{fontSize: 18}}>
+                    {replyingMessage && replyingMessage.message}
+                  </Text>
                   <TouchableOpacity
                     onPress={handleRemoveReplying}
                     style={styles.closeReplyingMessage}>
@@ -273,7 +275,6 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
                 }}
               />
             </View>
-
             <TouchableOpacity
               onPress={handleSendMessage}
               style={styles.sendButton}>

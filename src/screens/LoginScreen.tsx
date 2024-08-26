@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,36 +11,36 @@ import {
 import {login} from '../services/authService';
 import {jwtDecode} from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../context/userContext';
+import {useAuth} from '../context/userContext';
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false); // Loading state
-  const [loggedUserId, setLoggeduserId] = useState<string>('');
-  const {loggedUser,setLoggedUser}=useAuth();
-// console.log(loggedUser,'loggeduser')
-  // --get logged user--
-    const fetchLoggedUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          const decodedToken = jwtDecode(token);
-          const userId = decodedToken.id; // Adjust if your payload structure is different
+  const {loggedUserId, setLoggedUserId} = useAuth();
 
-          if (userId) {
-            setLoggedUser(userId);
-          }
+
+
+  const fetchLoggedUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.id; // Adjust if your payload structure is different
+        console.log(decodedToken);
+        if (userId) {
+          setLoggedUserId(userId);
         }
-      } catch (error) {
-        console.error('Error fetching user:', error);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   const handleLogin = async () => {
     setLoading(true); // Start loading
     try {
       await login(username, password);
-      await  fetchLoggedUser();
+      await fetchLoggedUser();
       setLoading(false); // Stop loading
       navigation.navigate('ChatList');
       Alert.alert('Login successful');
@@ -98,14 +98,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    color :"blue",
+    color: 'blue',
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
   input: {
     borderBottomWidth: 1,
-    color:"black",
+    color: 'black',
     marginBottom: 20,
     padding: 10,
     backgroundColor: '#fff',

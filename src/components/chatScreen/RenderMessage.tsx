@@ -61,7 +61,7 @@ const RenderMessage = ({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{translateX: translateX.value}],
   }));
-  
+
   return (
     <GestureHandlerRootView>
       <PanGestureHandler
@@ -73,10 +73,15 @@ const RenderMessage = ({
             isSender ? styles.senderContainer : styles.receiverContainer,
             animatedStyle,
           ]}>
+          {item.replyingMessage && (
+            <Text style={styles.renderRepyingMessage}>
+              {item.replyingMessage.message}
+            </Text>
+          )}
           <View style={styles.message}>
             <Text
               style={
-                isSender ? styles.receivermessageText : styles.sendermessageText
+                isSender ? styles.sendermessageText : styles.receivermessageText
               }>
               {item.message}
             </Text>
@@ -107,27 +112,30 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 10,
     maxWidth: '70%',
-    flexDirection: 'row', // Keep the content in a row
+    flexDirection: 'column', // Keep the content in a row
     flexWrap: 'wrap', // Allow wrapping to handle longer texts
-    // Align items to the bottom
-    justifyContent: 'flex-end', // Ensure space between message and info
   },
   message: {
     flexShrink: 1, // Allow message text to shrink when necessary
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    // backgroundColor:'red'
   },
   messageInfoContainer: {
     marginLeft: 5, // Space between the message and the info container
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   timeText: {
     color: '#808080',
-    fontSize: 12,
+    fontSize: 10,
     marginRight: 3, // Slight margin for separation
   },
   tickIcon: {
-    width: 12,
-    height: 12,
+    width: 9,
+    height: 9,
     marginLeft: 3, // Slight margin for separation
   },
   senderContainer: {
@@ -157,9 +165,16 @@ const styles = StyleSheet.create({
   },
   sendermessageText: {
     color: '#000',
+    fontSize: 16,
   },
   receivermessageText: {
     color: '#000',
+    fontSize: 16,
+  },
+  renderRepyingMessage: {
+    backgroundColor: '#F3F8EF',
+    borderRadius: 5,
+    padding: 10,
   },
 });
 

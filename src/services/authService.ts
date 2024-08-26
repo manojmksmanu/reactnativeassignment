@@ -82,3 +82,19 @@ export const sendMessage = async (
     },
   );
 };
+
+export const loggeduser = async (): Promise<void> => {
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const response = await axios.get(`${API_URL}/auth/loggedUser`, {
+      headers: {Authorization: `Bearer ${token}`},
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      'Login failed:',
+      error.response ? error.response.data : error.message,
+    );
+    throw error; // Re-throw the error to handle it in the component
+  }
+};

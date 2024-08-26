@@ -7,13 +7,20 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import {getUsers} from '../services/authService';
+import {getUsers, loggeduser} from '../services/authService';
 import {useAuth} from '../context/userContext';
 
 const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const {loggedUser} = useAuth();
+  const {setLoggedUser} = useAuth();
+  useEffect(() => {
+    const find = async () => {
+      const response = await loggeduser();
+      await setLoggedUser(response)
+    };
+    find()
+  }, []);
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true); // Start loading
