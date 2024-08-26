@@ -25,7 +25,6 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         const token = await AsyncStorage.getItem('token');
         if (token) {
           const decodedToken = jwtDecode(token);
-          console.log(decodedToken.id, 'decod');
           const userId = decodedToken.id; // Adjust if your payload structure is different
 
           if (userId) {

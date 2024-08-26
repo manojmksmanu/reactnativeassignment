@@ -28,13 +28,12 @@ export const login = async (
 // New function to get the current user's details
 export const getCurrentUser = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
-  console.log(token, 'get user token');
+
   try {
     const response = await axios.get(`${API_URL}/auth/me`, {
       // Assuming /auth/me endpoint exists
       headers: {Authorization: `Bearer ${token}`},
     });
-    console.log(response, 'response');
     return response.data;
   } catch (error) {
     console.error(
@@ -47,7 +46,6 @@ export const getCurrentUser = async (): Promise<any> => {
 
 export const getUsers = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
-  console.log(token);
   try {
     const response = await axios.get(`${API_URL}/chat/users`, {
       headers: {Authorization: `Bearer ${token}`},
