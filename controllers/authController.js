@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const { createChatsForNewUser } = require("./chatController");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
@@ -8,7 +9,7 @@ const generateToken = (id) => {
 };
 
 exports.signup = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, isAdmin } = req.body;
 
   try {
     const userExists = await User.findOne({ username });
@@ -17,8 +18,9 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = await User.create({ username, password });
-
+    const user = await User.create({ username, password, isAdmin });
+    console.log(user, "users");
+    await createChatsForNewUser(user);
     res.status(201).json({
       _id: user._id,
       username: user.username,
@@ -54,7 +56,7 @@ exports.login = async (req, res) => {
 exports.getLoggedUser = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user, 'user');
+    console.log(user, "user");
 
     // Use findOne instead of find to get a single user document
     const loggedUser = await User.findOne({
@@ -68,7 +70,7 @@ exports.getLoggedUser = async (req, res) => {
     res.json(loggedUser);
     console.log(loggedUser);
   } catch (error) {
-    console.error('Error fetching logged user:', error);
+    console.error("Error fetching logged user:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };

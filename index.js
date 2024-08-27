@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const connectDB = require("./config/db");
 const Message = require("./models/messageModel");
 const authRoutes = require("./routes/authRoutes");
-const chatRoutes = require("./routes/chatRoutes");
+const chatRoutes = require("./routes/chatMessageRoutes");
 const cors = require("cors");
 
 connectDB();

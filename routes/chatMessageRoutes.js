@@ -1,10 +1,13 @@
+// chat and message route
+
 const express = require("express");
 const {
   sendMessage,
   getMessages,
   getUsers,
-} = require("../controllers/chatController");
+} = require("../controllers/messageController");
 const { protect } = require("../middleware/authMiddleware");
+const { getChatsForUser } = require("../misc/misc");
 const router = express.Router();
 
 // Send message (protected)
@@ -15,5 +18,11 @@ router.get("/messages/:chatUserId", protect, getMessages);
 
 // Get all users (protected, only admin)
 router.get("/users", protect, getUsers);
+
+//Get all chats 
+router.get("/users/:userId/chats",protect, async (req, res) => {
+  const chats = await getChatsForUser(req.params.userId);
+  res.json(chats);
+});
 
 module.exports = router;
