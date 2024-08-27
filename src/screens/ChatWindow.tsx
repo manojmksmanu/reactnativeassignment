@@ -15,7 +15,6 @@ import {getMessages, getUsers} from '../services/authService';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
-
 interface User {
   _id: string;
   username: string;
@@ -25,7 +24,8 @@ const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const navigation = useNavigation();
-  const {userId} = route.params;
+  const {chatId} = route.params;
+  console.log(chatId, 'userid');
   const [messages, setMessages] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [currentChat, setCurrentChat] = useState<any>(null);
@@ -41,7 +41,6 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     loggedUserId: string;
     loggedUser: User;
   };
-
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -100,12 +99,12 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   }, []);
   // Fetch users end
 
-  useEffect(() => {
-    if (users.length > 0) {
-      const user = users.find(user => user._id === userId);
-      setCurrentChat(user);
-    }
-  }, [users, userId]);
+  // useEffect(() => {
+  //   if (users.length > 0) {
+  //     const user = users.find(user => user._id === userId);
+  //     setCurrentChat(user);
+  //   }
+  // }, [users, userId]);
 
   // ----chat window header--
   useEffect(() => {
@@ -145,7 +144,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     const fetchMessages = async () => {
       setLoading(true); // Start loading
       try {
-        const response = await getMessages(userId);
+        const response = await getMessages(chatId);
         setMessages(response);
       } catch (error) {
         console.error('Failed to fetch messages:', error);
@@ -154,7 +153,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       }
     };
     fetchMessages();
-  }, [userId]);
+  }, [chatId]);
 
   // ---fetch messages function end --
   const handleSendMessage = async () => {
@@ -162,9 +161,9 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     if (message === '') return;
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
+      chatId: chatId,
       sender: loggedUserId,
       senderName: loggedUser ? loggedUser.username : 'Unknown',
-      receiver: currentChat._id,
       message,
       messageId,
       replyingMessage,
@@ -223,7 +222,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
               return (
                 <RenderMessage
                   item={item}
-                  userId={userId}
+                  loggedUserId={loggedUserId}
                   onLeftSwipe={() => handleSwipeLeft(item)}
                   onRightSwipe={() => handleSwipeRight(item)}
                 />

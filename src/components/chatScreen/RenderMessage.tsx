@@ -15,16 +15,16 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const RenderMessage = ({
   item,
-  userId,
+  loggedUserId,
   onLeftSwipe,
   onRightSwipe,
 }: {
   item: any;
-  userId: any;
+  loggedUserId:string;
   onLeftSwipe: any;
   onRightSwipe: any;
 }) => {
-  const isSender = item.sender !== userId;
+  const isSender = item.sender === loggedUserId;
   const translateX = useSharedValue(0);
   // Gesture handler for pan gestures
   const onGestureEvent = (event: PanGestureHandlerGestureEvent) => {
@@ -80,9 +80,7 @@ const RenderMessage = ({
                   {item.replyingMessage.senderName}
                 </Text>
               ) : (
-                <Text style={{color: '#25d366'}}>
-                 You
-                </Text>
+                <Text style={{color: '#25d366'}}>You</Text>
               )}
               <Text>{item.replyingMessage.message}</Text>
             </View>

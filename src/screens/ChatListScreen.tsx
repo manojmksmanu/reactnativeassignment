@@ -60,9 +60,6 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   }, [loggedUserId, setChats]);
 
-  const data = Sender(loggedUser, chats && chats[0]?.users);
-  console.log(data, 'sender');
-  console.log(chats && chats[0]?.users);
   console.log(chats);
   return (
     <View style={styles.container}>
