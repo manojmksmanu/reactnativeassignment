@@ -216,7 +216,7 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
         ) : (
           <ScrollView
             ref={scrollViewRef}
-            contentContainerStyle={{flexGrow: 1}}
+            contentContainerStyle={{flexGrow: 0}}
             onContentSizeChange={hanldeContentSizeChange}>
             {messages.map(item => {
               return (
