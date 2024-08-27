@@ -25,7 +25,7 @@ const base_url = 'http://10.0.2.2:5000';
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const navigation = useNavigation();
   const {chatId} = route.params;
-  console.log(chatId, 'userid');
+  console.log(chatId, 'chatId');
   const [messages, setMessages] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [currentChat, setCurrentChat] = useState<any>(null);

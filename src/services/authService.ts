@@ -71,7 +71,7 @@ export const getAllChats = async (userId: string): Promise<any> => {
     const response = await axios.get(`${API_URL}/chat/${userId}/chats`, {
       headers: {Authorization: `Bearer ${token}`},
     });
-    console.log(response.config.data, 'allchats');
+    console.log(response.data, 'allchats');
     return response.data;
   } catch (err:any) {
     console.error(

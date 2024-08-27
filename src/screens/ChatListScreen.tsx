@@ -46,9 +46,10 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
   useEffect(() => {
     if (loggedUserId) {
       const fetchChats = async () => {
-        setLoading(true); // Start loading
+        // setLoading(true); // Start loading
         try {
           const response = await getAllChats(loggedUserId);
+          console.log(response,'response')
           setChats(response);
         } catch (error) {
           console.error('Failed to fetch chats:', error);
@@ -58,7 +59,7 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
       };
       fetchChats();
     }
-  }, [loggedUserId, setChats]);
+  }, [setChats]);
 
   console.log(chats);
   return (
@@ -91,7 +92,7 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate('ChatWindow', {userId: item._id})
+                navigation.navigate('ChatWindow', {chatId: item._id})
               }
               style={styles.userContainer}>
               <View style={styles.userInfo}>
