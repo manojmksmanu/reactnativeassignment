@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   Image,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
@@ -16,6 +15,12 @@ import {getMessages, getUsers} from '../services/authService';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
+
+interface User {
+  _id: string;
+  username: string;
+}
+
 const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any}> = ({route}) => {
@@ -25,19 +30,21 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [users, setUsers] = useState<any[]>([]);
   const [currentChat, setCurrentChat] = useState<any>(null);
   const [message, setMessage] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const flatListRef = useRef<FlatList<any>>(null); // Create ref for FlatList
+  const [loading, setLoading] = useState<boolean>(true);
   const [socket, setSocket] = useState<any>();
   const [isConnected, setIsConnected] = useState(true);
-  const {loggedUserId, loggedUser} = useAuth();
   const [replyingMessage, setReplyingMessage] = useState<any>(null);
-  const [isReplying, setIsReplying] = useState<boolean>(false); // Track if replying
-  const textInputRef = useRef<TextInput>(null); // Ref for TextInput
+  const [isReplying, setIsReplying] = useState<boolean>(false);
+  const textInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const {loggedUserId, loggedUser} = useAuth() as {
+    loggedUserId: string;
+    loggedUser: User;
+  };
+
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
-    console.log(loggedUser);
   }, [messages]);
 
   const scrollToBottom = () => {
@@ -148,15 +155,15 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     };
     fetchMessages();
   }, [userId]);
-  // ---fetch messages function end --
 
+  // ---fetch messages function end --
   const handleSendMessage = async () => {
     setReplyingMessage('');
     if (message === '') return;
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
       sender: loggedUserId,
-      senderName: loggedUser.username,
+      senderName: loggedUser ? loggedUser.username : 'Unknown',
       receiver: currentChat._id,
       message,
       messageId,
@@ -174,13 +181,13 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
     setMessage('');
   };
   const handleSwipeLeft = (item: any) => {
-    console.log('Left swipe on item:', item);
+    // console.log('Left swipe on item:', item);
     setReplyingMessage(item);
     setIsReplying(true);
   };
 
   const handleSwipeRight = (item: any) => {
-    console.log('Right swipe on item:', item);
+    // console.log('Right swipe on item:', item);
     setReplyingMessage(item);
     setIsReplying(true);
   };
@@ -310,12 +317,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: 70, // Adjust as needed
+    width: 70,
     marginRight: 10,
   },
   background: {
     flex: 1,
-    resizeMode: 'cover', // or 'contain'
+    resizeMode: 'cover',
   },
   container: {
     flex: 1,
@@ -346,18 +353,17 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     textDecorationLine: 'none',
 
-    shadowColor: '#000', // Shadow color
+    shadowColor: '#000',
 
     shadowOffset: {
-      width: 0, // Horizontal offset
-      height: 1, // Vertical offset
+      width: 0,
+      height: 1,
     },
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 1, // Shadow blur radius
-    elevation: 1, // Android shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
   },
   input: {
-    // flex: 1,
     color: 'grey',
     paddingLeft: 20,
     textDecorationLine: 'none',
@@ -369,7 +375,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     marginRight: 10,
-    minHeight: 40, // Minimum height when there is no text
+    minHeight: 40,
     maxHeight: 120,
   },
   sendButton: {
@@ -390,7 +396,7 @@ const styles = StyleSheet.create({
   image: {
     width: 20,
     height: 20,
-    resizeMode: 'contain', // Resizes the image to maintain aspect ratio
+    resizeMode: 'contain',
   },
   replyingMessage: {
     backgroundColor: 'white',

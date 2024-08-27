@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,24 +9,28 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {login} from '../services/authService';
-import {jwtDecode} from 'jwt-decode';
+import {jwtDecode }from 'jwt-decode'; // Correct import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
+
+// Define a custom interface that extends JwtPayload to include the 'id' property
+interface CustomJwtPayload {
+  id: string;
+  // Add other properties if needed, e.g., username, email, etc.
+}
+
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false); // Loading state
-  const {loggedUserId, setLoggedUserId} = useAuth();
-
-
+  const {setLoggedUserId} = useAuth();
 
   const fetchLoggedUser = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.id; // Adjust if your payload structure is different
-        console.log(decodedToken);
+        const decodedToken = jwtDecode<CustomJwtPayload>(token);
+        const userId = decodedToken.id; // This should now be recognized
         if (userId) {
           setLoggedUserId(userId);
         }

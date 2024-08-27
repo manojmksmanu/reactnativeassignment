@@ -1,6 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+interface User {
+  _id: string;
+  username: string;
+  // Add other properties as needed
+}
 // const API_URL = 'https://reactnativeassignment.onrender.com/api';
 const API_URL = 'http://10.0.2.2:5000/api';
 
@@ -16,7 +21,7 @@ export const login = async (
     const {token} = response.data;
 
     await AsyncStorage.setItem('token', token);
-  } catch (error) {
+  } catch (error:any) {
     console.error(
       'Login failed:',
       error.response ? error.response.data : error.message,
@@ -35,7 +40,7 @@ export const getCurrentUser = async (): Promise<any> => {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     console.error(
       'Failed to fetch current user:',
       error.response ? error.response.data : error.message,
@@ -51,7 +56,24 @@ export const getUsers = async (): Promise<any> => {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (err) {
+  } catch (err:any) {
+    console.error(
+      'Failed to fetch users:',
+      err.response ? err.response.data : err.message,
+    );
+    throw err;
+  }
+};
+
+export const getAllChats = async (userId: string): Promise<any> => {
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const response = await axios.get(`${API_URL}/chat/${userId}/chats`, {
+      headers: {Authorization: `Bearer ${token}`},
+    });
+    console.log(response.config.data, 'allchats');
+    return response.data;
+  } catch (err:any) {
     console.error(
       'Failed to fetch users:',
       err.response ? err.response.data : err.message,
@@ -83,14 +105,14 @@ export const sendMessage = async (
   );
 };
 
-export const loggeduser = async (): Promise<void> => {
+export const loggeduser = async (): Promise<User | null> => {
   const token = await AsyncStorage.getItem('token');
   try {
     const response = await axios.get(`${API_URL}/auth/loggedUser`, {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     console.error(
       'Login failed:',
       error.response ? error.response.data : error.message,
