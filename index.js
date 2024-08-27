@@ -36,12 +36,12 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", async (messageData) => {
     console.log(messageData)
     try {
-      const { sender, receiver, message, replyingMessage ,senderName} = messageData;
+      const { sender,  message, replyingMessage ,senderName,chatId} = messageData;
       // Save message to database
       const newMessage = new Message({
+        chatId,
         sender,
         senderName,
-        receiver,
         message,
         replyingMessage,
       });

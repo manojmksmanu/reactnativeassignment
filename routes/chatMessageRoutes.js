@@ -1,5 +1,3 @@
-// chat and message route
-
 const express = require("express");
 const {
   sendMessage,
@@ -14,13 +12,13 @@ const router = express.Router();
 router.post("/message", protect, sendMessage);
 
 // Get messages (protected)
-router.get("/messages/:chatUserId", protect, getMessages);
+router.get("/messages/:chatId", protect, getMessages);
 
 // Get all users (protected, only admin)
 router.get("/users", protect, getUsers);
 
 //Get all chats 
-router.get("/users/:userId/chats",protect, async (req, res) => {
+router.get("/:userId/chats",protect, async (req, res) => {
   const chats = await getChatsForUser(req.params.userId);
   res.json(chats);
 });

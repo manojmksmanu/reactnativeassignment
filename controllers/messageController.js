@@ -32,34 +32,41 @@ exports.sendMessage = async (req, res) => {
 
 // Get messages
 exports.getMessages = async (req, res) => {
-  const { chatUserId } = req.params;
+  const { chatId } = req.params;
 
   try {
-    // Check if the user is allowed to see the chat
-    const user = req.user;
-    const chatUser = await User.findById(chatUserId);
-
-    if (!chatUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (user.isAdmin || chatUser.isAdmin) {
-      const messages = await Message.find({
-        $or: [
-          { sender: user._id, receiver: chatUserId },
-          { sender: chatUserId, receiver: user._id },
-        ],
-      })
-        .populate("sender", "username")
-        .populate("receiver", "username");
-
-      res.json(messages);
-    } else {
-      res.status(403).json({ message: "Not authorized to see these messages" });
-    }
+    const messages = await Message.find({ chatId: chatId })
+      .populate("sender", "name pic email")
+      .populate("chatId");
+    res.json(messages);
   } catch (error) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(400);
+    throw new Error(error.message);
   }
+    // const chatUser = await Message.findById(chatId);
+
+    // if (!chatUser) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
+
+
+    // if (user.isAdmin || chatUser.isAdmin) {
+    //   const messages = await Message.find({
+    //     $or: [
+    //       { sender: user._id, receiver: chatUserId },
+    //       { sender: chatUserId, receiver: user._id },
+    //     ],
+    //   })
+    //     .populate("sender", "username")
+    //     .populate("receiver", "username");
+
+  //     res.json(messages);
+  //   } else {
+  //     res.status(403).json({ message: "Not authorized to see these messages" });
+  //   }
+  // } catch (error) {
+  //   res.status(500).json({ message: "Server Error" });
+  // }
 };
 
 // Get all users (only for admin)
