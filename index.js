@@ -6,6 +6,7 @@ const Message = require("./models/messageModel");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatMessageRoutes");
 const cors = require("cors");
+const { initSocket } = require("./socket/socket");
 
 connectDB();
 const app = express();
@@ -28,36 +29,46 @@ app.use("/api/chat", chatRoutes);
 
 const http = require("http").createServer(app);
 
-const io = require("socket.io")(http);
+// Initialize Socket.IO with the HTTP server
+initSocket(http);
 
-io.on("connection", (socket) => {
-  console.log("a user is connected", socket.id);
+// const io = require("socket.io")(http);
 
-  socket.on("sendMessage", async (messageData) => {
-    console.log(messageData)
-    try {
-      const { sender,  message, replyingMessage ,senderName,chatId} = messageData;
-      // Save message to database
-      const newMessage = new Message({
-        chatId,
-        sender,
-        senderName,
-        message,
-        replyingMessage,
-      });
-      await newMessage.save();
+// // Export the io instance
+// module.exports = { io };
 
-      // Emit message to the specific receiver
-      socket.to(receiver).emit("receiveMessage", messageData);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  });
+// io.on("connection", (socket) => {
+//   console.log("a user is connected", socket.id);
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
-  });
-});
+//   socket.on("sendMessage", async (messageData) => {
+//     console.log(messageData);
+//     try {
+//       const { sender, message, replyingMessage, senderName, chatId } =
+//         messageData;
+//       // Save message to database
+//       const newMessage = new Message({
+//         chatId,
+//         sender,
+//         senderName,
+//         message,
+//         replyingMessage,
+//       });
+//       await newMessage.save();
+
+//       // Emit message to the specific receiver
+//       socket.emit("receiveMessage", messageData);
+//     } catch (error) {
+//       console.error("Error sending message:", error);
+//     }
+//   });
+//   socket.on("forwardMessage", async (messageData) => {
+//     console.log(messageData);
+//     socket.emit("forwardR", messageData);
+//   });
+//   socket.on("disconnect", () => {
+//     console.log("user disconnected", socket.id);
+//   });
+// });
 
 http.listen(5000, () => {
   console.log("Socket.IO running on port 5000");

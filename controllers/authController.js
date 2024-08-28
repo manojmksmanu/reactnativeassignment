@@ -13,11 +13,9 @@ exports.signup = async (req, res) => {
 
   try {
     const userExists = await User.findOne({ username });
-
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-
     const user = await User.create({ username, password, isAdmin });
     console.log(user, "users");
     await createChatsForNewUser(user);

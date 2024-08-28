@@ -1,31 +1,31 @@
+// const { io } = require("../index");
 const Message = require("../models/messageModel");
 const User = require("../models/userModel");
 
 // Send message
 exports.sendMessage = async (req, res) => {
-  const { receiverId, message } = req.body;
-
+  const { chatId, sender, senderName, message, messageId, replyingMessage } =
+    req.body;
   try {
-    // Check if the sender is an admin or if the receiver is the admin
-    const sender = req.user;
-    const receiver = await User.findById(receiverId);
-
-    if (!receiver) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (sender.isAdmin || receiver.isAdmin) {
-      const newMessage = await Message.create({
-        sender: sender._id,
-        receiver: receiverId,
-        message,
-      });
-
-      res.status(201).json(newMessage);
-    } else {
-      res.status(403).json({ message: "Not authorized to send messages" });
-    }
+    const newMessage = await Message.create({
+      chatId,
+      sender,
+      senderName,
+      message,
+      messageId,
+      replyingMessage,
+    });
+    // Log the new message for debugging
+    console.log(newMessage, "New message created successfully");
+    // Send success response
+    res
+      .status(201)
+      .json({ message: "Message created successfully", newMessage });
   } catch (error) {
+    // Log the error for debugging
+    console.error("Error creating message:", error);
+
+    // Send error response
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -43,22 +43,21 @@ exports.getMessages = async (req, res) => {
     res.status(400);
     throw new Error(error.message);
   }
-    // const chatUser = await Message.findById(chatId);
+  // const chatUser = await Message.findById(chatId);
 
-    // if (!chatUser) {
-    //   return res.status(404).json({ message: "User not found" });
-    // }
+  // if (!chatUser) {
+  //   return res.status(404).json({ message: "User not found" });
+  // }
 
-
-    // if (user.isAdmin || chatUser.isAdmin) {
-    //   const messages = await Message.find({
-    //     $or: [
-    //       { sender: user._id, receiver: chatUserId },
-    //       { sender: chatUserId, receiver: user._id },
-    //     ],
-    //   })
-    //     .populate("sender", "username")
-    //     .populate("receiver", "username");
+  // if (user.isAdmin || chatUser.isAdmin) {
+  //   const messages = await Message.find({
+  //     $or: [
+  //       { sender: user._id, receiver: chatUserId },
+  //       { sender: chatUserId, receiver: user._id },
+  //     ],
+  //   })
+  //     .populate("sender", "username")
+  //     .populate("receiver", "username");
 
   //     res.json(messages);
   //   } else {
@@ -77,17 +76,59 @@ exports.getUsers = async (req, res) => {
 
     if (user.isAdmin) {
       // Admins can see all users except themselves
-      const users = await User.find({ _id: { $ne: user._id } }).select('-password');
+      const users = await User.find({ _id: { $ne: user._id } }).select(
+        "-password"
+      );
       res.json(users);
     } else {
       // Normal users can only see admins except themselves
-      const admins = await User.find({ isAdmin: true, _id: { $ne: user._id } }).select('-password');
+      const admins = await User.find({
+        isAdmin: true,
+        _id: { $ne: user._id },
+      }).select("-password");
       res.json(admins);
-      console.log(admins)
+      console.log(admins);
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
+exports.forwardMessages = async (req, res) => {
+  const { chatId, messages } = req.body;
 
+  try {
+    const newMessages = await Promise.all(
+      messages.map(async (msg) => {
+        console.log(msg, "msg");
+        const newMessage = new Message({
+          chatId,
+          sender: msg.sender,
+          senderName: msg.senderName,
+          message: msg.message,
+          replyingMessage: "",
+          createdAt: new Date(),
+        });
+        console.log(newMessage, "new");
+        await newMessage.save();
+        return newMessage;
+      })
+    );
+
+    // // Update the chat with the last message
+    // const lastMessage = newMessages[newMessages.length - 1];
+    // await Chat.findByIdAndUpdate(chatId, { lastMessage: lastMessage.text });
+
+    // Emit event to other clients
+    // io.emit("newMessage", newMessages);
+
+    res
+      .status(201)
+      .json({ message: "Messages forwarded successfully", newMessages });
+  } catch (error) {
+    console.error("Failed to forward messages:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to forward messages", details: error.message });
+  }
+};
