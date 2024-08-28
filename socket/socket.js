@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const Message = require("../models/messageModel");
 
 let io;
 
@@ -8,21 +9,47 @@ function initSocket(server) {
   io.on("connection", (socket) => {
     console.log("a user is connected", socket.id);
 
+    socket.on("joinRoom", (chatId) => {
+      socket.join(chatId);
+      console.log(`User ${socket.id} joined room ${chatId}`);
+    });
+
     socket.on("sendMessage", async (messageData) => {
-      console.log(messageData,'hskdjfhdsjkhfsdfs');
+      console.log(messageData, "hskdjfhdsjkhfsdfs");
       try {
         const { sender, message, replyingMessage, senderName, chatId } =
           messageData;
-        // Emit message to the specific receiver
-        socket.emit("receiveMessage", messageData);
+        // Emit message to the specific room
+        io.to(chatId).emit("receiveMessage", messageData);
       } catch (error) {
         console.error("Error sending message:", error);
       }
     });
 
-    socket.on("forwardMessage", async (messageData) => {
-      console.log(messageData);
-      socket.emit("forwardR", messageData);
+
+
+    socket.on("forwardMessage", async ({chatId,messages}) => {
+       try {
+         const newMessages = await Promise.all(
+           messages.map(async (msg) => {
+             const newMessage = new Message({
+               chatId:chatId,
+               sender: msg.sender,
+               senderName: msg.senderName,
+               message: msg.message,
+               replyingMessage: "",
+               createdAt: new Date(),
+             });
+             await newMessage.save();
+             return newMessage;
+           })
+         );
+         console.log(newMessages,'socketworking')
+         // Emit event to other clients
+         io.to(chatId).emit("forwarMessageReceived", newMessages);
+       } catch (error) {
+        console.log(error)
+       }
     });
 
     socket.on("disconnect", () => {

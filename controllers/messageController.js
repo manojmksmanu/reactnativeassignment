@@ -100,7 +100,6 @@ exports.forwardMessages = async (req, res) => {
   try {
     const newMessages = await Promise.all(
       messages.map(async (msg) => {
-        console.log(msg, "msg");
         const newMessage = new Message({
           chatId,
           sender: msg.sender,
@@ -109,18 +108,16 @@ exports.forwardMessages = async (req, res) => {
           replyingMessage: "",
           createdAt: new Date(),
         });
-        console.log(newMessage, "new");
+
         await newMessage.save();
         return newMessage;
       })
     );
-
-    // // Update the chat with the last message
-    // const lastMessage = newMessages[newMessages.length - 1];
-    // await Chat.findByIdAndUpdate(chatId, { lastMessage: lastMessage.text });
+    // const forwardSocket=(io)=>{
+    //   io.to(chatId).emit("newMessage", newMessages);
+    // }
 
     // Emit event to other clients
-    // io.emit("newMessage", newMessages);
 
     res
       .status(201)
