@@ -90,17 +90,11 @@ exports.forwardMessages = async (req, res) => {
           replyingMessage: "",
           createdAt: new Date(),
         });
-
+        console.log(newMessage.length,'messagelength')
         await newMessage.save();
         return newMessage;
       })
     );
-    // const forwardSocket=(io)=>{
-    //   io.to(chatId).emit("newMessage", newMessages);
-    // }
-
-    // Emit event to other clients
-
     res
       .status(201)
       .json({ message: "Messages forwarded successfully", newMessages });

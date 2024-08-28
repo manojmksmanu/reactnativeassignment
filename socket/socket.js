@@ -38,7 +38,6 @@ function initSocket(server) {
               replyingMessage: "",
               createdAt: new Date(),
             });
-            await newMessage.save();
             return newMessage;
           })
         );
