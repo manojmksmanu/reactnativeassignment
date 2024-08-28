@@ -26,30 +26,28 @@ function initSocket(server) {
       }
     });
 
-
-
-    socket.on("forwardMessage", async ({chatId,messages}) => {
-       try {
-         const newMessages = await Promise.all(
-           messages.map(async (msg) => {
-             const newMessage = new Message({
-               chatId:chatId,
-               sender: msg.sender,
-               senderName: msg.senderName,
-               message: msg.message,
-               replyingMessage: "",
-               createdAt: new Date(),
-             });
-             await newMessage.save();
-             return newMessage;
-           })
-         );
-         console.log(newMessages,'socketworking')
-         // Emit event to other clients
-         io.to(chatId).emit("forwarMessageReceived", newMessages);
-       } catch (error) {
-        console.log(error)
-       }
+    socket.on("forwardMessage", async ({ chatId, messages }) => {
+      try {
+        const newMessages = await Promise.all(
+          messages.map(async (msg) => {
+            const newMessage = new Message({
+              chatId: chatId,
+              sender: msg.sender,
+              senderName: msg.senderName,
+              message: msg.message,
+              replyingMessage: "",
+              createdAt: new Date(),
+            });
+            await newMessage.save();
+            return newMessage;
+          })
+        );
+        console.log(newMessages, "socketworking");
+        // Emit event to other clients
+        io.to(chatId).emit("forwarMessageReceived", newMessages);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     socket.on("disconnect", () => {

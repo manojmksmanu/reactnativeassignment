@@ -1,4 +1,5 @@
 // const { io } = require("../index");
+const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
 const User = require("../models/userModel");
 
@@ -15,9 +16,13 @@ exports.sendMessage = async (req, res) => {
       messageId,
       replyingMessage,
     });
-    // Log the new message for debugging
-    console.log(newMessage, "New message created successfully");
-    // Send success response
+    // console.log(newMessage, "New message created successfully");
+    // const updatedChat= Chat.findOneAndUpdate(
+    //   { chatId },
+    //   { latestMessage: newMessage, updatedAt: Date.now() }, // Storing the entire message object
+    //   { new: true }
+    // );
+    // console.log(updatedChat, "Chat updated with latest message");
     res
       .status(201)
       .json({ message: "Message created successfully", newMessage });
@@ -43,29 +48,6 @@ exports.getMessages = async (req, res) => {
     res.status(400);
     throw new Error(error.message);
   }
-  // const chatUser = await Message.findById(chatId);
-
-  // if (!chatUser) {
-  //   return res.status(404).json({ message: "User not found" });
-  // }
-
-  // if (user.isAdmin || chatUser.isAdmin) {
-  //   const messages = await Message.find({
-  //     $or: [
-  //       { sender: user._id, receiver: chatUserId },
-  //       { sender: chatUserId, receiver: user._id },
-  //     ],
-  //   })
-  //     .populate("sender", "username")
-  //     .populate("receiver", "username");
-
-  //     res.json(messages);
-  //   } else {
-  //     res.status(403).json({ message: "Not authorized to see these messages" });
-  //   }
-  // } catch (error) {
-  //   res.status(500).json({ message: "Server Error" });
-  // }
 };
 
 // Get all users (only for admin)
