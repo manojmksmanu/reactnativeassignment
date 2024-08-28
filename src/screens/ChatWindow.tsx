@@ -20,7 +20,7 @@ interface User {
   _id: string;
   username: string;
 }
-const base_url = 'http://10.0.2.2:5000';
+const base_url = 'https://reactnativeassignment.onrender.com';
 
 const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   route,

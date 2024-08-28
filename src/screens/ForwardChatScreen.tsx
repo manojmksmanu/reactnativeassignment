@@ -40,11 +40,9 @@ const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
   };
   console.log(selectedChats.length);
   return (
-    <View>
-      {selectedChats.length > 0 && (
-        <Button title="Forward" onPress={forwardMessages} />
-      )}
+    <View style={{flex: 1}}>
       <FlatList
+        style={{flexGrow: 1}}
         data={chats}
         renderItem={({item}) => (
           <TouchableOpacity
@@ -66,6 +64,11 @@ const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
         )}
         keyExtractor={item => item._id}
       />
+      <View>
+        {selectedChats.length > 0 && (
+          <Button title="Forward" onPress={forwardMessages} />
+        )}
+      </View>
     </View>
   );
 };
