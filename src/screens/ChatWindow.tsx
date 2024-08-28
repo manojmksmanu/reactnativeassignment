@@ -10,25 +10,24 @@ import {
   ActivityIndicator,
   ImageBackground,
   ScrollView,
+  Button,
 } from 'react-native';
-import {getMessages, getUsers} from '../services/authService';
-import {useNavigation} from '@react-navigation/native';
+import {getMessages, getUsers, sendMessage} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
+import {Sender} from '../misc/misc';
 interface User {
   _id: string;
   username: string;
 }
-
 const base_url = 'http://10.0.2.2:5000';
 
-const ChatWindow: React.FC<{route: any}> = ({route}) => {
-  const navigation = useNavigation();
+const ChatWindow: React.FC<{route: any; navigation: any}> = ({
+  route,
+  navigation,
+}) => {
   const {chatId} = route.params;
-  console.log(chatId, 'chatId');
   const [messages, setMessages] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [currentChat, setCurrentChat] = useState<any>(null);
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [socket, setSocket] = useState<any>();
@@ -37,10 +36,15 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const {loggedUserId, loggedUser} = useAuth() as {
+  const {loggedUserId, loggedUser, selectedChat} = useAuth() as {
     loggedUserId: string;
     loggedUser: User;
+    selectedChat: any;
   };
+  const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
+  const [forwardMode, setForwardMode] = useState<boolean>(false);
+  const [currentSender, setCurrentSender] = useState<any>(null);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -63,14 +67,26 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       reconnectionDelayMax: 5000, // Maximum delay
     });
     setSocket(socketInstance);
+
+    // Join the chat room
+    socketInstance.emit('joinRoom', chatId);
+
     socketInstance.on('connect', () => {
       setIsConnected(true);
     });
+
     socketInstance.on('receiveMessage', messageData => {
       if (messageData.sender !== loggedUserId) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
     });
+    socketInstance.on('forwarMessageReceived', newMessages => {
+      // console.log(newMessages, 'message data');
+      // console.log(messages);
+      setMessages(prevMessages => [...prevMessages, ...newMessages]);
+      // console.log(messages, 'messages');
+    });
+
     socketInstance.on('disconnect', () => {
       console.log('Socket disconnected');
       setIsConnected(false);
@@ -82,29 +98,13 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   }, []);
   // --socket connection end--
 
-  // Fetch users
+  // ----function to getUsername with whom we chat ---
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true); // Start loading
-      try {
-        const response = await getUsers();
-        setUsers(response);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-    fetchUsers();
+    const sender = Sender(loggedUser, selectedChat.users);
+    setCurrentSender(sender);
   }, []);
-  // Fetch users end
-
-  // useEffect(() => {
-  //   if (users.length > 0) {
-  //     const user = users.find(user => user._id === userId);
-  //     setCurrentChat(user);
-  //   }
-  // }, [users, userId]);
+  console.log(currentSender);
+  // ----function to getUsername with whom we chat ends here ---
 
   // ----chat window header--
   useEffect(() => {
@@ -113,10 +113,10 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
         <View style={styles.headerTitleContainer}>
           <Image
             source={require('../assets/man.png')}
-            style={{width: 40, height: 40, marginRight: 10}}
+            style={{width: 40, height: 40, marginRight: 5}}
           />
           <Text style={styles.usernameText}>
-            {currentChat && currentChat.username}
+            {currentSender && currentSender.username}
           </Text>
         </View>
       ),
@@ -128,14 +128,21 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
               style={{width: 20, height: 20}}
             />
           </TouchableOpacity>
+          {selectedMessages.length > 0 && (
+            <TouchableOpacity onPress={() => navigateToForwardScreen()}>
+              <Image
+                source={require('../assets/forward-message.png')}
+                style={{width: 30, height: 30}}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       ),
     });
-  }, [navigation, currentChat]);
+  }, [navigation, currentSender, selectedMessages]);
   // ----chat window header end--
 
   const handleMoreOptions = () => {
-    // Handle more options logic here
     console.log('More options icon pressed');
   };
 
@@ -156,8 +163,11 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
   }, [chatId]);
 
   // ---fetch messages function end --
+
+  //----send message function--
   const handleSendMessage = async () => {
     setReplyingMessage('');
+    setMessage('');
     if (message === '') return;
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
@@ -168,28 +178,25 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
       messageId,
       replyingMessage,
     };
-
     if (socket) {
       socket.emit('sendMessage', messageData);
-      // Clear unsent messages list if socket is connected
       setMessages(prevMessages => [...prevMessages, messageData]);
-    } else {
-      // setUnsentMessages(prevMessages => [...prevMessages, messageData]);
     }
-
-    setMessage('');
+    await sendMessage(messageData);
   };
+  // --send message function ends here--
+
+  // ----function for handleswipeLeft and swipeRight ----
   const handleSwipeLeft = (item: any) => {
-    // console.log('Left swipe on item:', item);
     setReplyingMessage(item);
     setIsReplying(true);
   };
 
   const handleSwipeRight = (item: any) => {
-    // console.log('Right swipe on item:', item);
     setReplyingMessage(item);
     setIsReplying(true);
   };
+  // ----function for handleswipeLeft and swipeRight ends here ----
 
   const handleRemoveReplying = () => {
     setReplyingMessage('');
@@ -197,10 +204,35 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
 
   useEffect(() => {
     if (isReplying && textInputRef.current) {
-      textInputRef.current.focus(); // Focus the input field
-      setIsReplying(false); // Reset the state after focusing
+      textInputRef.current.focus();
+      setIsReplying(false);
     }
   }, [isReplying]);
+
+  const navigateToForwardScreen = () => {
+    setSelectedMessages([]);
+    navigation.navigate('ForwardChatScreen', {
+      messagesToForward: selectedMessages,
+      socket: socket,
+    });
+  };
+
+  const handleLongPress = (message: any) => {
+    setForwardMode(true);
+    setSelectedMessages([message]);
+  };
+
+  const handleTap = (message: any) => {
+    if (forwardMode) {
+      setSelectedMessages(prevSelected => {
+        const isSelected = prevSelected.some(msg => msg._id === message._id);
+        const updatedMessages = isSelected
+          ? prevSelected.filter(msg => msg._id !== message._id)
+          : [...prevSelected, message];
+        return updatedMessages;
+      });
+    }
+  };
 
   return (
     <ImageBackground
@@ -219,13 +251,25 @@ const ChatWindow: React.FC<{route: any}> = ({route}) => {
             contentContainerStyle={{flexGrow: 0}}
             onContentSizeChange={hanldeContentSizeChange}>
             {messages.map(item => {
+              const isSelected = selectedMessages.some(
+                msg => msg._id === item._id,
+              );
+
               return (
-                <RenderMessage
-                  item={item}
-                  loggedUserId={loggedUserId}
-                  onLeftSwipe={() => handleSwipeLeft(item)}
-                  onRightSwipe={() => handleSwipeRight(item)}
-                />
+                <TouchableOpacity
+                  key={item._id} // Ensure each TouchableOpacity has a unique key
+                  onLongPress={() => handleLongPress(item)}
+                  onPress={() => handleTap(item)}
+                  style={{
+                    backgroundColor: isSelected ? 'lightgray' : 'transparent', // Apply background color based on selection
+                  }}>
+                  <RenderMessage
+                    item={item}
+                    loggedUserId={loggedUserId}
+                    onLeftSwipe={() => handleSwipeLeft(item)}
+                    onRightSwipe={() => handleSwipeRight(item)}
+                  />
+                </TouchableOpacity>
               );
             })}
           </ScrollView>

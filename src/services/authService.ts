@@ -21,7 +21,7 @@ export const login = async (
     const {token} = response.data;
 
     await AsyncStorage.setItem('token', token);
-  } catch (error:any) {
+  } catch (error: any) {
     console.error(
       'Login failed:',
       error.response ? error.response.data : error.message,
@@ -40,7 +40,7 @@ export const getCurrentUser = async (): Promise<any> => {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (error:any) {
+  } catch (error: any) {
     console.error(
       'Failed to fetch current user:',
       error.response ? error.response.data : error.message,
@@ -56,7 +56,7 @@ export const getUsers = async (): Promise<any> => {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (err:any) {
+  } catch (err: any) {
     console.error(
       'Failed to fetch users:',
       err.response ? err.response.data : err.message,
@@ -73,7 +73,7 @@ export const getAllChats = async (userId: string): Promise<any> => {
     });
     console.log(response.data, 'allchats');
     return response.data;
-  } catch (err:any) {
+  } catch (err: any) {
     console.error(
       'Failed to fetch users:',
       err.response ? err.response.data : err.message,
@@ -91,14 +91,48 @@ export const getMessages = async (userId: string): Promise<any[]> => {
   return response.data;
 };
 
-export const sendMessage = async (
-  userId: string,
-  content: string,
+export const sendMessage = async (messageData: any): Promise<void> => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+    const response = await axios.post(
+      `${API_URL}/chat/message`,
+      {
+        chatId: messageData.chatId,
+        sender: messageData.sender,
+        senderName: messageData.senderName,
+        message: messageData.message,
+        messageId: messageData.messageId,
+        replyingMessage: messageData.replyingMessage,
+      },
+      {
+        headers: {Authorization: `Bearer ${token}`},
+      },
+    );
+
+    console.log('Message sent successfully:', response.data);
+  } catch (error: any) {
+    // Log full error object
+    console.error(
+      'Error sending message:',
+      error.response || error.message || error,
+    );
+  }
+
+  console.log('Exiting sendMessage function');
+};
+
+export const forward = async (
+  chatId: string,
+  messagesToForward: any,
 ): Promise<void> => {
   const token = await AsyncStorage.getItem('token');
   await axios.post(
-    `${API_URL}/chat/message`,
-    {receiverId: userId, message: content},
+    `${API_URL}/chat/forwardMessages`,
+    {chatId: chatId, messages: messagesToForward},
     {
       headers: {Authorization: `Bearer ${token}`},
     },
@@ -112,7 +146,7 @@ export const loggeduser = async (): Promise<User | null> => {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
-  } catch (error:any) {
+  } catch (error: any) {
     console.error(
       'Login failed:',
       error.response ? error.response.data : error.message,

@@ -18,7 +18,14 @@ interface User {
 const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const {setLoggedUser, loggedUser, loggedUserId, setChats, chats} = useAuth();
+  const {
+    setLoggedUser,
+    loggedUser,
+    loggedUserId,
+    setChats,
+    chats,
+    setSelectedChat,
+  } = useAuth();
 
   useEffect(() => {
     const find = async () => {
@@ -49,7 +56,6 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
         // setLoading(true); // Start loading
         try {
           const response = await getAllChats(loggedUserId);
-          console.log(response,'response')
           setChats(response);
         } catch (error) {
           console.error('Failed to fetch chats:', error);
@@ -61,7 +67,11 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   }, [setChats]);
 
-  console.log(chats);
+  const chatClicked = (chat: any) => {
+    navigation.navigate('ChatWindow', {chatId: chat._id});
+    setSelectedChat(chat);
+  };
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -71,29 +81,12 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
           style={styles.loadingIndicator}
         />
       ) : (
-        // <FlatList
-        //   data={users}
-        //   keyExtractor={item => item._id}
-        //   renderItem={({item}) => (
-        //     <TouchableOpacity
-        //       onPress={() =>
-        //         navigation.navigate('ChatWindow', {userId: item._id})
-        //       }
-        //       style={styles.userContainer}>
-        //       <View style={styles.userInfo}>
-        //         <Text style={styles.username}>{item.username}</Text>
-        //       </View>
-        //     </TouchableOpacity>
-        //   )}
-        // />
         <FlatList
           data={chats}
           keyExtractor={item => item._id}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('ChatWindow', {chatId: item._id})
-              }
+              onPress={() => chatClicked(item)}
               style={styles.userContainer}>
               <View style={styles.userInfo}>
                 <Text style={styles.username}>
