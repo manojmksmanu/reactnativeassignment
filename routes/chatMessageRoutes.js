@@ -21,6 +21,7 @@ router.get("/users", protect, getUsers);
 //Get all chats
 router.get("/:userId/chats", protect, async (req, res) => {
   const chats = await getChatsForUser(req.params.userId);
+  console.log(chats)
   res.json(chats);
 });
 

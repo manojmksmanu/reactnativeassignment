@@ -26,28 +26,41 @@ function initSocket(server) {
       }
     });
 
-    socket.on("forwardMessage", async ({ chatId, messages }) => {
-      try {
-        const newMessages = await Promise.all(
-          messages.map(async (msg) => {
-            const newMessage = new Message({
-              chatId: chatId,
-              sender: msg.sender,
-              senderName: msg.senderName,
-              message: msg.message,
-              replyingMessage: "",
-              createdAt: new Date(),
-            });
-            return newMessage;
-          })
+    socket.on(
+      "forwardMessage",
+      async ({ chatId, messages, loggedUserId, loggedUserName }) => {
+        console.log(
+          chatId,
+          "chatId",
+          messages,
+          "messages",
+          loggedUserId,
+          "loggedUserId",
+          loggedUserName,
+          "loggedUsernae"
         );
-        console.log(newMessages, "socketworking");
-        // Emit event to other clients
-        io.to(chatId).emit("forwarMessageReceived", newMessages);
-      } catch (error) {
-        console.log(error);
+        try {
+          const newMessages = await Promise.all(
+            messages.map(async (msg) => {
+              const newMessage = new Message({
+                chatId: chatId,
+                sender: loggedUserId,
+                senderName: loggedUserName,
+                message: msg.message,
+                replyingMessage: "",
+                createdAt: new Date(),
+              });
+              return newMessage;
+            })
+          );
+          console.log(newMessages, "socketworking");
+          // Emit event to other clients
+          io.to(chatId).emit("forwarMessageReceived", newMessages);
+        } catch (error) {
+          console.log(error);
+        }
       }
-    });
+    );
 
     socket.on("disconnect", () => {
       console.log("user disconnected", socket.id);

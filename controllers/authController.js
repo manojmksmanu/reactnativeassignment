@@ -9,21 +9,21 @@ const generateToken = (id) => {
 };
 
 exports.signup = async (req, res) => {
-  const { username, password, isAdmin } = req.body;
-
+  const { name, email, password, userType } = req.body;
+  console.log(name, email, password, userType);
   try {
-    const userExists = await User.findOne({ username });
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-    const user = await User.create({ username, password, isAdmin });
+    const user = await User.create({ name, email, password, userType });
     console.log(user, "users");
-    await createChatsForNewUser(user);
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      isAdmin: user.isAdmin,
-    });
+    // await createChatsForNewUser(user);
+    // res.status(201).json({
+    //   _id: user._id,
+    //   username: user.username,
+    //   isAdmin: user.isAdmin,
+    // });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -31,10 +31,8 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
-
   try {
     const user = await User.findOne({ username });
-
     if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
@@ -55,16 +53,13 @@ exports.getLoggedUser = async (req, res) => {
   try {
     const user = req.user;
     console.log(user, "user");
-
     // Use findOne instead of find to get a single user document
     const loggedUser = await User.findOne({
       _id: user._id,
     }).select("-password"); // Exclude the password field
-
     if (!loggedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
     res.json(loggedUser);
     console.log(loggedUser);
   } catch (error) {

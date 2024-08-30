@@ -77,20 +77,18 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.forwardMessages = async (req, res) => {
-  const { chatId, messages } = req.body;
-
+  const { chatId, messages, loggedUserId, loggedUserName } = req.body;
   try {
     const newMessages = await Promise.all(
       messages.map(async (msg) => {
         const newMessage = new Message({
           chatId,
-          sender: msg.sender,
-          senderName: msg.senderName,
+          sender: loggedUserId,
+          senderName: loggedUserName,
           message: msg.message,
           replyingMessage: "",
           createdAt: new Date(),
         });
-        console.log(newMessage.length,'messagelength')
         await newMessage.save();
         return newMessage;
       })

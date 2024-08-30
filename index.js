@@ -7,6 +7,11 @@ const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatMessageRoutes");
 const cors = require("cors");
 const { initSocket } = require("./socket/socket");
+const {
+  getAllUsersForChatCreation,
+  createChatsForAllUsers,
+} = require("./misc/createChats");
+const ChatNew = require("./models/chatNewModel");
 
 connectDB();
 const app = express();
@@ -28,47 +33,15 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 
 const http = require("http").createServer(app);
+const getData = async () => {
+  // const data = await getAllUsersForChatCreation();
+  const data = await createChatsForAllUsers();
 
-// Initialize Socket.IO with the HTTP server
+};
+
+getData();
+
 initSocket(http);
-
-// const io = require("socket.io")(http);
-
-// // Export the io instance
-// module.exports = { io };
-
-// io.on("connection", (socket) => {
-//   console.log("a user is connected", socket.id);
-
-//   socket.on("sendMessage", async (messageData) => {
-//     console.log(messageData);
-//     try {
-//       const { sender, message, replyingMessage, senderName, chatId } =
-//         messageData;
-//       // Save message to database
-//       const newMessage = new Message({
-//         chatId,
-//         sender,
-//         senderName,
-//         message,
-//         replyingMessage,
-//       });
-//       await newMessage.save();
-
-//       // Emit message to the specific receiver
-//       socket.emit("receiveMessage", messageData);
-//     } catch (error) {
-//       console.error("Error sending message:", error);
-//     }
-//   });
-//   socket.on("forwardMessage", async (messageData) => {
-//     console.log(messageData);
-//     socket.emit("forwardR", messageData);
-//   });
-//   socket.on("disconnect", () => {
-//     console.log("user disconnected", socket.id);
-//   });
-// });
 
 http.listen(5000, () => {
   console.log("Socket.IO running on port 5000");
