@@ -4,29 +4,29 @@ interface User {
   // Add other properties as needed
 }
 
-export const Sender = (
-  loggedUser: any | null,
-  users: any | null,
-): User | null => {
-  // Return null if loggedUser is null or users is null
-  if (!loggedUser || !users) return null;
+export const getSenderName = (loggedUser: User, chatUsers: any[]) => {
+  if (chatUsers) {
+    // Filter out the loggedUser from the chat users to get the sender
+    const sender = chatUsers.find(
+      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+    );
 
-  // Ensure users is an array before calling map
-  const validUsers = Array.isArray(users) ? users : [];
+    // Return the sender's name, or a fallback if no sender is found
+    return sender ? sender.user.name : 'Unknown Sender';
+  } else {
+    return null;
+  }
+};
+export const getSendedType = (loggedUser: User, chatUsers: any[]) => {
+  if (chatUsers) {
+    // Filter out the loggedUser from the chat users to get the sender
+    const sender = chatUsers.find(
+      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+    );
 
-  // Extract the relevant data from users if it's wrapped in a specific structure
-  const extractedUsers = validUsers.map(user => user._j || user);
-
-  // Check if loggedUser is part of the extracted users array
-  const isLoggedUserInUsers = extractedUsers.some(
-    user => user._id === loggedUser._id,
-  );
-
-  if (!isLoggedUserInUsers) return null;
-
-  // Determine the sender user
-  const senderUser =
-    extractedUsers.find(user => user._id !== loggedUser._id) || null;
-
-  return senderUser;
+    // Return the sender's name, or a fallback if no sender is found
+    return sender ? sender.user.userType : 'Unknown Type';
+  } else {
+    return null;
+  }
 };

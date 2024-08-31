@@ -20,7 +20,7 @@ const RenderMessage = ({
   onRightSwipe,
 }: {
   item: any;
-  loggedUserId:string;
+  loggedUserId: string;
   onLeftSwipe: any;
   onRightSwipe: any;
 }) => {
@@ -82,7 +82,9 @@ const RenderMessage = ({
               ) : (
                 <Text style={{color: '#25d366'}}>You</Text>
               )}
-              <Text>{item.replyingMessage.message}</Text>
+              <Text style={{color: 'grey'}}>
+                {item.replyingMessage.message}
+              </Text>
             </View>
           )}
           <View style={styles.message}>
@@ -173,12 +175,12 @@ const styles = StyleSheet.create({
   sendermessageText: {
     color: '#000',
     fontSize: 16,
-    margin:2
+    margin: 2,
   },
   receivermessageText: {
     color: '#000',
     fontSize: 16,
-    margin:2
+    margin: 2,
   },
   renderRepyingMessage: {
     backgroundColor: '#F3F8EF',

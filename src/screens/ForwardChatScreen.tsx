@@ -1,14 +1,15 @@
 import React, {useState} from 'react';
 import {View, FlatList, TouchableOpacity, Button, Text} from 'react-native';
 import {useAuth} from '../context/userContext';
-import {Sender} from '../misc/misc';
+import {getSenderName} from '../misc/misc';
 import {forward} from '../services/authService';
 
 const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
   route,
   navigation,
 }) => {
-  const {messagesToForward, socket} = route.params;
+  const {messagesToForward, socket, loggedUserId, loggedUserName} =
+    route.params;
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const {chats, loggedUser} = useAuth();
 
@@ -23,13 +24,24 @@ const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
   };
 
   const forwardMessages = async () => {
+    if (!loggedUser) {
+      console.error('No logged in user found');
+      return;
+    }
     try {
       await Promise.all(
         selectedChats.map(async chatId => {
-          await forward(chatId, messagesToForward);
+          await forward(
+            chatId,
+            messagesToForward,
+            loggedUserId,
+            loggedUserName,
+          );
           socket.emit('forwardMessage', {
             chatId,
             messages: messagesToForward,
+            loggedUserId: loggedUser._id,
+            loggedUserName: loggedUser.name,
           });
         }),
       );
@@ -56,8 +68,8 @@ const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
               borderRadius: 10,
             }}>
             <View style={{margin: 2}}>
-              <Text style={{fontSize: 20, padding: 4}}>
-                {loggedUser && Sender(loggedUser, item.users)?.username}
+              <Text style={{fontSize: 20, padding: 4, color: 'grey'}}>
+                {loggedUser && getSenderName(loggedUser, item.users)}
               </Text>
             </View>
           </TouchableOpacity>

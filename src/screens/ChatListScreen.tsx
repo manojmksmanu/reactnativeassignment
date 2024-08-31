@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import {getAllChats, getUsers, loggeduser} from '../services/authService';
 import {useAuth} from '../context/userContext';
-import {Sender} from '../misc/misc';
+import {getSendedType, getSenderName} from '../misc/misc';
 interface User {
   _id: string;
-  username: string;
+  name: string;
+  userType: any;
   // Add other properties as needed
 }
 const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
@@ -26,7 +27,26 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     chats,
     setSelectedChat,
   } = useAuth();
-
+  console.log(loggedUser);
+  // ----chatList window header--
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <View>
+          <Text>Chat List</Text>
+        </View>
+      ),
+      headerRight: () => (
+        <View>
+          <Text>
+            {loggedUser && loggedUser.name}-({loggedUser && loggedUser.userType}
+            )
+          </Text>
+        </View>
+      ),
+    });
+  }, [navigation, loggedUser]);
+  // ----chatList window header end--
   useEffect(() => {
     const find = async () => {
       const response: User | null = await loggeduser();
@@ -34,21 +54,6 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     };
     find();
   }, [setLoggedUser]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true); // Start loading
-      try {
-        const response = await getUsers();
-        setUsers(response);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-    fetchUsers();
-  }, []);
 
   useEffect(() => {
     if (loggedUserId) {
@@ -90,7 +95,8 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
               style={styles.userContainer}>
               <View style={styles.userInfo}>
                 <Text style={styles.username}>
-                  {loggedUser && Sender(loggedUser, item.users)?.username}
+                  {loggedUser && getSenderName(loggedUser, item.users)}-(
+                  {loggedUser && getSendedType(loggedUser, item.users)})
                 </Text>
               </View>
             </TouchableOpacity>

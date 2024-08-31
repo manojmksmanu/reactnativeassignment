@@ -3,19 +3,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface User {
   _id: string;
-  username: string;
+  name: string;
+  userType: any;
   // Add other properties as needed
 }
 // const API_URL = 'https://reactnativeassignment.onrender.com/api';
-const API_URL = 'https://reactnativeassignment.onrender.com/api';
+// const API_URL = 'https://reactnativeassignment.onrender.com/api';
+const API_URL = 'http://10.0.2.2:5000/api';
 
 export const login = async (
-  username: string,
+  email: string,
+  userType: string,
   password: string,
 ): Promise<void> => {
   try {
     const response = await axios.post(`${API_URL}/auth/login`, {
-      username,
+      email,
+      userType,
       password,
     });
     const {token} = response.data;
@@ -30,24 +34,6 @@ export const login = async (
   }
 };
 
-// New function to get the current user's details
-export const getCurrentUser = async (): Promise<any> => {
-  const token = await AsyncStorage.getItem('token');
-
-  try {
-    const response = await axios.get(`${API_URL}/auth/me`, {
-      // Assuming /auth/me endpoint exists
-      headers: {Authorization: `Bearer ${token}`},
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error(
-      'Failed to fetch current user:',
-      error.response ? error.response.data : error.message,
-    );
-    throw error;
-  }
-};
 
 export const getUsers = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
@@ -71,7 +57,6 @@ export const getAllChats = async (userId: string): Promise<any> => {
     const response = await axios.get(`${API_URL}/chat/${userId}/chats`, {
       headers: {Authorization: `Bearer ${token}`},
     });
-    console.log(response.data, 'allchats');
     return response.data;
   } catch (err: any) {
     console.error(
@@ -128,11 +113,18 @@ export const sendMessage = async (messageData: any): Promise<void> => {
 export const forward = async (
   chatId: string,
   messagesToForward: any,
+  loggedUserId: string,
+  loggedUserName: string,
 ): Promise<void> => {
   const token = await AsyncStorage.getItem('token');
   await axios.post(
     `${API_URL}/chat/forwardMessages`,
-    {chatId: chatId, messages: messagesToForward},
+    {
+      chatId: chatId,
+      messages: messagesToForward,
+      loggedUserId: loggedUserId,
+      loggedUserName: loggedUserName,
+    },
     {
       headers: {Authorization: `Bearer ${token}`},
     },

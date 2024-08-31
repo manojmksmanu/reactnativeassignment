@@ -3,13 +3,15 @@ import React, {createContext, useState, useContext, ReactNode} from 'react';
 // Define a type for the context value
 interface User {
   _id: string;
-  username: string;
+  name: string;
+  userType: any;
   // Add other properties as needed
 }
 
 interface Chat {
   _id: string;
   users: User[];
+
   // Add other properties as needed
 }
 interface AuthContextType {

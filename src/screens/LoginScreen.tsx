@@ -20,7 +20,8 @@ interface CustomJwtPayload {
 }
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
-  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [userType, SetUserType] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false); // Loading state
   const {setLoggedUserId} = useAuth();
@@ -43,7 +44,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const handleLogin = async () => {
     setLoading(true); // Start loading
     try {
-      await login(username, password);
+      await login(email,userType, password);
       await fetchLoggedUser();
       setLoading(false); // Stop loading
       navigation.navigate('ChatList');
@@ -68,10 +69,19 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
       <TextInput
-        placeholder="Username"
+        placeholder="email"
         placeholderTextColor="#808080"
-        value={username}
-        onChangeText={setUsername}
+        value={email}
+        onChangeText={setEmail}
+        style={styles.input}
+        editable={!loading} // Disable input while loading
+      />
+      <TextInput
+        placeholder="userType"
+        placeholderTextColor="#808080"
+        value={userType}
+        onChangeText={SetUserType}
+        secureTextEntry
         style={styles.input}
         editable={!loading} // Disable input while loading
       />

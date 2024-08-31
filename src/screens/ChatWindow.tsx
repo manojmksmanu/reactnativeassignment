@@ -10,17 +10,18 @@ import {
   ActivityIndicator,
   ImageBackground,
   ScrollView,
-  Button,
 } from 'react-native';
 import {getMessages, getUsers, sendMessage} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
-import {Sender} from '../misc/misc';
+import {getSenderName} from '../misc/misc';
 interface User {
   _id: string;
-  username: string;
+  name: string;
+  userType: any;
 }
-const base_url = 'https://reactnativeassignment.onrender.com';
+// const base_url = 'https://reactnativeassignment.onrender.com';
+const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   route,
@@ -44,7 +45,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
-
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -98,14 +98,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   }, []);
   // --socket connection end--
 
-  // ----function to getUsername with whom we chat ---
-  useEffect(() => {
-    const sender = Sender(loggedUser, selectedChat.users);
-    setCurrentSender(sender);
-  }, []);
-  console.log(currentSender);
-  // ----function to getUsername with whom we chat ends here ---
-
   // ----chat window header--
   useEffect(() => {
     navigation.setOptions({
@@ -116,7 +108,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={{width: 40, height: 40, marginRight: 5}}
           />
           <Text style={styles.usernameText}>
-            {currentSender && currentSender.username}
+            {loggedUser && getSenderName(loggedUser, selectedChat.users)}
           </Text>
         </View>
       ),
@@ -204,16 +196,19 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 
   useEffect(() => {
     if (isReplying && textInputRef.current) {
-      textInputRef.current.focus();
-      setIsReplying(false);
+      setTimeout(() => {
+        textInputRef.current?.focus();
+        setIsReplying(false);
+      }, 10);
     }
   }, [isReplying]);
-
   const navigateToForwardScreen = () => {
     setSelectedMessages([]);
     navigation.navigate('ForwardChatScreen', {
       messagesToForward: selectedMessages,
       socket: socket,
+      loggedUserId:loggedUser._id,
+      loggedUsername:loggedUser.name
     });
   };
 
@@ -260,6 +255,9 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                   key={item._id} // Ensure each TouchableOpacity has a unique key
                   onLongPress={() => handleLongPress(item)}
                   onPress={() => handleTap(item)}
+                  // onPress={() => {if (!isSelected) {
+                  //   // Perform your onPress action here
+                  // }}}
                   style={{
                     backgroundColor: isSelected ? 'lightgray' : 'transparent', // Apply background color based on selection
                   }}>
@@ -280,56 +278,60 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
               {replyingMessage && (
                 <View style={styles.replyingMessage}>
                   <Text style={{fontSize: 18, color: '#25d366'}}>
-                    {replyingMessage.senderName !== loggedUser.username
+                    {replyingMessage.senderName !== loggedUser.name
                       ? replyingMessage.senderName
                       : 'You'}
                   </Text>
-                  <Text style={{fontSize: 16}}>
+                  <Text style={{fontSize: 16, color: 'grey'}}>
                     {replyingMessage && replyingMessage.message}
                   </Text>
                   <TouchableOpacity
                     onPress={handleRemoveReplying}
                     style={styles.closeReplyingMessage}>
                     <Image
-                      style={{width: 15, height: 15}}
+                      style={{width: 25, height: 25}}
                       source={require('../assets/remove.png')}
                     />
                   </TouchableOpacity>
                 </View>
               )}
-              <TextInput
-                ref={textInputRef} // Attach ref to TextInput
-                value={message}
-                onChangeText={setMessage}
-                placeholder="Type a message"
-                placeholderTextColor="#808080"
-                style={styles.input}
-                multiline
-              />
-              <Image
-                source={require('../assets/attach-file.png')}
-                style={{
-                  width: 22,
-                  height: 22,
-                  position: 'absolute',
-                  zIndex: 10,
-                  bottom: 9,
-                  right: 50,
-                  opacity: 0.6,
-                }}
-              />
-              <Image
-                source={require('../assets/photo-camera.png')}
-                style={{
-                  width: 24,
-                  height: 24,
-                  position: 'absolute',
-                  zIndex: 10,
-                  bottom: 10,
-                  right: 23,
-                  opacity: 0.6,
-                }}
-              />
+              <View>
+                <TextInput
+                  ref={textInputRef} // Attach ref to TextInput
+                  value={message}
+                  onChangeText={setMessage}
+                  placeholder="Type a message"
+                  placeholderTextColor="#808080"
+                  style={styles.input}
+                  multiline
+                />
+                <View>
+                  <Image
+                    source={require('../assets/attach-file.png')}
+                    style={{
+                      width: 22,
+                      height: 22,
+                      position: 'absolute',
+                      zIndex: 10,
+                      bottom: 9,
+                      right: 50,
+                      opacity: 0.6,
+                    }}
+                  />
+                  <Image
+                    source={require('../assets/photo-camera.png')}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      position: 'absolute',
+                      zIndex: 10,
+                      bottom: 10,
+                      right: 23,
+                      opacity: 0.6,
+                    }}
+                  />
+                </View>
+              </View>
             </View>
             <TouchableOpacity
               onPress={handleSendMessage}
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginRight: 10,
     flex: 1,
-    borderRadius: 25,
+    borderRadius: 15,
     textDecorationLine: 'none',
 
     shadowColor: '#000',
@@ -411,13 +413,13 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     textDecorationLine: 'none',
     paddingRight: 60,
-    fontSize: 20,
-    borderWidth: 0.05,
+    fontSize: 18,
+    borderWidth: 0,
     borderColor: '#363737',
-    borderRadius: 25,
+    borderRadius: 15,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    marginRight: 10,
+    marginRight: 12,
     minHeight: 40,
     maxHeight: 120,
   },
@@ -442,9 +444,10 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   replyingMessage: {
-    backgroundColor: 'white',
+    backgroundColor: '#E7FFE7',
     borderRadius: 20,
     padding: 20,
+    margin: 10,
     position: 'relative',
   },
   closeReplyingMessage: {
