@@ -1,5 +1,5 @@
 const Admin = require("../models/adminModel");
-const ChatNew = require("../models/chatNewModel");
+const NewChat = require("../models/newChatModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
 const { createChatId } = require("./misc");
@@ -34,21 +34,6 @@ getAllUsersForChatCreation = async () => {
   ];
 };
 
-async function populateAllChats() {
-  const chats = await ChatNew.findById({
-    _id: "66d1ba758f669d11e1920a81",
-  })
-    .populate("users.user")
-    .exec();
-  return chats;
-}
-
-const rundata = async () => {
-  const data = await populateAllChats();
-  console.log(data.users);
-};
-
-rundata();
 
 exports.createChatsForAllUsers = async () => {
   try {
@@ -62,43 +47,47 @@ exports.createChatsForAllUsers = async () => {
         // Check if user1 is allowed to chat with user2
         if (chatPermissions[user1.userType]?.includes(user2.userType)) {
           // Check if a chat already exists between these users
-          const existingChat = await ChatNew.findOne({
+          const existingChat = await NewChat.findOne({
             $and: [{ "users.user": user1._id }, { "users.user": user2._id }],
           });
 
           const chatId = createChatId(user1, user2);
+
+          const refModel1 = [
+            "Admin",
+            "Super-Admin",
+            "Sub-Admin",
+            "Co-Admin",
+          ].includes(user1.userType)
+            ? "Admin"
+            : user1.userType;
+          const refModel2 = [
+            "Admin",
+            "Super-Admin",
+            "Sub-Admin",
+            "Co-Admin",
+          ].includes(user2.userType)
+            ? "Admin"
+            : user2.userType;
+          console.log(refModel1, refModel2);
+
           // If no existing chat, create a new one
           if (!existingChat) {
-            const refModel1 = [
-              "Admin",
-              "Super-Admin",
-              "Sub-Admin",
-              "Co-Admin",
-            ].includes(user1.userType)
-              ? "Admin"
-              : user1.userType;
-            const refModel2 = [
-              "Admin",
-              "Super-Admin",
-              "Sub-Admin",
-              "Co-Admin",
-            ].includes(user1.userType)
-              ? "Admin"
-              : user2.userType;
-            console.log(refModel1, refModel2);
             const chatBetween = `Created chat between ${user1.userType} (${user1.name}) and ${user2.userType} (${user2.name})`;
-            const newChat = new ChatNew({
+            const newChat = new NewChat({
               chatId: chatId,
               chatBetween: chatBetween,
               users: [
                 {
                   user: user1._id,
                   userType: user1.userType, // Assign userType for user1
+                  // refModel: refModel1, // Assign refModel for user1
                   refModel: refModel1, // Assign refModel for user1
                 },
                 {
                   user: user2._id,
                   userType: user2.userType, // Assign userType for user2
+                  // refModel: refModel2, // Assign refModel for user2
                   refModel: refModel2, // Assign refModel for user2
                 },
               ],

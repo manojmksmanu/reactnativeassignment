@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const UserTest = require("./user");
 
 const studentSchema = new mongoose.Schema(
   {
@@ -36,5 +35,4 @@ studentSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 const Student = mongoose.model("Student", studentSchema);
-// const Student = UserTest.discriminator("Student", studentSchema);
 module.exports = Student;

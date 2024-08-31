@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const UserTest = require("./user");
-
 const adminSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -38,6 +36,6 @@ adminSchema.pre("save", async function (next) {
 adminSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-// const Admin = UserTest.discriminator("Admin", adminSchema);
+
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;

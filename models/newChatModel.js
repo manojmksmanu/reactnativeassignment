@@ -24,6 +24,6 @@ const chatSchema = new mongoose.Schema({
 chatSchema.path("users.user").options.refPath = "users.refModel";
 
 // Create the Chat model
-const ChatNew = mongoose.model("ChatNew", chatSchema);
+const NewChat = mongoose.model("NewChat", chatSchema);
 
-module.exports = ChatNew;
+module.exports = NewChat;

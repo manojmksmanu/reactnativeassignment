@@ -11,7 +11,8 @@ const {
   getAllUsersForChatCreation,
   createChatsForAllUsers,
 } = require("./misc/createChats");
-const ChatNew = require("./models/chatNewModel");
+const ChatNew = require("./models/newChatModel");
+const { deleteChatsForDeletedUsers } = require("./misc/deleteChat");
 
 connectDB();
 const app = express();
@@ -35,8 +36,9 @@ app.use("/api/chat", chatRoutes);
 const http = require("http").createServer(app);
 const getData = async () => {
   // const data = await getAllUsersForChatCreation();
-  const data = await createChatsForAllUsers();
+  await deleteChatsForDeletedUsers();
 
+  const data = await createChatsForAllUsers();
 };
 
 getData();
