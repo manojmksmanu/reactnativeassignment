@@ -26,19 +26,19 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     setChats,
     chats,
     setSelectedChat,
+    fetchAgain,
   } = useAuth();
-  console.log(loggedUser);
   // ----chatList window header--
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
         <View>
-          <Text>Chat List</Text>
+          <Text style={{color: 'grey'}}>Chat List</Text>
         </View>
       ),
       headerRight: () => (
         <View>
-          <Text>
+          <Text style={{color: 'grey'}}>
             {loggedUser && loggedUser.name}-({loggedUser && loggedUser.userType}
             )
           </Text>
@@ -70,7 +70,7 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
       };
       fetchChats();
     }
-  }, [setChats]);
+  }, [fetchAgain]);
 
   const chatClicked = (chat: any) => {
     navigation.navigate('ChatWindow', {chatId: chat._id});

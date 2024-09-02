@@ -19,10 +19,12 @@ interface AuthContextType {
   loggedUser: User | null;
   chats: Chat[] | null;
   selectedChat: Chat[] | null;
+  fetchAgain:boolean | false;
   setLoggedUserId: React.Dispatch<React.SetStateAction<string | null>>;
   setLoggedUser: React.Dispatch<React.SetStateAction<User | null>>;
   setChats: React.Dispatch<React.SetStateAction<Chat[] | null>>;
   setSelectedChat: React.Dispatch<React.SetStateAction<Chat[] | null>>;
+  setFetchAgain: React.Dispatch<React.SetStateAction<boolean | false>>;
 }
 
 const API_URL = 'http://10.0.2.2:5000/api';
@@ -36,6 +38,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [loggedUser, setLoggedUser] = useState<User | null>(null);
   const [chats, setChats] = useState<Chat[] | null>(null);
   const [selectedChat, setSelectedChat] = useState<Chat[] | null>(null);
+  const [fetchAgain, setFetchAgain] = useState<boolean>(false);
 
   return (
     <AuthContext.Provider
@@ -48,6 +51,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         setChats,
         selectedChat,
         setSelectedChat,
+        fetchAgain,setFetchAgain,
       }}>
       {children}
     </AuthContext.Provider>

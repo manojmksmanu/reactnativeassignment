@@ -37,11 +37,14 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const {loggedUserId, loggedUser, selectedChat} = useAuth() as {
+  const {loggedUserId, loggedUser, selectedChat,fetchAgain,setFetchAgain} = useAuth()   as {
     loggedUserId: string;
     loggedUser: User;
     selectedChat: any;
+    fetchAgain:boolean;
+    setFetchAgain:any;
   };
+  console.log(fetchAgain,'fetchagain')
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
@@ -165,11 +168,12 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     const messageData = {
       chatId: chatId,
       sender: loggedUserId,
-      senderName: loggedUser ? loggedUser.username : 'Unknown',
+      senderName: loggedUser ? loggedUser.name : 'Unknown',
       message,
       messageId,
       replyingMessage,
     };
+    setFetchAgain(!fetchAgain)
     if (socket) {
       socket.emit('sendMessage', messageData);
       setMessages(prevMessages => [...prevMessages, messageData]);

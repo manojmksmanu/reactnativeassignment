@@ -50,7 +50,6 @@ const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
       console.error('Failed to forward messages', error);
     }
   };
-  console.log(selectedChats.length);
   return (
     <View style={{flex: 1}}>
       <FlatList
