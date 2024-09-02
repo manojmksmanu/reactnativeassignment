@@ -1,6 +1,7 @@
 // const { io } = require("../index");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
+const NewChat = require("../models/newChatModel");
 const User = require("../models/userModel");
 
 // Send message
@@ -16,13 +17,10 @@ exports.sendMessage = async (req, res) => {
       messageId,
       replyingMessage,
     });
-    // console.log(newMessage, "New message created successfully");
-    // const updatedChat= Chat.findOneAndUpdate(
-    //   { chatId },
-    //   { latestMessage: newMessage, updatedAt: Date.now() }, // Storing the entire message object
-    //   { new: true }
-    // );
-    // console.log(updatedChat, "Chat updated with latest message");
+    // Update the latest message in the chat
+    await NewChat.findByIdAndUpdate(chatId, {
+      latestMessage: newMessage._id,
+    });
     res
       .status(201)
       .json({ message: "Message created successfully", newMessage });
