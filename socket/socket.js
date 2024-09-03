@@ -2,13 +2,14 @@ const { Server } = require("socket.io");
 const Message = require("../models/messageModel");
 
 let io;
+let onlineUsers = [];
 function initSocket(server) {
   io = new Server(server);
 
   io.on("connection", (socket) => {
     console.log("a user is connected to", socket.id);
     // Initialize onlineUsers as an empty array
-    let onlineUsers = [];
+
     // Listen for 'userOnline' event
     socket.on("userOnline", (userId) => {
       console.log(userId, "userId");
