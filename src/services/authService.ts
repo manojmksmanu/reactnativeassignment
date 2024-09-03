@@ -8,8 +8,8 @@ interface User {
   // Add other properties as needed
 }
 // const API_URL = 'https://reactnativeassignment.onrender.com/api';
-// const API_URL = 'https://reactnativeassignment.onrender.com/api';
-const API_URL = 'http://10.0.2.2:5000/api';
+const API_URL = 'https://reactnativeassignment.onrender.com/api';
+// const API_URL = 'http://10.0.2.2:5000/api';
 
 export const login = async (
   email: string,
@@ -23,7 +23,6 @@ export const login = async (
       password,
     });
     const {token} = response.data;
-
     await AsyncStorage.setItem('token', token);
   } catch (error: any) {
     console.error(
@@ -33,7 +32,6 @@ export const login = async (
     throw error; // Re-throw the error to handle it in the component
   }
 };
-
 
 export const getUsers = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
@@ -98,7 +96,7 @@ export const sendMessage = async (messageData: any): Promise<void> => {
       },
     );
 
-    console.log('Message sent successfully:', response.data);
+    // console.log('Message sent successfully:', response.data);
   } catch (error: any) {
     // Log full error object
     console.error(
@@ -106,8 +104,6 @@ export const sendMessage = async (messageData: any): Promise<void> => {
       error.response || error.message || error,
     );
   }
-
-  console.log('Exiting sendMessage function');
 };
 
 export const forward = async (

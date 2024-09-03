@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useRef} from 'react';
-import io, {Socket} from 'socket.io-client';
 import {
   View,
   Text,
@@ -61,7 +60,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     socket: any;
     onlineUsers: any;
   };
-  console.log(fetchAgain, 'fetchagain');
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
@@ -81,22 +79,38 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   useEffect(() => {
     // Join the chat room
 
-    console.log('inside');
     if (!socket) return;
     socket.emit('joinRoom', chatId);
-    socket.on('receiveMessage', (messageData: MessageData) => {
-      console.log(messageData, 'message');
-      if (messageData.sender !== loggedUserId) {
+
+    // Define message handlers
+    const handleReceiveMessage = (messageData: MessageData) => {
+      console.log(messageData, 'messagfddsfsdfdsfe👍👍👍👍👍👍👍👍');
+      if (messageData.sender !== loggedUser._id) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
-    });
-    socket.on('forwarMessageReceived', (newMessages: MessageData[]) => {
+    };
+
+    const handleForwardMessageReceived = (newMessages: MessageData[]) => {
       console.log(newMessages, 'forward messages');
       setMessages(prevMessages => [...prevMessages, ...newMessages]);
-    });
+    };
+
+    // Attach event listeners
+    socket.on('receiveMessage', handleReceiveMessage);
+    socket.on('forwarMessageReceived', handleForwardMessageReceived);
+
+    // Cleanup function to remove event listeners
+    return () => {
+      socket.off('receiveMessage', handleReceiveMessage);
+      socket.off('forwarMessageReceived', handleForwardMessageReceived);
+    };
   }, []);
   // --socket connection end--
+  useEffect(() => {
+    console.log('Chat window rendered👌👌👌👌👌👌👌👌👌👌👌👌👌👌');
 
+    // Rest of the useEffect logic
+  }, [socket, chatId, loggedUserId]);
   // ----chat window header--
   useEffect(() => {
     navigation.setOptions({
@@ -109,7 +123,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
           <Text style={styles.usernameText}>
             {loggedUser && getSenderName(loggedUser, selectedChat.users)}
           </Text>
-          <Text style={{}}>
+          <Text style={{color: 'grey'}}>
             {loggedUser &&
               getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
           </Text>
@@ -167,7 +181,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
       chatId: chatId,
-      sender: loggedUserId,
+      sender: loggedUser._id,
       senderName: loggedUser ? loggedUser.name : 'Unknown',
       message,
       messageId,
@@ -253,21 +267,17 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
               const isSelected = selectedMessages.some(
                 msg => msg._id === item._id,
               );
-
               return (
                 <TouchableOpacity
-                  key={item._id} // Ensure each TouchableOpacity has a unique key
+                  key={item._id}
                   onLongPress={() => handleLongPress(item)}
                   onPress={() => handleTap(item)}
-                  // onPress={() => {if (!isSelected) {
-                  //   // Perform your onPress action here
-                  // }}}
                   style={{
-                    backgroundColor: isSelected ? 'lightgray' : 'transparent', // Apply background color based on selection
+                    backgroundColor: isSelected ? 'lightgray' : 'transparent',
                   }}>
                   <RenderMessage
                     item={item}
-                    loggedUserId={loggedUserId}
+                    loggedUserId={loggedUser._id}
                     onLeftSwipe={() => handleSwipeLeft(item)}
                     onRightSwipe={() => handleSwipeRight(item)}
                   />

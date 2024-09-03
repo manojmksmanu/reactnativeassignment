@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import {login} from '../services/authService';
-import {jwtDecode }from 'jwt-decode'; // Correct import
+import {loggeduser, login} from '../services/authService';
+import {jwtDecode} from 'jwt-decode'; // Correct import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
 
@@ -24,28 +24,19 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [userType, SetUserType] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false); // Loading state
-  const {setLoggedUserId} = useAuth();
-
-  const fetchLoggedUser = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const decodedToken = jwtDecode<CustomJwtPayload>(token);
-        const userId = decodedToken.id; // This should now be recognized
-        if (userId) {
-          setLoggedUserId(userId);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    }
-  };
+  const {setLoggedUser, socket} = useAuth();
 
   const handleLogin = async () => {
     setLoading(true); // Start loading
     try {
-      await login(email,userType, password);
-      await fetchLoggedUser();
+      await login(email, userType, password);
+      const user: any = await loggeduser();
+      await AsyncStorage.setItem('userInfo', JSON.stringify(user));
+      setLoggedUser(user);
+
+      // Emit userOnline event
+      socket?.emit('userOnline', user._id);
+
       setLoading(false); // Stop loading
       navigation.navigate('ChatList');
       Alert.alert('Login successful');
