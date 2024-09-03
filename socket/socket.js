@@ -3,26 +3,23 @@ const Message = require("../models/messageModel");
 
 let io;
 let onlineUsers = [];
+console.log(onlineUsers)
 function initSocket(server) {
   io = new Server(server);
 
   io.on("connection", (socket) => {
+    console.log(onlineUsers,'connection')
     console.log("a user is connected to", socket.id);
     // Initialize onlineUsers as an empty array
 
     // Listen for 'userOnline' event
     socket.on("userOnline", (userId) => {
-      console.log(userId, "userId");
-      // Check if the user is already in the onlineUsers array
       if (!onlineUsers.some((user) => user.userId === userId)) {
-        // If not, add the user to the onlineUsers array
         onlineUsers.push({ userId, socketId: socket.id });
       }
-      console.log("onlineUsers", onlineUsers);
-      // Emit the updated onlineUsers array to all connected clients
+      console.log(onlineUsers, "online");
       io.emit("getOnlineUsers", onlineUsers);
     });
-    // Listen for user joining with their userId ends here
 
     socket.on("joinRoom", (chatId) => {
       socket.join(chatId);
@@ -30,12 +27,13 @@ function initSocket(server) {
     });
 
     socket.on("sendMessage", async (messageData) => {
-      console.log(messageData, "hskdjfhdsjkhfsdfs");
+      console.log("sendMessage event received:", messageData);
       try {
         const { sender, message, replyingMessage, senderName, chatId } =
           messageData;
         // Emit message to the specific room
         io.to(chatId).emit("receiveMessage", messageData);
+        console.log("Message emitted to chatId:", chatId);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -76,10 +74,19 @@ function initSocket(server) {
         }
       }
     );
+
+    // Handle logout event
+    socket.on("logout", (userId) => {
+      onlineUsers = onlineUsers.filter((user) => user.userId !== userId);
+      console.log(onlineUsers, "👌👌👌👌👌👌👌👌👌👌");
+      io.emit("getOnlineUsers", onlineUsers);
+    });
     // Handle user disconnect
     socket.on("disconnect", () => {
       onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+      console.log(onlineUsers,'disconnect')
       io.emit("getOnlineUsers", onlineUsers);
+      console.log("A user disconnected:", socket.id);
     });
   });
 
