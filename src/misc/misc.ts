@@ -30,3 +30,24 @@ export const getSendedType = (loggedUser: User, chatUsers: any[]) => {
     return null;
   }
 };
+export const getSenderStatus = (
+  loggedUser: User,
+  chatUsers: any[],
+  onlineUsers: any[],
+) => {
+  console.log(onlineUsers, 'misc');
+  if (chatUsers) {
+    const sender = chatUsers.find(
+      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+    );
+    if (onlineUsers.some(user => user.userId === sender.user._id)) {
+      console.log('online');
+      return 'online';
+    } else {
+      console.log('offline');
+      return 'offline';
+    }
+  } else {
+    return null;
+  }
+};

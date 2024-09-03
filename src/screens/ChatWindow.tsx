@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {io} from 'socket.io-client';
+import io, {Socket} from 'socket.io-client';
 import {
   View,
   Text,
@@ -11,17 +11,26 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
-import {getMessages, getUsers, sendMessage} from '../services/authService';
+import {getMessages, sendMessage} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
-import {getSenderName} from '../misc/misc';
+import {getSenderName, getSenderStatus} from '../misc/misc';
 interface User {
   _id: string;
   name: string;
   userType: any;
 }
+
+interface MessageData {
+  chatId: string;
+  sender: string;
+  senderName: string;
+  message: string;
+  messageId: string;
+  replyingMessage: any; // Replace `any` with a more specific type if possible
+}
+
 // const base_url = 'https://reactnativeassignment.onrender.com';
-const base_url = 'http://10.0.2.2:5000';
 
 const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   route,
@@ -31,20 +40,28 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
-  const [socket, setSocket] = useState<any>();
-  const [isConnected, setIsConnected] = useState(true);
   const [replyingMessage, setReplyingMessage] = useState<any>(null);
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const {loggedUserId, loggedUser, selectedChat,fetchAgain,setFetchAgain} = useAuth()   as {
+  const {
+    loggedUserId,
+    loggedUser,
+    selectedChat,
+    fetchAgain,
+    setFetchAgain,
+    socket,
+    onlineUsers,
+  } = useAuth() as {
     loggedUserId: string;
     loggedUser: User;
     selectedChat: any;
-    fetchAgain:boolean;
-    setFetchAgain:any;
+    fetchAgain: boolean;
+    setFetchAgain: any;
+    socket: any;
+    onlineUsers: any;
   };
-  console.log(fetchAgain,'fetchagain')
+  console.log(fetchAgain, 'fetchagain');
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
@@ -62,42 +79,21 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   };
   // ----socket connection--
   useEffect(() => {
-    const socketInstance = io(base_url, {
-      transports: ['websocket'],
-      reconnection: true, // Automatically reconnect
-      reconnectionAttempts: Infinity, // Retry indefinitely
-      reconnectionDelay: 1000, // Initial delay
-      reconnectionDelayMax: 5000, // Maximum delay
-    });
-    setSocket(socketInstance);
-
     // Join the chat room
-    socketInstance.emit('joinRoom', chatId);
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-    });
-
-    socketInstance.on('receiveMessage', messageData => {
+    console.log('inside');
+    if (!socket) return;
+    socket.emit('joinRoom', chatId);
+    socket.on('receiveMessage', (messageData: MessageData) => {
+      console.log(messageData, 'message');
       if (messageData.sender !== loggedUserId) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
     });
-    socketInstance.on('forwarMessageReceived', newMessages => {
-      // console.log(newMessages, 'message data');
-      // console.log(messages);
+    socket.on('forwarMessageReceived', (newMessages: MessageData[]) => {
+      console.log(newMessages, 'forward messages');
       setMessages(prevMessages => [...prevMessages, ...newMessages]);
-      // console.log(messages, 'messages');
     });
-
-    socketInstance.on('disconnect', () => {
-      console.log('Socket disconnected');
-      setIsConnected(false);
-    });
-
-    return () => {
-      socketInstance.disconnect();
-    };
   }, []);
   // --socket connection end--
 
@@ -112,6 +108,10 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
           />
           <Text style={styles.usernameText}>
             {loggedUser && getSenderName(loggedUser, selectedChat.users)}
+          </Text>
+          <Text style={{}}>
+            {loggedUser &&
+              getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
           </Text>
         </View>
       ),
@@ -173,7 +173,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
       messageId,
       replyingMessage,
     };
-    setFetchAgain(!fetchAgain)
+    setFetchAgain(!fetchAgain);
     if (socket) {
       socket.emit('sendMessage', messageData);
       setMessages(prevMessages => [...prevMessages, messageData]);
@@ -211,8 +211,8 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     navigation.navigate('ForwardChatScreen', {
       messagesToForward: selectedMessages,
       socket: socket,
-      loggedUserId:loggedUser._id,
-      loggedUsername:loggedUser.name
+      loggedUserId: loggedUser._id,
+      loggedUsername: loggedUser.name,
     });
   };
 

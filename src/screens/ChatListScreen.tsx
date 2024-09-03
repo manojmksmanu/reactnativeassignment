@@ -9,16 +9,18 @@ import {
 } from 'react-native';
 import {getAllChats, getUsers, loggeduser} from '../services/authService';
 import {useAuth} from '../context/userContext';
-import {getSendedType, getSenderName} from '../misc/misc';
+import {getSendedType, getSenderName, getSenderStatus} from '../misc/misc';
 interface User {
   _id: string;
   name: string;
   userType: any;
   // Add other properties as needed
 }
+
 const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
+
   const {
     setLoggedUser,
     loggedUser,
@@ -27,7 +29,10 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     chats,
     setSelectedChat,
     fetchAgain,
+    onlineUsers,
   } = useAuth();
+  console.log(onlineUsers, 'fsdkljfl');
+  console.log(chats, 'chats');
   // ----chatList window header--
   useEffect(() => {
     navigation.setOptions({
@@ -47,6 +52,7 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
     });
   }, [navigation, loggedUser]);
   // ----chatList window header end--
+
   useEffect(() => {
     const find = async () => {
       const response: User | null = await loggeduser();
@@ -97,6 +103,10 @@ const ChatListScreen: React.FC<{navigation: any}> = ({navigation}) => {
                 <Text style={styles.username}>
                   {loggedUser && getSenderName(loggedUser, item.users)}-(
                   {loggedUser && getSendedType(loggedUser, item.users)})
+                </Text>
+                <Text>
+                  {loggedUser &&
+                    getSenderStatus(loggedUser, item.users, onlineUsers)}
                 </Text>
               </View>
             </TouchableOpacity>
