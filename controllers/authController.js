@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
     const user = await User.create({ name, email, password, userType });
-    console.log(user, "users");
+;
     // await createChatsForNewUser(user);
     // res.status(201).json({
     //   _id: user._id,
@@ -52,11 +52,10 @@ exports.signup = async (req, res) => {
 // };
 exports.login = async (req, res) => {
   const { email,userType, password,  } = req.body;
-  console.log(userType, "login details");
   if (userType === "Admin") {
     try {
       const user = await Admin.findOne({ email });
-      console.log(user), "user";
+    
       if (user && (await user.matchPassword(password))) {
         res.json({
           _id: user._id,
@@ -109,7 +108,7 @@ exports.login = async (req, res) => {
   }
 
   // if (userType !== "Tutor" || userType !== "Student" || userType !== "Admin") {
-  //   console.log("userType is not valied");
+
   //   res.json("userType does not valied");
   // }
 };
@@ -118,7 +117,6 @@ exports.login = async (req, res) => {
 exports.getLoggedUser = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user, "user");
     // Use findOne instead of find to get a single user document
     const loggedUser = await findUserById({ userId: user._id }); // Exclude the password field
     if (!loggedUser) {

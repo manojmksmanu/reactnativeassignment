@@ -2,12 +2,26 @@ const { Server } = require("socket.io");
 const Message = require("../models/messageModel");
 
 let io;
-
 function initSocket(server) {
   io = new Server(server);
 
   io.on("connection", (socket) => {
-    console.log("a user is connected", socket.id);
+    console.log("a user is connected to", socket.id);
+    // Initialize onlineUsers as an empty array
+    let onlineUsers = [];
+    // Listen for 'userOnline' event
+    socket.on("userOnline", (userId) => {
+      console.log(userId,'userId')
+      // Check if the user is already in the onlineUsers array
+      if (!onlineUsers.some((user) => user.userId === userId)) {
+        // If not, add the user to the onlineUsers array
+        onlineUsers.push({ userId, socketId: socket.id });
+      }
+      console.log("onlineUsers", onlineUsers);
+      // Emit the updated onlineUsers array to all connected clients
+      io.emit("getOnlineUsers", onlineUsers);
+    });
+    // Listen for user joining with their userId ends here
 
     socket.on("joinRoom", (chatId) => {
       socket.join(chatId);
@@ -61,10 +75,17 @@ function initSocket(server) {
         }
       }
     );
-
-    socket.on("disconnect", () => {
-      console.log("user disconnected", socket.id);
-    });
+    // Handle user disconnect
+    // socket.on("disconnect", () => {
+    //   const userId = [...onlineUsers].find(
+    //     ([key, value]) => value === socket.id
+    //   )?.[0];
+    //   if (userId) {
+    //     onlineUsers.delete(userId);
+    //     io.emit("statusUpdate", { userId, status: "offline" });
+    //   }
+    //   console.log("A user disconnected:", socket.id);
+    // });
   });
 
   return io;

@@ -67,7 +67,6 @@ exports.getUsers = async (req, res) => {
         _id: { $ne: user._id },
       }).select("-password");
       res.json(admins);
-      console.log(admins);
     }
   } catch (error) {
     res.status(500).json({ message: "Server Error" });

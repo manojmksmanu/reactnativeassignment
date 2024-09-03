@@ -20,12 +20,12 @@ exports.getChatsForUser = async (userId) => {
   return chats;
 };
 exports.findUserById = async ({userId}) => {
-  console.log(userId)
+
   let user;
 
   // Check in Student model
   user = await Student.findById(userId).select("-password");
-  console.log(user)
+
   if (user) return user;
 
   // Check in Tutor model

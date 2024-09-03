@@ -7,14 +7,12 @@ const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatMessageRoutes");
 const cors = require("cors");
 const { initSocket } = require("./socket/socket");
-const {
-  getAllUsersForChatCreation,
-  createChatsForAllUsers,
-} = require("./misc/createChats");
+const { createChatsForAllUsers } = require("./misc/createChats");
 const ChatNew = require("./models/newChatModel");
 const { deleteChatsForDeletedUsers } = require("./misc/deleteChat");
 
 connectDB();
+
 const app = express();
 app.use(express.json());
 

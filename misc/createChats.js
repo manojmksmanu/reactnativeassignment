@@ -69,7 +69,6 @@ exports.createChatsForAllUsers = async () => {
           ].includes(user2.userType)
             ? "Admin"
             : user2.userType;
-          console.log(refModel1, refModel2);
 
           // If no existing chat, create a new one
           if (!existingChat) {
@@ -94,12 +93,12 @@ exports.createChatsForAllUsers = async () => {
             });
 
             await newChat.save();
-            console.log(
-              `Created chat between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
-            );
+            // console.log(
+            //   `Created chat between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+            // );
           } else {
             console.log(
-              `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+              // `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
             );
           }
         }
