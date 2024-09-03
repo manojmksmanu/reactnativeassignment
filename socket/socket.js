@@ -11,7 +11,7 @@ function initSocket(server) {
     let onlineUsers = [];
     // Listen for 'userOnline' event
     socket.on("userOnline", (userId) => {
-      console.log(userId,'userId')
+      console.log(userId, "userId");
       // Check if the user is already in the onlineUsers array
       if (!onlineUsers.some((user) => user.userId === userId)) {
         // If not, add the user to the onlineUsers array
@@ -76,16 +76,10 @@ function initSocket(server) {
       }
     );
     // Handle user disconnect
-    // socket.on("disconnect", () => {
-    //   const userId = [...onlineUsers].find(
-    //     ([key, value]) => value === socket.id
-    //   )?.[0];
-    //   if (userId) {
-    //     onlineUsers.delete(userId);
-    //     io.emit("statusUpdate", { userId, status: "offline" });
-    //   }
-    //   console.log("A user disconnected:", socket.id);
-    // });
+    socket.on("disconnect", () => {
+      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+      io.emit("getOnlineUsers", onlineUsers);
+    });
   });
 
   return io;
