@@ -23,7 +23,6 @@ type RootStackParamList = {
 const ChatListScreen: React.FC = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
-  const [loading, setLoading] = useState<boolean>(true);
   const {
     setLoggedUser,
     loggedUser,
@@ -33,6 +32,7 @@ const ChatListScreen: React.FC = () => {
     fetchAgain,
     onlineUsers,
     socket,
+    loading,
     FetchChatsAgain,
   } = useAuth();
   // Update header title and right component
@@ -76,24 +76,13 @@ const ChatListScreen: React.FC = () => {
     };
   }, [navigation, loggedUser]);
 
-  // Fetch chats
   useEffect(() => {
-    if (loggedUser) {
-      const fetchChats = async () => {
-        setLoading(true);
-        try {
-          const response = await getAllChats(loggedUser._id);
-          setChats(response);
-        } catch (error) {
-          console.error('Failed to fetch chats:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchChats();
-    }
-  }, [fetchAgain, loggedUser]);
-  // Fetch Chats end here
+    socket?.on('fetchAgain', () => {
+      console.log('message received hello');
+      FetchChatsAgain();
+      console.log(fetchAgain, 'on list screen (old value)'); // This will still log the old value
+    });
+  }, [socket]);
 
   // Handle chat item click
   const chatClicked = useCallback(

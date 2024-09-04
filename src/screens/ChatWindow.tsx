@@ -48,8 +48,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     loggedUserId,
     loggedUser,
     selectedChat,
-    fetchAgain,
-    setFetchAgain,
     socket,
     onlineUsers,
     FetchChatsAgain,
@@ -57,8 +55,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     loggedUserId: string;
     loggedUser: User;
     selectedChat: any;
-    fetchAgain: boolean;
-    setFetchAgain: any;
     socket: any;
     onlineUsers: any;
     FetchChatsAgain: any;
@@ -70,7 +66,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
   const scrollToBottom = () => {
     scrollViewRef.current?.scrollToEnd({animated: false});
   };
@@ -189,12 +184,11 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
       replyingMessage,
     };
     if (socket) {
-      socket.emit('sendMessage', messageData);
       socket.emit('fetch', 'fetchAgain');
+      socket.emit('sendMessage', messageData);
       setMessages(prevMessages => [...prevMessages, messageData]);
     }
     await sendMessage(messageData);
-    await FetchChatsAgain();
   };
   // --send message function ends here--
 
