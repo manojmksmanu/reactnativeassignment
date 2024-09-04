@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import {getAllChats, loggeduser} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import {getSendedType, getSenderName, getSenderStatus} from '../misc/misc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
