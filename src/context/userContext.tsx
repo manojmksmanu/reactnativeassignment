@@ -38,6 +38,7 @@ interface AuthContextType {
   setFetchAgain: React.Dispatch<React.SetStateAction<boolean | false>>;
   socket: Socket | null; // Add socket
   setSocket: React.Dispatch<React.SetStateAction<Socket | null>>; // Add setSocket
+  FetchChatsAgain: () => void; // Add this line
 }
 
 interface Message {
@@ -60,8 +61,8 @@ type RootStackParamList = {
   Login: undefined;
 };
 
-// const API_URL = 'http://10.0.2.2:5000';
-const API_URL = 'https://reactnativeassignment.onrender.com';
+const API_URL = 'http://10.0.2.2:5000';
+// const API_URL = 'https://reactnativeassignment.onrender.com';
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,6 +78,10 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [onlineUsers, setOnlineUsers] = useState<any[] | null>(null);
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
+
+  const FetchChatsAgain = () => {
+    setFetchAgain(!fetchAgain);
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -124,6 +129,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     };
   }, []);
 
+  useEffect(() => {
+    socket?.on('fetchAgain', () => {
+      FetchChatsAgain();
+    });
+  }, []);
+
   // add user to online and offline status
   useEffect(() => {
     if (socket && loggedUser?._id) {
@@ -139,8 +150,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     }
   }, [socket, loggedUser]);
   // -------------------------------------------
-  // console.log(onlineUsers, 'online users');
-  console.log(onlineUsers, '✌✌✌✌✌✌✌✌✌✌');
   return (
     <AuthContext.Provider
       value={{
@@ -152,8 +161,9 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         setChats,
         selectedChat,
         setSelectedChat,
-        fetchAgain,
-        setFetchAgain,
+        fetchAgain, // Add this line
+        setFetchAgain, // Add this line
+        FetchChatsAgain,
         socket,
         setSocket,
         onlineUsers,

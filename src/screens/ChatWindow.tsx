@@ -14,6 +14,7 @@ import {getMessages, sendMessage} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
 import {getSenderName, getSenderStatus} from '../misc/misc';
+import {FlatList} from 'react-native-gesture-handler';
 interface User {
   _id: string;
   name: string;
@@ -51,6 +52,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     setFetchAgain,
     socket,
     onlineUsers,
+    FetchChatsAgain,
   } = useAuth() as {
     loggedUserId: string;
     loggedUser: User;
@@ -59,6 +61,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     setFetchAgain: any;
     socket: any;
     onlineUsers: any;
+    FetchChatsAgain: any;
   };
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
@@ -84,7 +87,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 
     // Define message handlers
     const handleReceiveMessage = (messageData: MessageData) => {
-      console.log(messageData, 'messagfddsfsdfdsfe👍👍👍👍👍👍👍👍');
       if (messageData.sender !== loggedUser._id) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
@@ -108,9 +110,8 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   // --socket connection end--
   useEffect(() => {
     console.log('Chat window rendered👌👌👌👌👌👌👌👌👌👌👌👌👌👌');
-
     // Rest of the useEffect logic
-  }, [socket, chatId, loggedUserId]);
+  }, []);
   // ----chat window header--
   useEffect(() => {
     navigation.setOptions({
@@ -187,12 +188,13 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
       messageId,
       replyingMessage,
     };
-    setFetchAgain(!fetchAgain);
     if (socket) {
       socket.emit('sendMessage', messageData);
+      socket.emit('fetch', 'fetchAgain');
       setMessages(prevMessages => [...prevMessages, messageData]);
     }
     await sendMessage(messageData);
+    await FetchChatsAgain();
   };
   // --send message function ends here--
 
@@ -259,17 +261,16 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={styles.loadingIndicator}
           />
         ) : (
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{flexGrow: 0}}
-            onContentSizeChange={hanldeContentSizeChange}>
-            {messages.map(item => {
+          <FlatList
+            data={messages.slice().reverse()}
+            inverted
+            keyExtractor={item => item._id}
+            renderItem={({item}) => {
               const isSelected = selectedMessages.some(
                 msg => msg._id === item._id,
               );
               return (
                 <TouchableOpacity
-                  key={item._id}
                   onLongPress={() => handleLongPress(item)}
                   onPress={() => handleTap(item)}
                   style={{
@@ -283,8 +284,10 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                   />
                 </TouchableOpacity>
               );
-            })}
-          </ScrollView>
+            }}
+            contentContainerStyle={{flexGrow: 0}}
+            // onContentSizeChange={handleContentSizeChange}
+          />
         )}
         <View>
           <View style={styles.inputMainContainer}>

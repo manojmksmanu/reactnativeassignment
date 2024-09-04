@@ -33,6 +33,7 @@ const ChatListScreen: React.FC = () => {
     fetchAgain,
     onlineUsers,
     socket,
+    FetchChatsAgain,
   } = useAuth();
   // Update header title and right component
   useEffect(() => {
@@ -60,20 +61,21 @@ const ChatListScreen: React.FC = () => {
         </View>
       ),
     });
+    const removeToken = async () => {
+      try {
+        await AsyncStorage.removeItem('token');
+
+        socket?.emit('logout', loggedUser?._id);
+
+        setLoggedUser(null);
+        navigation.navigate('Login');
+        console.log('Token removed successfully');
+      } catch (error) {
+        console.error('Failed to remove token:', error);
+      }
+    };
   }, [navigation, loggedUser]);
-  const removeToken = async () => {
-    try {
-      await AsyncStorage.removeItem('token');
 
-      socket?.emit('logout', loggedUser?._id);
-
-      setLoggedUser(null);
-      navigation.navigate('Login');
-      console.log('Token removed successfully');
-    } catch (error) {
-      console.error('Failed to remove token:', error);
-    }
-  };
   // Fetch chats
   useEffect(() => {
     if (loggedUser) {
@@ -90,7 +92,8 @@ const ChatListScreen: React.FC = () => {
       };
       fetchChats();
     }
-  }, [loggedUser, fetchAgain, setChats]);
+  }, [fetchAgain, loggedUser]);
+  // Fetch Chats end here
 
   // Handle chat item click
   const chatClicked = useCallback(
@@ -100,7 +103,6 @@ const ChatListScreen: React.FC = () => {
     },
     [navigation, setSelectedChat],
   );
-
   // Render chat item
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
@@ -113,7 +115,8 @@ const ChatListScreen: React.FC = () => {
         </Text>
         <Text style={styles.statusText}>
           {loggedUser &&
-          !getSenderStatus(loggedUser, item.users, onlineUsers || []) ? (
+          getSenderStatus(loggedUser, item.users, onlineUsers || []) ===
+            'online' ? (
             <Image
               style={{width: 15, height: 15}}
               source={require('../assets/dotgreen.png')}
