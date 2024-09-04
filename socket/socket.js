@@ -43,7 +43,10 @@ function initSocket(server) {
       console.log(data);
       try {
         io.emit("fetchAgain", data);
-      } catch {}
+        console.log("inside try");
+      } catch {
+        console.log("inside catch");
+      }
     });
 
     socket.on(
