@@ -3,12 +3,12 @@ const Message = require("../models/messageModel");
 
 let io;
 let onlineUsers = [];
-console.log(onlineUsers)
+console.log(onlineUsers);
 function initSocket(server) {
   io = new Server(server);
 
   io.on("connection", (socket) => {
-    console.log(onlineUsers,'connection')
+    console.log(onlineUsers, "connection");
     console.log("a user is connected to", socket.id);
     // Initialize onlineUsers as an empty array
 
@@ -27,7 +27,7 @@ function initSocket(server) {
     });
 
     socket.on("sendMessage", async (messageData) => {
-      console.log("sendMessage event received:", messageData);
+      // console.log("sendMessage event received:", messageData);
       try {
         const { sender, message, replyingMessage, senderName, chatId } =
           messageData;
@@ -37,6 +37,13 @@ function initSocket(server) {
       } catch (error) {
         console.error("Error sending message:", error);
       }
+    });
+
+    socket.on("fetch", async (data) => {
+      console.log(data);
+      try {
+        io.emit("fetchAgain", data);
+      } catch {}
     });
 
     socket.on(
@@ -84,7 +91,7 @@ function initSocket(server) {
     // Handle user disconnect
     socket.on("disconnect", () => {
       onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-      console.log(onlineUsers,'disconnect')
+      console.log(onlineUsers, "disconnect");
       io.emit("getOnlineUsers", onlineUsers);
       console.log("A user disconnected:", socket.id);
     });

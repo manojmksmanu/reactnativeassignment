@@ -21,7 +21,6 @@ const chatSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Message", // Reference to the Message model
   },
-  createdAt: { type: Date, default: Date.now },
 } ,{ timestamps: true });
 
 // Add the refPath to the schema, referencing the refModel field

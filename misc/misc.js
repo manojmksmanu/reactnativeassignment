@@ -11,16 +11,25 @@ exports.createChatId = (user1, user2) => {
 };
 
 exports.getChatsForUser = async (userId) => {
-  const chats = await NewChat.find({ "users.user": userId })
-    .populate({
-      path: "users.user",
-      select: "-password", // Exclude the password field
-    })
-    .sort({ updatedAt: -1 });
-  return chats;
+  try {
+    const chats = await NewChat.find({ "users.user": userId })
+      .populate({
+        path: "users.user",
+        select: "-password",
+      })
+      .populate({
+        path: "latestMessage",
+        model: "Message",
+      })
+      .sort({ updatedAt: -1 });
+    return chats;
+  } catch (error) {
+    console.error("Error fetching chats for user:", error);
+    throw error;
+  }
 };
-exports.findUserById = async ({userId}) => {
 
+exports.findUserById = async ({ userId }) => {
   let user;
 
   // Check in Student model

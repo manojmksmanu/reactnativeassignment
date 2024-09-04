@@ -1,14 +1,13 @@
-// const { io } = require("../index");
-const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
 const NewChat = require("../models/newChatModel");
-const User = require("../models/userModel");
 
 // Send message
 exports.sendMessage = async (req, res) => {
   const { chatId, sender, senderName, message, messageId, replyingMessage } =
     req.body;
+
   try {
+    // Create the new message
     const newMessage = await Message.create({
       chatId,
       sender,
@@ -17,22 +16,24 @@ exports.sendMessage = async (req, res) => {
       messageId,
       replyingMessage,
     });
-    // Update the latest message in the chat
-    await NewChat.findByIdAndUpdate(chatId, {
-      latestMessage: newMessage._id,
-    });
+    // Update the latest message in the chat and ensure updatedAt is set
+    const updatedChat = await NewChat.findOneAndUpdate(
+      { _id: chatId },
+      {
+        latestMessage: newMessage,
+        updatedAt: Date.now(), // Ensure updatedAt is manually set
+      },
+      { new: true }
+    ).populate("latestMessage");
+
     res
       .status(201)
       .json({ message: "Message created successfully", newMessage });
   } catch (error) {
-    // Log the error for debugging
     console.error("Error creating message:", error);
-
-    // Send error response
     res.status(500).json({ message: "Server Error" });
   }
 };
-
 // Get messages
 exports.getMessages = async (req, res) => {
   const { chatId } = req.params;
