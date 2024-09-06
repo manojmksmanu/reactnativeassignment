@@ -3,9 +3,16 @@ const NewChat = require("../models/newChatModel");
 
 // Send message
 exports.sendMessage = async (req, res) => {
-  const { chatId, sender, senderName, message, messageId, replyingMessage } =
-    req.body;
-
+  const {
+    chatId,
+    sender,
+    senderName,
+    message,
+    fileUrl,
+    fileType,
+    messageId,
+    replyingMessage,
+  } = req.body;
   try {
     // Create the new message
     const newMessage = await Message.create({
@@ -13,9 +20,12 @@ exports.sendMessage = async (req, res) => {
       sender,
       senderName,
       message,
+      fileUrl,
+      fileType,
       messageId,
       replyingMessage,
     });
+    console.log(newMessage);
     // Update the latest message in the chat and ensure updatedAt is set
     const updatedChat = await NewChat.findOneAndUpdate(
       { _id: chatId },

@@ -27,10 +27,10 @@ function initSocket(server) {
     });
 
     socket.on("sendMessage", async (messageData) => {
-      // console.log("sendMessage event received:", messageData);
       try {
         const { sender, message, replyingMessage, senderName, chatId } =
           messageData;
+          console.log(messageData,'hello')
         // Emit message to the specific room
         io.to(chatId).emit("receiveMessage", messageData);
         console.log("Message emitted to chatId:", chatId);
