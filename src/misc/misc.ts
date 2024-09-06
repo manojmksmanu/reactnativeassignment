@@ -40,7 +40,7 @@ export const getSenderStatus = (
     const sender = chatUsers.find(
       chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
     );
-    if (onlineUsers.some(user => user.userId === sender.user._id)) {
+    if (onlineUsers && onlineUsers.some(user => user.userId === sender.user._id)) {
       // console.log('online');
       return 'online';
     } else {

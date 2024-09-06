@@ -15,6 +15,10 @@ import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
 import {getSenderName, getSenderStatus} from '../misc/misc';
 import {FlatList} from 'react-native-gesture-handler';
+import {
+  openCamera,
+  openDocumentPicker,
+} from '../misc/FireBaseUsedFunctions/FireBaseUsedFunctios';
 interface User {
   _id: string;
   name: string;
@@ -29,8 +33,6 @@ interface MessageData {
   messageId: string;
   replyingMessage: any; // Replace `any` with a more specific type if possible
 }
-
-// const base_url = 'https://reactnativeassignment.onrender.com';
 
 const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   route,
@@ -62,17 +64,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  const scrollToBottom = () => {
-    scrollViewRef.current?.scrollToEnd({animated: false});
-  };
-  // Handle content size change to scroll to bottom
-  const hanldeContentSizeChange = () => {
-    scrollViewRef.current?.scrollToEnd({animated: false});
-  };
+
   // ----socket connection--
   useEffect(() => {
     // Join the chat room
@@ -82,6 +74,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 
     // Define message handlers
     const handleReceiveMessage = (messageData: MessageData) => {
+      console.log(messageData, 'socket rec');
       if (messageData.sender !== loggedUser._id) {
         setMessages(prevMessages => [...prevMessages, messageData]);
       }
@@ -171,18 +164,57 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 
   //----send message function--
   const handleSendMessage = async () => {
+    if (!message.trim()) return;
+
     setReplyingMessage('');
     setMessage('');
-    if (message === '') return;
+
+    const messageId = Date.now().toString(); // Unique ID for the message
+    const messageData = {
+      chatId,
+      sender: loggedUser._id,
+      senderName: loggedUser ? loggedUser.name : 'Unknown',
+      message,
+      fileUrl: null, // No file for a text message
+      fileType: 'text', // Make sure fileType is set for normal messages
+      messageId,
+      replyingMessage,
+    };
+
+    console.log('Sending Message: ', messageData); // Check what you're sending
+
+    // Emit message to socket
+    if (socket) {
+      socket.emit('fetch', 'fetchAgain');
+      socket.emit('sendMessage', messageData);
+      setMessages(prevMessages => [...prevMessages, messageData]);
+    }
+
+    // Send the message to the backend
+    try {
+      await sendMessage(messageData);
+    } catch (error) {
+      console.error('Error sending message: ', error);
+    }
+  };
+  // --send message function ends here--
+  //----send message function--
+  const handleSendDocuments = async (downloadURL: string, fileType: any) => {
+    console.log(downloadURL, fileType);
+    setReplyingMessage('');
+    setMessage('');
     const messageId = Date.now().toString(); // Unique ID for the message
     const messageData = {
       chatId: chatId,
       sender: loggedUser._id,
       senderName: loggedUser ? loggedUser.name : 'Unknown',
-      message,
+      message:"image",
+      fileUrl:downloadURL,
+      fileType,
       messageId,
       replyingMessage,
     };
+    console.log(messageData);
     if (socket) {
       socket.emit('fetch', 'fetchAgain');
       socket.emit('sendMessage', messageData);
@@ -192,7 +224,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   };
   // --send message function ends here--
 
-  // ----function for handleswipeLeft and swipeRight ----
+  // ----function for handleswipeLefat and swipeRight ----
   const handleSwipeLeft = (item: any) => {
     setReplyingMessage(item);
     setIsReplying(true);
@@ -243,6 +275,15 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     }
   };
 
+  // here I send document to firebase and I get the url
+  const sendDocument = async () => {
+    await openDocumentPicker(setMessage, handleSendDocuments);
+  };
+
+  const sendCameraFile = async () => {
+    await openCamera();
+  };
+
   return (
     <ImageBackground
       source={require('../assets/b9qk3w41sqf1l0ccujfh.webp')}
@@ -255,33 +296,35 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={styles.loadingIndicator}
           />
         ) : (
-          <FlatList
-            data={messages.slice().reverse()}
-            inverted
-            keyExtractor={item => item._id}
-            renderItem={({item}) => {
-              const isSelected = selectedMessages.some(
-                msg => msg._id === item._id,
-              );
-              return (
-                <TouchableOpacity
-                  onLongPress={() => handleLongPress(item)}
-                  onPress={() => handleTap(item)}
-                  style={{
-                    backgroundColor: isSelected ? 'lightgray' : 'transparent',
-                  }}>
-                  <RenderMessage
-                    item={item}
-                    loggedUserId={loggedUser._id}
-                    onLeftSwipe={() => handleSwipeLeft(item)}
-                    onRightSwipe={() => handleSwipeRight(item)}
-                  />
-                </TouchableOpacity>
-              );
-            }}
-            contentContainerStyle={{flexGrow: 0}}
-            // onContentSizeChange={handleContentSizeChange}
-          />
+          <>
+            <FlatList
+              data={messages.slice().reverse()}
+              inverted
+              keyExtractor={item => item._id}
+              renderItem={({item}) => {
+                const isSelected = selectedMessages.some(
+                  msg => msg._id === item._id,
+                );
+                return (
+                  <TouchableOpacity
+                    onLongPress={() => handleLongPress(item)}
+                    onPress={() => handleTap(item)}
+                    style={{
+                      backgroundColor: isSelected ? 'lightgray' : 'transparent',
+                    }}>
+                    <RenderMessage
+                      item={item}
+                      loggedUserId={loggedUser._id}
+                      onLeftSwipe={() => handleSwipeLeft(item)}
+                      onRightSwipe={() => handleSwipeRight(item)}
+                    />
+                  </TouchableOpacity>
+                );
+              }}
+              contentContainerStyle={{flexGrow: 0}}
+              // onContentSizeChange={handleContentSizeChange}
+            />
+          </>
         )}
         <View>
           <View style={styles.inputMainContainer}>
@@ -317,30 +360,35 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                   multiline
                 />
                 <View>
-                  <Image
-                    source={require('../assets/attach-file.png')}
-                    style={{
-                      width: 22,
-                      height: 22,
-                      position: 'absolute',
-                      zIndex: 10,
-                      bottom: 9,
-                      right: 50,
-                      opacity: 0.6,
-                    }}
-                  />
-                  <Image
-                    source={require('../assets/photo-camera.png')}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      position: 'absolute',
-                      zIndex: 10,
-                      bottom: 10,
-                      right: 23,
-                      opacity: 0.6,
-                    }}
-                  />
+                  <TouchableOpacity onPress={sendDocument}>
+                    <Image
+                      source={require('../assets/attach-file.png')}
+                      style={{
+                        width: 22,
+                        height: 22,
+                        position: 'absolute',
+                        zIndex: 10,
+                        bottom: 9,
+                        right: 50,
+                        opacity: 0.6,
+                      }}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={sendCameraFile}>
+                    <Image
+                      source={require('../assets/photo-camera.png')}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        position: 'absolute',
+                        zIndex: 10,
+                        bottom: 10,
+                        right: 23,
+                        opacity: 0.6,
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>

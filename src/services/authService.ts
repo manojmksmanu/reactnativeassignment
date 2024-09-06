@@ -7,9 +7,9 @@ interface User {
   userType: any;
   // Add other properties as needed
 }
-const API_URL = 'https://reactnativeassignment.onrender.com/api';
 // const API_URL = 'https://reactnativeassignment.onrender.com/api';
-// const API_URL = 'http://10.0.2.2:5000/api';
+// const API_URL = 'https://reactnativeassignment.onrender.com/api';
+const API_URL = 'http://10.0.2.2:5000/api';
 
 export const login = async (
   email: string,
@@ -88,6 +88,8 @@ export const sendMessage = async (messageData: any): Promise<void> => {
         sender: messageData.sender,
         senderName: messageData.senderName,
         message: messageData.message,
+        fileUrl: messageData.fileUrl,
+        fileType: messageData.fileType,
         messageId: messageData.messageId,
         replyingMessage: messageData.replyingMessage,
       },
