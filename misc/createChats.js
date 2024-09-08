@@ -15,7 +15,7 @@ const chatPermissions = {
 
 getAllUsersForChatCreation = async () => {
   const admins = await Admin.find({});
-  const tutors = await Tutor.find({});
+  const tutors = await Tutor.find({ isIpaApproved: true });
   const students = await Student.find({});
 
   return [
@@ -33,7 +33,6 @@ getAllUsersForChatCreation = async () => {
     })),
   ];
 };
-
 
 exports.createChatsForAllUsers = async () => {
   try {
@@ -93,12 +92,12 @@ exports.createChatsForAllUsers = async () => {
             });
 
             await newChat.save();
-            // console.log(
-            //   `Created chat between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
-            // );
+            console.log(
+              `Created chat between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+            );
           } else {
             console.log(
-              // `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+              `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
             );
           }
         }
