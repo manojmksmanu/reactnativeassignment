@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {loggeduser, login} from '../services/authService';
-import {jwtDecode} from 'jwt-decode'; // Correct import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
+import {Picker} from '@react-native-picker/picker';
 
 // Define a custom interface that extends JwtPayload to include the 'id' property
 interface CustomJwtPayload {
@@ -67,15 +67,19 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         style={styles.input}
         editable={!loading} // Disable input while loading
       />
-      <TextInput
-        placeholder="userType"
-        placeholderTextColor="#808080"
-        value={userType}
-        onChangeText={SetUserType}
-        secureTextEntry
-        style={styles.input}
-        editable={!loading} // Disable input while loading
-      />
+      <View >
+        <Text style={styles.label}>Select User Type</Text>
+        <Picker
+          selectedValue={userType}
+          onValueChange={itemValue => SetUserType(itemValue)}
+          style={styles.picker}
+          enabled={!loading} // Disable dropdown while loading
+        >
+          <Picker.Item label="Admin" value="Admin" />
+          <Picker.Item label="Tutor" value="Tutor" />
+          <Picker.Item label="Student" value="Student" />
+        </Picker>
+      </View>
       <TextInput
         placeholder="Password"
         placeholderTextColor="#808080"
@@ -115,6 +119,16 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
     borderRadius: 5,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#f0f0f0',
   },
 });
 
