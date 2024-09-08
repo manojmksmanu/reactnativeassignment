@@ -2,6 +2,7 @@ const Admin = require("../models/adminModel");
 const NewChat = require("../models/newChatModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
+const { deleteChatsForDeletedUsers } = require("./deleteChat");
 
 exports.createChatId = (user1, user2) => {
   // Ensure that the chatId is always the same regardless of the order of the users
@@ -22,6 +23,9 @@ exports.getChatsForUser = async (userId) => {
         model: "Message",
       })
       .sort({ updatedAt: -1 });
+    console.log("updated");
+
+    await deleteChatsForDeletedUsers();
     return chats;
   } catch (error) {
     console.error("Error fetching chats for user:", error);

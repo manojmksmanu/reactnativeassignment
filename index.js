@@ -38,7 +38,7 @@ const getData = async () => {
 
   // const data = await createChatsForAllUsers();
 };
-
+console.log('on indexpage')
 getData();
 
 initSocket(http);
