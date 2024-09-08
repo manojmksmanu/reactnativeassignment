@@ -36,7 +36,7 @@ const getData = async () => {
   // const data = await getAllUsersForChatCreation();
   await deleteChatsForDeletedUsers();
 
-  const data = await createChatsForAllUsers();
+  // const data = await createChatsForAllUsers();
 };
 console.log('on indexpage')
 getData();
