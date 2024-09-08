@@ -32,14 +32,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 
 const http = require("http").createServer(app);
-// const getData = async () => {
-//   // const data = await getAllUsersForChatCreation();
-//   await deleteChatsForDeletedUsers();
+const getData = async () => {
+  // const data = await getAllUsersForChatCreation();
+  await deleteChatsForDeletedUsers();
 
-//   const data = await createChatsForAllUsers();
-// };
+  // const data = await createChatsForAllUsers();
+};
 
-// getData();
+getData();
 
 initSocket(http);
 
