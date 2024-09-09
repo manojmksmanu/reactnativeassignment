@@ -1,7 +1,10 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
-import { firebase } from './src/misc/FireBaseConfig/firebaseconfig';
+import {firebase} from './src/misc/FireBaseConfig/firebaseconfig';
+import {AuthProvider} from './src/context/userContext';
+import {NavigationContainer} from '@react-navigation/native'; // <-- Ensure this is imported
+
 const App: React.FC = () => {
   console.log(
     firebase.apps.length ? 'Firebase Initialized' : 'Firebase Not Initialized',
@@ -9,7 +12,12 @@ const App: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AppNavigator />
+      <AuthProvider>
+        {/* Wrap NavigationContainer here */}
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </AuthProvider>
     </SafeAreaView>
   );
 };

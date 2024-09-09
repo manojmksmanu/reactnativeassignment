@@ -10,7 +10,7 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
-import {getMessages, sendMessage} from '../services/authService';
+import {getMessages, loggeduser, sendMessage} from '../services/authService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
 import {getSenderName, getSenderStatus} from '../misc/misc';
@@ -45,7 +45,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [replyingMessage, setReplyingMessage] = useState<any>(null);
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
-  const scrollViewRef = useRef<ScrollView>(null);
   const {
     loggedUserId,
     loggedUser,
@@ -64,7 +63,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
-
+  console.log(loggeduser, 'loggeduser');
   // ----socket connection--
   useEffect(() => {
     // Join the chat room
@@ -165,31 +164,25 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   //----send message function--
   const handleSendMessage = async () => {
     if (!message.trim()) return;
-
     setReplyingMessage('');
     setMessage('');
-
-    const messageId = Date.now().toString(); // Unique ID for the message
+    const messageId = Date.now().toString();
     const messageData = {
       chatId,
       sender: loggedUser._id,
       senderName: loggedUser ? loggedUser.name : 'Unknown',
       message,
-      fileUrl: null, // No file for a text message
-      fileType: 'text', // Make sure fileType is set for normal messages
+      fileUrl: null,
+      fileType: 'text',
       messageId,
       replyingMessage,
     };
-
-    console.log('Sending Message: ', messageData); // Check what you're sending
-
-    // Emit message to socket
+    console.log('Sending Message: ', messageData);
     if (socket) {
       socket.emit('fetch', 'fetchAgain');
       socket.emit('sendMessage', messageData);
       setMessages(prevMessages => [...prevMessages, messageData]);
     }
-
     // Send the message to the backend
     try {
       await sendMessage(messageData);
@@ -208,8 +201,8 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
       chatId: chatId,
       sender: loggedUser._id,
       senderName: loggedUser ? loggedUser.name : 'Unknown',
-      message:"image",
-      fileUrl:downloadURL,
+      message: 'image',
+      fileUrl: downloadURL,
       fileType,
       messageId,
       replyingMessage,

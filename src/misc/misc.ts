@@ -1,53 +1,52 @@
 interface User {
   _id: string;
   username?: string;
-  // Add other properties as needed
+  name?: string;
+  userType?: string;
+}
+interface OnlineUser {
+  socketId: string;
+  userId: string;
 }
 
 export const getSenderName = (loggedUser: User, chatUsers: any[]) => {
-  if (chatUsers) {
-    // Filter out the loggedUser from the chat users to get the sender
+  if (chatUsers && loggedUser) {
     const sender = chatUsers.find(
-      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+      chatUser => chatUser.user?._id.toString() !== loggedUser._id.toString(),
     );
 
-    // Return the sender's name, or a fallback if no sender is found
-    return sender ? sender.user.name : 'Unknown Sender';
+    return sender ? sender.user?.name || 'Unknown Sender' : 'Unknown Sender';
   } else {
-    return null;
+    return 'Unknown Sender';
   }
 };
+
 export const getSendedType = (loggedUser: User, chatUsers: any[]) => {
-  if (chatUsers) {
-    // Filter out the loggedUser from the chat users to get the sender
+  if (chatUsers && loggedUser) {
     const sender = chatUsers.find(
-      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+      chatUser => chatUser.user?._id.toString() !== loggedUser._id.toString(),
     );
-
-    // Return the sender's name, or a fallback if no sender is found
-    return sender ? sender.user.userType : 'Unknown Type';
+    return sender ? sender.user?.userType || 'Unknown Type' : 'Unknown Type';
   } else {
-    return null;
+    return 'Unknown Type';
   }
 };
+
 export const getSenderStatus = (
   loggedUser: User,
   chatUsers: any[],
-  onlineUsers: any[],
+  onlineUsers: OnlineUser[],
 ) => {
-  // console.log(onlineUsers, 'misc');
-  if (chatUsers) {
+  if (chatUsers && loggedUser) {
     const sender = chatUsers.find(
-      chatUser => chatUser.user._id.toString() !== loggedUser._id.toString(),
+      chatUser => chatUser.user?._id.toString() !== loggedUser._id.toString(),
     );
-    if (onlineUsers && onlineUsers.some(user => user.userId === sender.user._id)) {
-      // console.log('online');
-      return 'online';
-    } else {
-      // console.log('offline');
-      return 'offline';
+
+    if (sender) {
+      return onlineUsers?.some(user => user.userId === sender.user?._id)
+        ? 'online'
+        : 'offline';
     }
-  } else {
-    return null;
   }
+  return 'offline';
 };

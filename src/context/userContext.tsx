@@ -7,9 +7,7 @@ import React, {
 } from 'react';
 import io, {Socket} from 'socket.io-client';
 import {loggeduser} from '../services/authService';
-import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {fetchChats} from '../misc/FindChatsForUser/findChatsforuser';
 // Define a type for the context value
 interface User {
@@ -33,6 +31,7 @@ interface AuthContextType {
   fetchAgain: boolean | false;
   onlineUsers: any[] | null;
   loading: boolean | false;
+  loadingLoggedUser: boolean | false;
   setLoggedUserId: React.Dispatch<React.SetStateAction<string | null>>;
   setLoggedUser: React.Dispatch<React.SetStateAction<User | null>>;
   setChats: React.Dispatch<React.SetStateAction<Chat[] | null>>;
@@ -56,15 +55,13 @@ interface SocketEvents {
   receiveMessage: (messageData: Message) => void;
   forwarMessageReceived: (newMessages: Message[]) => void;
 }
-
 type RootStackParamList = {
   ChatList: undefined;
   ChatWindow: {chatId: string};
   Login: undefined;
 };
-
-const API_URL = 'http://10.0.2.2:5000';
-// const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,15 +76,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<any[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const navigation =
-    useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
+  const [loadingLoggedUser,setLoadingLoggedUser]=useState<boolean>(true);
 
   const FetchChatsAgain = () => {
     setFetchAgain(prev => !prev);
   };
-  // useEffect(() => {
-  //   console.log(fetchAgain, '👀👀👀 Updated fetchAgain');
-  // }, [fetchAgain]);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -102,17 +96,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         }
       } catch (error) {
         console.error('Failed to fetch logged users:', error);
-      }
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        navigation.navigate('ChatList');
-      } else {
-        navigation.navigate('Login');
+      }finally{
+        setLoadingLoggedUser(false)
       }
     };
 
     fetchUserInfo();
-  }, [navigation]);
+  }, []);
 
   // Initialize socket connection here or elsewhere as needed
   useEffect(() => {
@@ -145,6 +135,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       };
     }
   }, [socket, loggedUser]);
+  console.log(onlineUsers)
   // -------------------------------------------
 
   // Fetch chats
@@ -173,6 +164,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         setSocket,
         onlineUsers,
         loading,
+        loadingLoggedUser,
       }}>
       {children}
     </AuthContext.Provider>

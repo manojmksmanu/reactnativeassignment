@@ -15,16 +15,31 @@ import {useAuth} from '../context/userContext';
 import {Picker} from '@react-native-picker/picker';
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
-  const [email, setEmail] = useState<string>('');
   const [userType, SetUserType] = useState<string>('Admin');
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [countryCode, setCountryCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [whatappNumber, setWhatappNumber] = useState('');
+  const countryCodes = [
+    {label: '+1', value: 'US'},
+    {label: '+44', value: 'UK'},
+    {label: '+91', value: 'IN'},
+    // Add more country codes here
+  ];
   const {setLoggedUser, socket} = useAuth();
 
+  useLayoutEffect(() => {
+    navigation.setOptions({headerShown: false});
+  }, [navigation]);
+
   const handleSignUpPress = () => {
-    navigation.navigate('SignUp');
+    navigation.navigate('Login');
   };
-  
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -56,6 +71,21 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
     <View style={styles.container}>
       <Text style={styles.logoText}>MyMegaminds</Text>
 
+      {/* Name Input */}
+      <View style={styles.inputContainer}>
+        <Image
+          style={{width: 20, height: 20}}
+          source={require('../assets/id-card.png')}
+        />
+        <TextInput
+          placeholder="Name"
+          placeholderTextColor="#9E9E9E"
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+          editable={!loading}
+        />
+      </View>
       {/* Email Input */}
       <View style={styles.inputContainer}>
         <Image
@@ -90,6 +120,83 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         </Picker>
       </View>
 
+      {/* --input phone number--  */}
+      <View style={styles.inputContainer}>
+        <Image
+          style={{width: 20, height: 20}}
+          source={require('../assets/phone.png')}
+        />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={countryCode}
+            onValueChange={itemValue => setCountryCode(itemValue)}
+            style={styles.picker}>
+            <Picker.Item label="Select code" value="" />
+            {countryCodes.map(code => (
+              <Picker.Item
+                key={code.value}
+                label={code.label}
+                value={code.value}
+              />
+            ))}
+          </Picker>
+        </View>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.countryCodeText}>
+            {countryCode
+              ? countryCodes.find(code => code.value === countryCode)?.label
+              : ''}
+          </Text>
+          <TextInput
+            placeholder="Phone number"
+            placeholderTextColor="#9E9E9E"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            style={styles.input}
+            editable={!loading}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+      {/* --input whatsapp number--  */}
+      <View style={styles.inputContainer}>
+        <Image
+          style={{width: 20, height: 20}}
+          source={require('../assets/whatsapp.png')}
+        />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={countryCode}
+            onValueChange={itemValue => setCountryCode(itemValue)}
+            style={styles.picker}>
+            <Picker.Item label="Select code" value="" />
+            {countryCodes.map(code => (
+              <Picker.Item
+                key={code.value}
+                label={code.label}
+                value={code.value}
+              />
+            ))}
+          </Picker>
+        </View>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.countryCodeText}>
+            {countryCode
+              ? countryCodes.find(code => code.value === countryCode)?.label
+              : ''}
+          </Text>
+          <TextInput
+            placeholder="Whatsapp number"
+            placeholderTextColor="#9E9E9E"
+            value={whatappNumber}
+            onChangeText={setWhatappNumber}
+            style={styles.input}
+            editable={!loading}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+
       {/* Password Input */}
       <View style={styles.inputContainer}>
         <Image
@@ -106,24 +213,45 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
           editable={!loading}
         />
       </View>
+      {/* Confirm Password Input */}
+      <View style={styles.inputContainer}>
+        <Image
+          style={{width: 20, height: 20}}
+          source={require('../assets/padlock.png')}
+        />
+        <TextInput
+          placeholder="Confirm Password"
+          placeholderTextColor="#9E9E9E"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          style={styles.input}
+          editable={!loading}
+        />
+      </View>
 
       {/* Login Button */}
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>SignUp</Text>
         </TouchableOpacity>
       )}
       <View>
         <Text style={{textAlign: 'center', marginTop: 10, fontSize: 16}}>
-          Don't have an account?{' '}
+          Already have an account?{' '}
         </Text>
         <View>
           <TouchableOpacity style={{paddingTop: 0}} onPress={handleSignUpPress}>
             <Text
-              style={{color: '#aa14f0', paddingTop: 0, textAlign: 'center',fontWeight:'bold'}}>
-              SignUp
+              style={{
+                color: '#aa14f0',
+                paddingTop: 0,
+                textAlign: 'center',
+                fontWeight: 'bold',
+              }}>
+              Login
             </Text>
           </TouchableOpacity>
         </View>
@@ -133,6 +261,22 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  pickerContainer: {
+    width: '30%', // Adjust width to 1/3 of the screen
+    paddingRight: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    width: '70%', // Adjust width to 2/3 of the screen
+    alignItems: 'center',
+  },
+  countryCodeText: {
+    fontSize: 16,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginRight: 8,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

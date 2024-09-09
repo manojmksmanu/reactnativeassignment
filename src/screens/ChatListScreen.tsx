@@ -13,6 +13,42 @@ import {getSendedType, getSenderName, getSenderStatus} from '../misc/misc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {
+  format,
+  formatDistanceToNow,
+  isToday,
+  isYesterday,
+  parseISO,
+} from 'date-fns';
+import { loggeduser } from '../services/authService';
+
+const formatMessageDate = (dateString: any) => {
+  if (!dateString) {
+    return '';
+  }
+
+  try {
+    const date = parseISO(dateString);
+
+    if (isNaN(date.getTime())) {
+      console.error('Parsed date is invalid.');
+      return 'Invalid Date';
+    }
+
+    const now = new Date();
+
+    if (isToday(date)) {
+      return format(date, 'p'); // Time format like '1:45 PM'
+    } else if (isYesterday(date)) {
+      return 'Yesterday';
+    } else {
+      return formatDistanceToNow(date, {addSuffix: true});
+    }
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return '';
+  }
+};
 
 type RootStackParamList = {
   ChatList: undefined;
@@ -39,7 +75,7 @@ const ChatListScreen: React.FC = () => {
     navigation.setOptions({
       headerTitle: () => (
         <View>
-          <Text style={styles.headerText}>Chat List</Text>
+          <Text style={styles.headerText}>MyMegaminds</Text>
         </View>
       ),
       headerLeft: () => null,
@@ -47,15 +83,15 @@ const ChatListScreen: React.FC = () => {
         <View>
           {loggedUser ? (
             <>
-              <Text style={styles.headerText}>
+              {/* <Text style={{}}>
                 {loggedUser.name} - ({loggedUser.userType})
-              </Text>
+              </Text> */}
               <TouchableOpacity onPress={() => removeToken()}>
-                <Text style={styles.headerText}>LogOut</Text>
+                <Text style={{paddingRight:20}}>LogOut</Text>
               </TouchableOpacity>
             </>
           ) : (
-            <Text style={styles.headerText}>Loading...</Text>
+            <Text style={{color:'#aa14f0',fontSize:18}}>Loading...</Text>
           )}
         </View>
       ),
@@ -63,9 +99,8 @@ const ChatListScreen: React.FC = () => {
     const removeToken = async () => {
       try {
         await AsyncStorage.removeItem('token');
-
+        await AsyncStorage.removeItem('userInfo');
         socket?.emit('logout', loggedUser?._id);
-
         setLoggedUser(null);
         navigation.navigate('Login');
         console.log('Token removed successfully');
@@ -97,21 +132,47 @@ const ChatListScreen: React.FC = () => {
       onPress={() => chatClicked(item)}
       style={styles.userContainer}>
       <View style={styles.userInfo}>
-        <Text style={styles.username}>
-          {loggedUser ? getSenderName(loggedUser, item.users) : 'Unknown'} - (
-          {loggedUser ? getSendedType(loggedUser, item.users) : 'Unknown'})
-        </Text>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
+          }}>
+          <Text style={styles.username}>
+            {loggedUser ? getSenderName(loggedUser, item.users) : 'Unknown'}
+          </Text>
+          <Text style={{fontSize: 10, color: '#aa14f0'}}>
+            {loggedUser ? getSendedType(loggedUser, item.users) : 'Unknown'}
+          </Text>
+        </View>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <Text>
+            {loggedUser ? item.latestMessage && item.latestMessage.message : ''}
+          </Text>
+          <Text style={{fontSize: 12}}>
+            {loggedUser &&
+              formatMessageDate(
+                item.latestMessage && item.latestMessage.createdAt,
+              )}
+          </Text>
+        </View>
         <Text style={styles.statusText}>
           {loggedUser &&
           getSenderStatus(loggedUser, item.users, onlineUsers || []) ===
             'online' ? (
             <Image
-              style={{width: 15, height: 15}}
+              style={{width: 10, height: 10}}
               source={require('../assets/dotgreen.png')}
             />
           ) : (
             <Image
-              style={{width: 15, height: 15}}
+              style={{width: 8, height: 8}}
               source={require('../assets/dot.png')}
             />
           )}
@@ -164,24 +225,31 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3,
   },
   userInfo: {
+    position: 'relative',
     width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
   },
   username: {
     fontSize: 18,
-    marginLeft: 10,
     color: '#333',
   },
   statusText: {
+    fontSize: 11,
+    position: 'absolute',
     color: 'grey',
+    right: 0,
+    top: -4,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
   },
   headerText: {
-    color: 'grey',
+    color: '#aa14f0',
+    fontSize:20,
+    fontWeight:'bold',
+    paddingLeft:6
   },
 });
 
