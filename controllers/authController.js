@@ -21,9 +21,11 @@ exports.signup = async (req, res) => {
     phoneCountry,
     whatsappNumber,
     whatsappCountry,
+    subjects,
   } = req.body;
-
+  console.log(req.body);
   try {
+    console.log("inside try");
     let existingUser;
     // Check if email exists for Admin
     if (userType === "Admin") {
@@ -39,8 +41,10 @@ exports.signup = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid user type" });
     }
+
     // If email already exists
     if (existingUser) {
+      console.log("Email already exists. Please try a different email. ");
       return res.status(400).json({
         message: "Email already exists. Please try a different email.",
       });
@@ -79,6 +83,7 @@ exports.signup = async (req, res) => {
         phoneCountry,
         whatsappNumber,
         whatsappCountry,
+        subjects,
       });
     }
 
