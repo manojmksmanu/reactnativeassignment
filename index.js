@@ -4,10 +4,11 @@ const { Server } = require("socket.io");
 const connectDB = require("./config/db");
 const Message = require("./models/messageModel");
 const authRoutes = require("./routes/authRoutes");
-const chatRoutes = require("./routes/chatMessageRoutes");
+const messageRoutes = require("./routes/MessageRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const countryRoutes = require("./routes/countryRoutes");
 const cors = require("cors");
 const { initSocket } = require("./socket/socket");
-const { createChatsForAllUsers } = require("./misc/createChats");
 const ChatNew = require("./models/newChatModel");
 const { deleteChatsForDeletedUsers } = require("./misc/deleteChat");
 
@@ -29,16 +30,16 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", messageRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/country", countryRoutes);
 
 const http = require("http").createServer(app);
 const getData = async () => {
-  // const data = await getAllUsersForChatCreation();
   await deleteChatsForDeletedUsers();
-
   // const data = await createChatsForAllUsers();
 };
-console.log('on indexpage')
+console.log("on indexpage");
 getData();
 
 initSocket(http);

@@ -18,11 +18,5 @@ router.get("/messages/:chatId", protect, getMessages);
 // Get all users (protected, only admin)
 router.get("/users", protect, getUsers);
 
-//Get all chats
-router.get("/:userId/chats", protect, async (req, res) => {
-  const chats = await getChatsForUser(req.params.userId);
-  res.json(chats);
-});
-
 router.post("/forwardMessages", protect, forwardMessages);
 module.exports = router;

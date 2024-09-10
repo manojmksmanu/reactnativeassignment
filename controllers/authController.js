@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/adminModel");
 const Student = require("../models/studentModel");
@@ -20,42 +19,17 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
     const user = await User.create({ name, email, password, userType });
-;
-    // await createChatsForNewUser(user);
-    // res.status(201).json({
-    //   _id: user._id,
-    //   username: user.username,
-    //   isAdmin: user.isAdmin,
     // });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
-// exports.login = async (req, res) => {
-//   const { name, password } = req.body;
-//   try {
-//     const user = await User.findOne({ username });
-//     if (user && (await user.matchPassword(password))) {
-//       res.json({
-//         _id: user._id,
-//         username: user.username,
-//         isAdmin: user.isAdmin,
-//         token: generateToken(user._id),
-//       });
-//     } else {
-//       res.status(401).json({ message: "Invalid credentials" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// };
 exports.login = async (req, res) => {
-  const { email,userType, password,  } = req.body;
+  const { email, userType, password } = req.body;
   if (userType === "Admin") {
     try {
       const user = await Admin.findOne({ email });
-    
+
       if (user && (await user.matchPassword(password))) {
         res.json({
           _id: user._id,
@@ -106,14 +80,8 @@ exports.login = async (req, res) => {
       res.status(500).json({ message: "Server Error" });
     }
   }
-
-  // if (userType !== "Tutor" || userType !== "Student" || userType !== "Admin") {
-
-  //   res.json("userType does not valied");
-  // }
 };
 
-// Controller function to get the logged user details
 exports.getLoggedUser = async (req, res) => {
   try {
     const user = req.user;
