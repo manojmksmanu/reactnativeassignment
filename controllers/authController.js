@@ -3,6 +3,7 @@ const Admin = require("../models/adminModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
 const { findUserById } = require("../misc/misc");
+const sendVerificationEmail = require("../misc/emailSendFunction");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
@@ -11,19 +12,121 @@ const generateToken = (id) => {
 };
 
 exports.signup = async (req, res) => {
-  const { name, email, password, userType } = req.body;
-  console.log(name, email, password, userType);
+  const {
+    name,
+    email,
+    password,
+    userType,
+    phoneNumber,
+    phoneCountry,
+    whatsappNumber,
+    whatsappCountry,
+  } = req.body;
+
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    let existingUser;
+    // Check if email exists for Admin
+    if (userType === "Admin") {
+      existingUser = await Admin.findOne({ email });
     }
-    const user = await User.create({ name, email, password, userType });
-    // });
+    // Check if email exists for Student
+    else if (userType === "Student") {
+      existingUser = await Student.findOne({ email });
+    }
+    // Check if email exists for Tutor
+    else if (userType === "Tutor") {
+      existingUser = await Tutor.findOne({ email });
+    } else {
+      return res.status(400).json({ message: "Invalid user type" });
+    }
+    // If email already exists
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already exists. Please try a different email.",
+      });
+    }
+    // Create new user
+    let user;
+    if (userType === "Admin") {
+      user = new Admin({
+        name,
+        email,
+        password,
+        userType,
+        phoneNumber,
+        phoneCountry,
+        whatsappNumber,
+        whatsappCountry,
+      });
+    } else if (userType === "Student") {
+      user = new Student({
+        name,
+        email,
+        password,
+        userType,
+        phoneNumber,
+        phoneCountry,
+        whatsappNumber,
+        whatsappCountry,
+      });
+    } else if (userType === "Tutor") {
+      user = new Tutor({
+        name,
+        email,
+        password,
+        userType,
+        phoneNumber,
+        phoneCountry,
+        whatsappNumber,
+        whatsappCountry,
+      });
+    }
+
+    // Save user in the database
+    await user.save();
+
+    // Generate verification link
+    const verificationToken = generateToken(user._id);
+    const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
+
+    // Send verification email
+    await sendVerificationEmail({
+      email: user.email,
+      verificationLink: verificationLink,
+    });
+
+    res.status(201).json({
+      message:
+        "User registered. Please check your email to verify your account.",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.verifyEmail = async (req, res) => {
+  const { token } = req.params;
+  try {
+    // Decode token to get the user ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+    // Find user in the Admin, Student, or Tutor collection
+    let user =
+      (await Admin.findById(userId)) ||
+      (await Student.findById(userId)) ||
+      (await Tutor.findById(userId));
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Update the `isVerified` field
+    user.isVerified = true;
+    await user.save();
+    res.json({ message: "Email verified successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.login = async (req, res) => {
   const { email, userType, password } = req.body;
   if (userType === "Admin") {

@@ -52,3 +52,4 @@ exports.findUserById = async ({ userId }) => {
   // If no user found in any of the models
   return null;
 };
+
