@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/MessageRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const countryRoutes = require("./routes/countryRoutes");
+const subjectRoutes = require("./routes/subjectRoutes");
 const cors = require("cors");
 const { initSocket } = require("./socket/socket");
 const ChatNew = require("./models/newChatModel");
@@ -33,6 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", messageRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/country", countryRoutes);
+app.use("/api/subject", subjectRoutes);
 
 const http = require("http").createServer(app);
 const getData = async () => {
