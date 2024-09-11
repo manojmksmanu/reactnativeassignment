@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#aa14f0',
+    color: '#187afa',
     paddingLeft: 6,
   },
   logoutText: {
@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    // backgroundColor: '#ECECEC',
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},

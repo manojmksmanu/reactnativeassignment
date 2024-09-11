@@ -14,9 +14,9 @@ interface User {
   _id: string;
   name: string;
   userType: any;
-  email:string;
-  phoneNumber:string;
-  whatsappNumber:string;
+  email: string;
+  phoneNumber: string;
+  whatsappNumber: string;
   // Add other properties as needed
 }
 
@@ -63,8 +63,8 @@ type RootStackParamList = {
   ChatWindow: {chatId: string};
   Login: undefined;
 };
-const API_URL = 'http://10.0.2.2:5000';
-// const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,12 +79,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<any[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [loadingLoggedUser,setLoadingLoggedUser]=useState<boolean>(true);
+  const [loadingLoggedUser, setLoadingLoggedUser] = useState<boolean>(true);
 
   const FetchChatsAgain = () => {
     setFetchAgain(prev => !prev);
   };
 
+  // --fetch user info and store in localStorage userInfo--
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -99,8 +100,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         }
       } catch (error) {
         console.error('Failed to fetch logged users:', error);
-      }finally{
-        setLoadingLoggedUser(false)
+      } finally {
+        setLoadingLoggedUser(false);
       }
     };
 
@@ -138,7 +139,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       };
     }
   }, [socket, loggedUser]);
-  console.log(onlineUsers)
+  console.log(onlineUsers);
   // -------------------------------------------
 
   // Fetch chats

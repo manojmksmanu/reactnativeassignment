@@ -17,8 +17,8 @@ const App: React.FC = () => {
         {/* Wrap NavigationContainer here */}
         <NavigationContainer>
           <AppNavigator />
-          <Toast />
         </NavigationContainer>
+          <Toast />
       </AuthProvider>
     </SafeAreaView>
   );

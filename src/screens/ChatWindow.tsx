@@ -11,11 +11,11 @@ import {
   ScrollView,
 } from 'react-native';
 import {loggeduser} from '../services/authService';
-import { getMessages } from '../services/messageService';
-import { sendMessage } from '../services/messageService';
+import {getMessages} from '../services/messageService';
+import {sendMessage} from '../services/messageService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
-import {getSenderName, getSenderStatus} from '../misc/misc';
+import {getSendedType, getSenderName, getSenderStatus} from '../misc/misc';
 import {FlatList} from 'react-native-gesture-handler';
 import {
   openCamera,
@@ -101,6 +101,10 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
     console.log('Chat window rendered👌👌👌👌👌👌👌👌👌👌👌👌👌👌');
     // Rest of the useEffect logic
   }, []);
+
+  const getUserFirstAlphabet = (userType: any) => {
+    return userType ? userType.charAt(0).toUpperCase() : '';
+  };
   // ----chat window header--
   useEffect(() => {
     navigation.setOptions({
@@ -117,6 +121,28 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
       ),
       headerTitle: () => (
         <View style={styles.headerTitleContainer}>
+          <View style={styles.profileCircle}>
+            {loggedUser ? (
+              <Text style={styles.profileText}>
+                {getUserFirstAlphabet(
+                  getSendedType(loggedUser, selectedChat.users),
+                )}
+              </Text>
+            ) : null}
+            <View style={styles.statusContainer}>
+              {loggedUser &&
+              getSenderStatus(
+                loggedUser,
+                selectedChat.users,
+                onlineUsers || [],
+              ) === 'online' ? (
+                <View style={styles.statusDotgreen}></View>
+              ) : (
+                <View style={styles.statusDotgrey}></View>
+              )}
+            </View>
+          </View>
+
           <View style={styles.textContainer}>
             <Text style={styles.usernameText}>
               {loggedUser && getSenderName(loggedUser, selectedChat.users)}
@@ -301,7 +327,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={styles.loadingIndicator}
           />
         ) : (
-          // <View style={{paddingLeft:5}}>
+         
           <FlatList
             data={messages.slice().reverse()}
             inverted
@@ -328,9 +354,8 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
               );
             }}
             contentContainerStyle={{flexGrow: 0}}
-            // onContentSizeChange={handleContentSizeChange}
           />
-          // </View>
+        
         )}
         <View>
           {/* ---Input bottom container--  */}
@@ -343,7 +368,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                   height: 28,
                   marginBottom: 6,
                   padding: 10,
-                  marginRight:5
+                  marginRight: 5,
                 }}
               />
             </TouchableOpacity>
@@ -516,7 +541,7 @@ const styles = StyleSheet.create({
     maxHeight: 120,
   },
   sendButton: {
-    backgroundColor: '#25d366',
+    backgroundColor: '#187afa',
     padding: 10,
     borderRadius: 20,
     alignItems: 'center',
@@ -567,6 +592,56 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     color: 'grey',
+  },
+  profileCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  profileText: {
+    fontSize: 20,
+    color: '#333',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+  },
+  statusDot: {
+    width: 20,
+    height: 20,
+    marginRight: 6,
+    top: -15,
+    left: -6,
+  },
+  statusDotgreen: {
+    opacity: 0.5,
+    backgroundColor: '#25D366',
+    width: 10,
+    height: 10,
+    marginRight: 6,
+    bottom: -15,
+    right: -20,
+    borderRadius: 100,
+  },
+  statusDotgrey: {
+    opacity: 0.5,
+    backgroundColor: 'grey',
+    width: 10,
+    height: 10,
+    marginRight: 6,
+    bottom: -15,
+    right: -20,
+    borderRadius: 100,
   },
 });
 
