@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getAllChats} from '../../services/authService';
+import { getAllChats } from '../../services/chatService';
 
 export const fetchChats = async (
   setLoading: (loading: boolean) => void,

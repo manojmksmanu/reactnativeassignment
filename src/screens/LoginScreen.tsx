@@ -13,6 +13,7 @@ import {loggeduser, login} from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
 import {Picker} from '@react-native-picker/picker';
+import Toast from 'react-native-toast-message';
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState<string>('');
@@ -24,7 +25,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const handleSignUpPress = () => {
     navigation.navigate('SignUp');
   };
-  
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -37,18 +38,11 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
       navigation.navigate('ChatList');
       Alert.alert('Login successful');
     } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text2: `${error.message}`,
+      });
       setLoading(false);
-      if (error?.response?.status === 401) {
-        Alert.alert(
-          'Invalid Credentials',
-          'Please enter the correct username and password.',
-        );
-      } else {
-        Alert.alert(
-          'Login Error',
-          'Something went wrong. Please try again later.',
-        );
-      }
     }
   };
 
@@ -122,7 +116,12 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         <View>
           <TouchableOpacity style={{paddingTop: 0}} onPress={handleSignUpPress}>
             <Text
-              style={{color: '#aa14f0', paddingTop: 0, textAlign: 'center',fontWeight:'bold'}}>
+              style={{
+                color: '#aa14f0',
+                paddingTop: 0,
+                textAlign: 'center',
+                fontWeight: 'bold',
+              }}>
               SignUp
             </Text>
           </TouchableOpacity>

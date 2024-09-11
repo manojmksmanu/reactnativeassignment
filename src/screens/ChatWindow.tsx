@@ -10,7 +10,9 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
-import {getMessages, loggeduser, sendMessage} from '../services/authService';
+import {loggeduser} from '../services/authService';
+import { getMessages } from '../services/messageService';
+import { sendMessage } from '../services/messageService';
 import {useAuth} from '../context/userContext';
 import RenderMessage from '../components/chatScreen/RenderMessage';
 import {getSenderName, getSenderStatus} from '../misc/misc';
@@ -102,34 +104,44 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   // ----chat window header--
   useEffect(() => {
     navigation.setOptions({
+      // Custom back icon (left header)
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}>
+          <Image
+            source={require('../assets/back.png')} // Your custom back icon image
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+      ),
       headerTitle: () => (
         <View style={styles.headerTitleContainer}>
-          <Image
-            source={require('../assets/man.png')}
-            style={{width: 40, height: 40, marginRight: 5}}
-          />
-          <Text style={styles.usernameText}>
-            {loggedUser && getSenderName(loggedUser, selectedChat.users)}
-          </Text>
-          <Text style={{color: 'grey'}}>
-            {loggedUser &&
-              getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
-          </Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.usernameText}>
+              {loggedUser && getSenderName(loggedUser, selectedChat.users)}
+            </Text>
+            <Text style={styles.statusText}>
+              {loggedUser &&
+                getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
+            </Text>
+          </View>
         </View>
       ),
       headerRight: () => (
         <View style={styles.headerRightContainer}>
-          <TouchableOpacity onPress={() => handleMoreOptions()}>
-            <Image
-              source={require('../assets/dots.png')}
-              style={{width: 20, height: 20}}
-            />
+          <TouchableOpacity
+            onPress={handleMoreOptions}
+            style={styles.iconButton}>
+            <Image source={require('../assets/dots.png')} style={styles.icon} />
           </TouchableOpacity>
           {selectedMessages.length > 0 && (
-            <TouchableOpacity onPress={() => navigateToForwardScreen()}>
+            <TouchableOpacity
+              onPress={navigateToForwardScreen}
+              style={styles.iconButton}>
               <Image
                 source={require('../assets/forward-message.png')}
-                style={{width: 30, height: 30}}
+                style={styles.forwardIcon}
               />
             </TouchableOpacity>
           )}
@@ -279,7 +291,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 
   return (
     <ImageBackground
-      source={require('../assets/b9qk3w41sqf1l0ccujfh.webp')}
+      source={require('../assets/57622.jpg')}
       style={styles.background}>
       <View style={styles.container}>
         {loading ? (
@@ -289,38 +301,52 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={styles.loadingIndicator}
           />
         ) : (
-          <>
-            <FlatList
-              data={messages.slice().reverse()}
-              inverted
-              keyExtractor={item => item._id}
-              renderItem={({item}) => {
-                const isSelected = selectedMessages.some(
-                  msg => msg._id === item._id,
-                );
-                return (
-                  <TouchableOpacity
-                    onLongPress={() => handleLongPress(item)}
-                    onPress={() => handleTap(item)}
-                    style={{
-                      backgroundColor: isSelected ? 'lightgray' : 'transparent',
-                    }}>
-                    <RenderMessage
-                      item={item}
-                      loggedUserId={loggedUser._id}
-                      onLeftSwipe={() => handleSwipeLeft(item)}
-                      onRightSwipe={() => handleSwipeRight(item)}
-                    />
-                  </TouchableOpacity>
-                );
-              }}
-              contentContainerStyle={{flexGrow: 0}}
-              // onContentSizeChange={handleContentSizeChange}
-            />
-          </>
+          // <View style={{paddingLeft:5}}>
+          <FlatList
+            data={messages.slice().reverse()}
+            inverted
+            keyExtractor={item => item._id}
+            style={{padding: 10}}
+            renderItem={({item}) => {
+              const isSelected = selectedMessages.some(
+                msg => msg._id === item._id,
+              );
+              return (
+                <TouchableOpacity
+                  onLongPress={() => handleLongPress(item)}
+                  onPress={() => handleTap(item)}
+                  style={{
+                    backgroundColor: isSelected ? 'lightgray' : 'transparent',
+                  }}>
+                  <RenderMessage
+                    item={item}
+                    loggedUserId={loggedUser._id}
+                    onLeftSwipe={() => handleSwipeLeft(item)}
+                    onRightSwipe={() => handleSwipeRight(item)}
+                  />
+                </TouchableOpacity>
+              );
+            }}
+            contentContainerStyle={{flexGrow: 0}}
+            // onContentSizeChange={handleContentSizeChange}
+          />
+          // </View>
         )}
         <View>
+          {/* ---Input bottom container--  */}
           <View style={styles.inputMainContainer}>
+            <TouchableOpacity onPress={sendDocument}>
+              <Image
+                source={require('../assets/add-folder.png')}
+                style={{
+                  width: 28,
+                  height: 28,
+                  marginBottom: 6,
+                  padding: 10,
+                  marginRight:5
+                }}
+              />
+            </TouchableOpacity>
             <View style={styles.inputContainer}>
               {replyingMessage && (
                 <View style={styles.replyingMessage}>
@@ -353,7 +379,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                   multiline
                 />
                 <View>
-                  <TouchableOpacity onPress={sendDocument}>
+                  {/* <TouchableOpacity onPress={sendDocument}>
                     <Image
                       source={require('../assets/attach-file.png')}
                       style={{
@@ -366,7 +392,7 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
                         opacity: 0.6,
                       }}
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
 
                   <TouchableOpacity onPress={sendCameraFile}>
                     <Image
@@ -401,6 +427,16 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+    marginLeft: 10, // Adjust margin if needed
+    padding: 5,
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#555', // Customize icon color if needed
+  },
+
   headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -420,10 +456,10 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   container: {
     flex: 1,
-    padding: 10,
   },
   loadingIndicator: {
     flex: 1,
@@ -439,7 +475,11 @@ const styles = StyleSheet.create({
   inputMainContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 5,
+    padding: 10,
+    paddingTop: 20,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: 'white',
   },
   inputContainer: {
     backgroundColor: 'white',
@@ -506,6 +546,27 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 10,
+  },
+  iconButton: {
+    marginLeft: 15,
+    padding: 5,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    tintColor: '#555',
+  },
+  forwardIcon: {
+    width: 30,
+    height: 30,
+    tintColor: '#4CAF50',
+  },
+  textContainer: {
+    flexDirection: 'column',
+  },
+  statusText: {
+    fontSize: 14,
+    color: 'grey',
   },
 });
 

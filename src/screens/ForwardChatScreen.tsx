@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {View, FlatList, TouchableOpacity, Button, Text} from 'react-native';
 import {useAuth} from '../context/userContext';
 import {getSenderName} from '../misc/misc';
-import {forward} from '../services/authService';
+import { forward } from '../services/messageService';
 
 const ForwarChatScreen: React.FC<{route: any; navigation: any}> = ({
   route,

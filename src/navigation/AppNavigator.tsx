@@ -7,6 +7,7 @@ import ChatWindow from '../screens/ChatWindow';
 import ForwardChatScreen from '../screens/ForwardChatScreen';
 import {useAuth} from '../context/userContext';
 import {View, ActivityIndicator, Animated, Text, Easing} from 'react-native';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -89,6 +90,7 @@ const AppNavigator: React.FC = () => {
       ) : (
         <>
           <Stack.Screen name="ChatList" component={ChatListScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen
             name="ForwardChatScreen"
             component={ForwardChatScreen}

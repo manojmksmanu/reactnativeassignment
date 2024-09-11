@@ -57,7 +57,10 @@ const requestExternalStoragePermission = async () => {
     }
   }
 };
-export const openDocumentPicker = async (setMessage: any, handleSendMessage:any) => {
+export const openDocumentPicker = async (
+  setMessage: any,
+  handleSendMessage: any,
+) => {
   const hasPermission = await requestExternalStoragePermission();
   console.log('document permission is enabled');
   if (hasPermission) {
@@ -78,7 +81,7 @@ export const openDocumentPicker = async (setMessage: any, handleSendMessage:any)
             const fileType = getFileTypeFromUri(decodedUri);
             console.log('File Type:', fileType);
 
-            await uploadFileToFirebase(decodedUri, fileType,handleSendMessage);
+            await uploadFileToFirebase(decodedUri, fileType, handleSendMessage);
             return decodedUri;
           }
         }
