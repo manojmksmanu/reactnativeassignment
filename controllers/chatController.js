@@ -2,7 +2,7 @@ const Admin = require("../models/adminModel");
 const NewChat = require("../models/newChatModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
-const { createChatId } = require("./misc");
+const { createChatId } = require("../misc/misc");
 
 const chatPermissions = {
   Admin: ["Super-Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],
@@ -100,6 +100,77 @@ exports.createChatsForAllUsers = async () => {
               `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
             );
           }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error creating chats:", error);
+  }
+};
+exports.createChatsForLoggedUser = async () => {
+  try {
+    const users = await getAllUsersForChatCreation();
+
+    for (let j = i + 1; j < users.length; j++) {
+      const user1 = users[i];
+      const user2 = users[j];
+
+      // Check if user1 is allowed to chat with user2
+      if (chatPermissions[user1.userType]?.includes(user2.userType)) {
+        // Check if a chat already exists between these users
+        const existingChat = await NewChat.findOne({
+          $and: [{ "users.user": user1._id }, { "users.user": user2._id }],
+        });
+
+        const chatId = createChatId(user1, user2);
+
+        const refModel1 = [
+          "Admin",
+          "Super-Admin",
+          "Sub-Admin",
+          "Co-Admin",
+        ].includes(user1.userType)
+          ? "Admin"
+          : user1.userType;
+        const refModel2 = [
+          "Admin",
+          "Super-Admin",
+          "Sub-Admin",
+          "Co-Admin",
+        ].includes(user2.userType)
+          ? "Admin"
+          : user2.userType;
+
+        // If no existing chat, create a new one
+        if (!existingChat) {
+          const chatBetween = `Created chat between ${user1.userType} (${user1.name}) and ${user2.userType} (${user2.name})`;
+          const newChat = new NewChat({
+            chatId: chatId,
+            chatBetween: chatBetween,
+            users: [
+              {
+                user: user1._id,
+                userType: user1.userType, // Assign userType for user1
+                // refModel: refModel1, // Assign refModel for user1
+                refModel: refModel1, // Assign refModel for user1
+              },
+              {
+                user: user2._id,
+                userType: user2.userType, // Assign userType for user2
+                // refModel: refModel2, // Assign refModel for user2
+                refModel: refModel2, // Assign refModel for user2
+              },
+            ],
+          });
+
+          await newChat.save();
+          console.log(
+            `Created chat between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+          );
+        } else {
+          console.log(
+            `Chat already exists between ${user1.userType} (${user1._id}) and ${user2.userType} (${user2._id})`
+          );
         }
       }
     }

@@ -4,6 +4,7 @@ const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
 const { findUserById } = require("../misc/misc");
 const sendVerificationEmail = require("../misc/emailSendFunction");
+const { createChatsForAllUsers, createChatsForLoggedUser } = require("./chatController");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
@@ -92,7 +93,8 @@ exports.signup = async (req, res) => {
 
     // Generate verification link
     const verificationToken = generateToken(user._id);
-    const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
+    // const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
+    const verificationLink = `http://localhost:5000/api/users/verify/${verificationToken}`;
 
     // Send verification email
     await sendVerificationEmail({
@@ -100,6 +102,7 @@ exports.signup = async (req, res) => {
       verificationLink: verificationLink,
     });
 
+    console.log("success fully messeage received");
     res.status(201).json({
       message:
         "User registered. Please check your email to verify your account.",
@@ -134,59 +137,45 @@ exports.verifyEmail = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, userType, password } = req.body;
-  if (userType === "Admin") {
-    try {
-      const user = await Admin.findOne({ email });
 
-      if (user && (await user.matchPassword(password))) {
-        res.json({
-          _id: user._id,
-          name: user.name,
-          isAdmin: user.userType,
-          token: generateToken(user._id),
-        });
-      } else {
-        res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: "Server Error" });
-    }
-  }
+  // Common logic for checking the userType
+  const findUserByType = async (userType) => {
+    if (userType === "Admin") return Admin.findOne({ email });
+    if (userType === "Student") return Student.findOne({ email });
+    if (userType === "Tutor") return Tutor.findOne({ email });
+  };
 
-  if (userType === "Student") {
-    try {
-      const user = await Student.findOne({ email });
-      if (user && (await user.matchPassword(password))) {
-        res.json({
-          _id: user._id,
-          name: user.name,
-          isAdmin: user.userType,
-          token: generateToken(user._id),
-        });
-      } else {
-        res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: "Server Error" });
-    }
-  }
+  try {
+    const user = await findUserByType(userType);
 
-  if (userType === "Tutor") {
-    try {
-      const user = await Tutor.findOne({ email });
-      if (user && (await user.matchPassword(password))) {
-        res.json({
-          _id: user._id,
-          name: user.name,
-          isAdmin: user.userType,
-          token: generateToken(user._id),
-        });
-      } else {
-        res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: "Server Error" });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "User Not Found For This Email....😢😢😢😢" });
     }
+
+    // Check if the user is verified
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message:
+          "User is not verified please check your email and verify 😊😊 ",
+      });
+    }
+
+    // Check password
+    if (await user.matchPassword(password)) {
+      // await createChatsForLoggedUser();
+      res.json({
+        _id: user._id,
+        name: user.name,
+        isAdmin: user.userType,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json({ message: "Fill Correct Passowrd 👀👀" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
   }
 };
 

@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 
-const sendVerificationEmail = async (email, verificationLink) => {
+const sendVerificationEmail = async ({ email, verificationLink }) => {
+  console.log(email, "email");
   try {
     console.log("verificationemail generator");
 
@@ -8,7 +9,7 @@ const sendVerificationEmail = async (email, verificationLink) => {
       service: "Gmail",
       auth: {
         user: "manojforwork2022@gmail.com",
-        pass: "manoj@for@work@2024", // Ideally, use environment variables for security
+        pass: "kxvx tnam hiii ptms", // Ideally, use environment variables for security
       },
     });
 
@@ -24,7 +25,14 @@ const sendVerificationEmail = async (email, verificationLink) => {
 
     console.log("2");
     // Await the result of sendMail
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions, (error, emailResponse) => {
+      if (error) {
+        console.log(error, "inside error");
+        throw error;
+      }
+      console.log("success");
+      response.end();
+    });
     console.log("final");
   } catch (error) {
     console.error("Error sending email:", error.message);
