@@ -4,7 +4,10 @@ const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
 const { findUserById } = require("../misc/misc");
 const sendVerificationEmail = require("../misc/emailSendFunction");
-const { createChatsForAllUsers, createChatsForLoggedUser } = require("./chatController");
+const {
+  createChatsForAllUsers,
+  createChatsForLoggedUser,
+} = require("./chatController");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
