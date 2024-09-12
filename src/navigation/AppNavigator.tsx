@@ -4,6 +4,7 @@ import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatWindow from '../screens/ChatWindow';
+import ForgotPassword from '../screens/ForgorPassword';
 import ForwardChatScreen from '../screens/ForwardChatScreen';
 import {useAuth} from '../context/userContext';
 import {View, ActivityIndicator, Animated, Text, Easing} from 'react-native';
@@ -81,6 +82,13 @@ const AppNavigator: React.FC = () => {
             component={LoginScreen}
             options={{headerShown: false}}
           />
+
+          <Stack.Screen
+            name="ForgotPassowrd"
+            component={ForgotPassword}
+            options={{headerShown: false}}
+          />
+
           <Stack.Screen
             name="SignUp"
             component={SignUpScreen}

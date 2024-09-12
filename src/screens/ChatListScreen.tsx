@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback} from 'react';
+import React, {useEffect, useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -7,29 +7,28 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
-  ImageBackground,
-  Alert,
 } from 'react-native';
 import {useAuth} from '../context/userContext';
-import {getSendedType, getSenderName, getSenderStatus} from '../misc/misc';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  getSendedType,
+  getSender,
+  getSenderName,
+  getSenderStatus,
+} from '../misc/misc';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {format, isToday, isYesterday, parseISO} from 'date-fns';
-
+import {TextInput} from 'react-native-gesture-handler';
 const formatMessageDate = (dateString: any) => {
   if (!dateString) {
     return '';
   }
-
   try {
     const date = parseISO(dateString);
-
     if (isNaN(date.getTime())) {
       console.error('Parsed date is invalid.');
       return 'Invalid Date';
     }
-
     if (isToday(date)) {
       return format(date, 'p'); // Time format like '1:45 PM'
     } else if (isYesterday(date)) {
@@ -50,23 +49,63 @@ type RootStackParamList = {
   Profile: undefined;
 };
 
+interface User {
+  _id: string;
+  name: string;
+  userType: any;
+  email: string;
+  phoneNumber: string;
+  whatsappNumber: string;
+  // Add other properties as needed
+}
+
+interface Chat {
+  _id: string;
+  users: User[];
+
+  // Add other properties as needed
+}
+
 const ChatListScreen: React.FC = () => {
-  const navigation =
-    useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
   const {
     setLoggedUser,
     loggedUser,
     setChats,
     chats,
     setSelectedChat,
-    fetchAgain,
     onlineUsers,
     socket,
     loading,
     FetchChatsAgain,
   } = useAuth();
-  useEffect(() => {
+  const [searchText, setSearchText] = useState('');
+  const [filteredChats, setFilteredChats] = useState<Chat[] | null>(null);
+  const navigation =
+    useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
 
+  // -----filter chats by sender name ---
+  useEffect(() => {
+    const searchChats = () => {
+      if (searchText.trim() === '') {
+        setFilteredChats(chats || null);
+      } else {
+        const updatedChats = chats?.filter(chat => {
+          if (loggedUser) {
+            const sender = getSender(loggedUser, chat.users);
+            return (
+              sender &&
+              sender.user.name?.toLowerCase().includes(searchText.toLowerCase())
+            );
+          }
+        });
+        setFilteredChats(updatedChats || null);
+      }
+    };
+    searchChats();
+  }, [searchText, chats, loggedUser]);
+
+  //------header-------
+  useEffect(() => {
     navigation.setOptions({
       headerTitle: () => <Text style={styles.headerText}>MyMegaminds</Text>,
       headerLeft: () => null,
@@ -85,13 +124,12 @@ const ChatListScreen: React.FC = () => {
         borderBottomWidth: 0, // Optional: Remove border on iOS
       },
     });
-        const handleRedirectToProfileScreen = () => {
-          console.log('hello');
-          navigation.navigate('Profile');
-        };
+    const handleRedirectToProfileScreen = () => {
+      navigation.navigate('Profile');
+    };
+  }, [navigation, loggedUser]);
 
-  }, [navigation,loggedUser]); // Include navigation in the dependency array
-
+  // ---fetch Again active----
   useEffect(() => {
     socket?.on('fetchAgain', () => {
       FetchChatsAgain();
@@ -106,10 +144,9 @@ const ChatListScreen: React.FC = () => {
     [navigation, setSelectedChat],
   );
 
-  const getUserTypeInitial = (userType: any) => {
+  const getUserFirstLetter = (userType: any) => {
     return userType ? userType.charAt(0).toUpperCase() : '';
   };
-
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
       onPress={() => chatClicked(item)}
@@ -117,7 +154,7 @@ const ChatListScreen: React.FC = () => {
       <View style={styles.profileCircle}>
         {loggedUser ? (
           <Text style={styles.profileText}>
-            {getUserTypeInitial(getSendedType(loggedUser, item.users))}
+            {getUserFirstLetter(getSenderName(loggedUser, item.users))}
           </Text>
         ) : null}
         <View style={styles.statusContainer}>
@@ -158,9 +195,6 @@ const ChatListScreen: React.FC = () => {
   );
 
   return (
-    // <ImageBackground
-    //   source={require('../assets/back.png')}
-    //   style={styles.background}>
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator
@@ -169,27 +203,68 @@ const ChatListScreen: React.FC = () => {
           style={styles.loadingIndicator}
         />
       ) : (
-        <FlatList
-          data={chats}
-          keyExtractor={item => item._id}
-          renderItem={renderItem}
-        />
+        <View>
+          <View style={styles.searchContainer}>
+            <Image
+              style={styles.icon}
+              source={require('../assets/search.png')}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Search users..."
+              value={searchText}
+              onChangeText={setSearchText}
+              placeholderTextColor="#888"
+              autoCapitalize="none"
+            />
+          </View>
+          <FlatList
+            data={filteredChats}
+            keyExtractor={item => item._id}
+            renderItem={renderItem}
+          />
+        </View>
       )}
     </View>
-    // </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 1,
+    paddingHorizontal: 5,
     paddingVertical: 10,
     backgroundColor: 'white',
   },
   background: {
     flex: 1,
     resizeMode: 'cover',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 30,
+    marginVertical: 10,
+    margin: 15,
+    // marginBottom: 12,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.1,
+    // shadowRadius: 5,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    paddingLeft: 8,
+  },
+  icon: {
+    marginRight: 8,
+    width: 30,
+    height: 30,
   },
   loadingIndicator: {
     flex: 1,

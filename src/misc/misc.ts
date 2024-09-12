@@ -8,6 +8,18 @@ interface OnlineUser {
   socketId: string;
   userId: string;
 }
+export const getSender = (loggedUser: any, users: any[]) => {
+  if (users && loggedUser) {
+    const sender = users.find(
+      chatUser => chatUser.user?._id.toString() !== loggedUser._id.toString(),
+    );
+
+    return sender ? sender|| 'Unknown Sender' : 'Unknown Sender';
+  } else {
+    return 'Unknown Sender';
+  }
+
+};
 
 export const getSenderName = (loggedUser: User, chatUsers: any[]) => {
   if (chatUsers && loggedUser) {

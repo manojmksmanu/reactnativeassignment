@@ -8,9 +8,8 @@ interface User {
   // Add other properties as needed
 }
 
-// const API_URL = 'https://reactnativeassignment.onrender.com/api';
-const API_URL = 'https://reactnativeassignment.onrender.com/api';
-// const API_URL = 'http://10.0.2.2:5000/api';
+// const API_URL = 'https://reactnativeassignment.onrender.com';
+const API_URL = 'http://10.0.2.2:5000';
 
 export const signup = async (
   name: string,
@@ -39,7 +38,7 @@ export const signup = async (
       data.subjects = selectedSubjects; // Include subjects only for Tutors
     }
     // Make the API request to signup
-    const response = await axios.post(`${API_URL}/auth/signup`, data);
+    const response = await axios.post(`${API_URL}/api/auth/signup`, data);
     return response.data.message;
   } catch (error: any) {
     console.error(
@@ -59,7 +58,7 @@ export const login = async (
   password: string,
 ): Promise<void> => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axios.post(`${API_URL}/api/auth/login`, {
       email,
       userType,
       password,
@@ -78,7 +77,7 @@ export const login = async (
 export const getUsers = async (): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
   try {
-    const response = await axios.get(`${API_URL}/chat/users`, {
+    const response = await axios.get(`${API_URL}/api/chat/users`, {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
@@ -94,7 +93,7 @@ export const getUsers = async (): Promise<any> => {
 export const loggeduser = async (): Promise<User | null> => {
   const token = await AsyncStorage.getItem('token');
   try {
-    const response = await axios.get(`${API_URL}/auth/loggedUser`, {
+    const response = await axios.get(`${API_URL}/api/auth/loggedUser`, {
       headers: {Authorization: `Bearer ${token}`},
     });
     return response.data;
@@ -104,5 +103,45 @@ export const loggeduser = async (): Promise<User | null> => {
       error.response ? error.response.data : error.message,
     );
     throw error; // Re-throw the error to handle it in the component
+  }
+};
+
+export const forgotPassword = async (email: string): Promise<any> => {
+  console.log(email, 'email');
+  console.log('1');
+  try {
+    console.log('2');
+    const response = await axios.post(`${API_URL}/api/auth/forgot-password`, {
+      email,
+    });
+    console.log(response.data, 'forgot');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'An error occurred');
+  }
+};
+export const otpConfirm = async (email: string, otp: string): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_URL}/api/auth/confirm-otp`, {
+      email,
+      otp,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'An error occurred');
+  }
+};
+export const resetPassword = async (
+  email: string,
+  newPassword: string,
+): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_URL}/api/auth/reset-password`, {
+      email,
+      newPassword,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'An error occurred');
   }
 };

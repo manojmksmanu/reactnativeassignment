@@ -46,6 +46,10 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    navigation.navigate('ForgotPassowrd');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.logoText}>MyMegaminds</Text>
@@ -110,14 +114,29 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         </TouchableOpacity>
       )}
       <View>
-        <Text style={{textAlign: 'center', marginTop: 10, fontSize: 16}}>
+        <View style={{marginTop: 20}}>
+          <TouchableOpacity
+            style={{paddingTop: 0}}
+            onPress={handleForgotPassword}>
+            <Text
+              style={{
+                color: '#187afa',
+                paddingTop: 0,
+                textAlign: 'center',
+                fontWeight: 'bold',
+              }}>
+              Forgot Your Password?
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={{textAlign: 'center', marginTop: 4, fontSize: 16}}>
           Don't have an account?{' '}
         </Text>
         <View>
           <TouchableOpacity style={{paddingTop: 0}} onPress={handleSignUpPress}>
             <Text
               style={{
-                color: '#aa14f0',
+                color: '#187afa',
                 paddingTop: 0,
                 textAlign: 'center',
                 fontWeight: 'bold',
@@ -141,7 +160,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#aa14f0',
+    color: '#187afa',
     textAlign: 'center',
     marginBottom: 40,
   },
@@ -167,7 +186,7 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   button: {
-    backgroundColor: '#aa14f0',
+    backgroundColor: '#187afa',
     padding: 12,
     borderRadius: 15,
     alignItems: 'center',

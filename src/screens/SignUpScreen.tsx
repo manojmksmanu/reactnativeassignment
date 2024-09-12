@@ -15,10 +15,7 @@ import Toast from 'react-native-toast-message';
 import RNPickerSelect from 'react-native-picker-select';
 import {getAllContry, getAllSubjects} from '../services/miscServices';
 import {signup} from '../services/authService';
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+import {isValidEmail} from '../services/smallServices'
 interface Country {
   _id: string;
   name: string;
