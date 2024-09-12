@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/adminModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
+const bcrypt = require("bcryptjs");
 const { findUserById } = require("../misc/misc");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../misc/emailSendFunction");
@@ -242,7 +243,7 @@ exports.confirmOtp = async (req, res) => {
 
     if (
       !user ||
-      !user.verifyResetOtp(otp)||
+      !user.verifyResetOtp(otp) ||
       user.resetOtpExpiry < Date.now()
     ) {
       return res.status(400).json({ message: "Invalid or expired OTP." });
@@ -270,7 +271,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     // Hash the new password and save
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = newPassword;
     user.resetOtp = undefined; // Clear OTP
     user.resetOtpExpiry = undefined; // Clear OTP expiry
     await user.save();

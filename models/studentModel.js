@@ -38,7 +38,6 @@ studentSchema.methods.matchPassword = async function (enteredPassword) {
 };
 studentSchema.methods.setResetOtp = function (otp) {
   // Encrypt the OTP before saving
- 
   if (
     Buffer.from(process.env.OTP_SECRET_KEY, "hex").length !== 32 ||
     Buffer.from(process.env.OTP_IV, "hex").length !== 16
