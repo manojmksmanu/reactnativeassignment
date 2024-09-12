@@ -36,7 +36,7 @@ const ProfileScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
   const deleteUserAccount = async () => {
-    // Handle account deletion logic here
+    navigation.navigate('DeleteAccount');
   };
 
   useEffect(() => {

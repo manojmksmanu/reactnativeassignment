@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
 import {Picker} from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
+import {isValidEmail} from '../services/smallServices';
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState<string>('');
@@ -27,8 +28,16 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   };
 
   const handleLogin = async () => {
-    setLoading(true);
+    if (!email || !isValidEmail(email)) {
+      Toast.show({
+        type: 'error',
+        text2: 'Enter Valid Email.... ',
+      });
+      return;
+    }
+
     try {
+      setLoading(true);
       await login(email, userType, password);
       const user: any = await loggeduser();
       await AsyncStorage.setItem('userInfo', JSON.stringify(user));

@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   logoutText: {
     width: 30,
     height: 30,
-    marginRight: 15,
+    marginRight: 20,
     color: 'grey',
   },
   userContainer: {

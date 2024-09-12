@@ -15,7 +15,7 @@ import Toast from 'react-native-toast-message';
 import RNPickerSelect from 'react-native-picker-select';
 import {getAllContry, getAllSubjects} from '../services/miscServices';
 import {signup} from '../services/authService';
-import {isValidEmail} from '../services/smallServices'
+import {isValidEmail} from '../services/smallServices';
 interface Country {
   _id: string;
   name: string;
@@ -405,7 +405,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
                 <ScrollView horizontal style={styles.tagsContainer}>
                   {selectedSubjects.map(subject => (
                     <View key={subject} style={styles.tag}>
-                      <Text style={{color: '#aa14f0'}}>{subject}</Text>
+                      <Text style={{color: '#187afa'}}>{subject}</Text>
                       <TouchableOpacity
                         onPress={() => handleRemoveTag(subject)}>
                         <Text style={styles.removeText}>x</Text>
@@ -453,7 +453,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
           <TouchableOpacity style={{paddingTop: 0}} onPress={handleSignUpPress}>
             <Text
               style={{
-                color: '#aa14f0',
+                color: '#187afa',
                 paddingTop: 0,
                 textAlign: 'center',
                 fontWeight: 'bold',
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#aa14f0',
+    color: '#187afa',
     textAlign: 'center',
     marginBottom: 40,
   },
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   button: {
-    backgroundColor: '#aa14f0',
+    backgroundColor: '#187afa',
     padding: 12,
     borderRadius: 15,
     alignItems: 'center',
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   buttonSignUp: {
     width: '50%',
-    backgroundColor: '#aa14f0',
+    backgroundColor: '#187afa',
     padding: 12,
     borderRadius: 15,
     alignItems: 'center',
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   BackbuttonText: {
-    color: '#aa14f0',
+    color: '#187afa',
     fontSize: 18,
     fontWeight: '500',
   },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeText: {
-    color: '#aa14f0',
+    color: '#187afa',
     marginLeft: 10,
     fontWeight: 'bold',
   },
