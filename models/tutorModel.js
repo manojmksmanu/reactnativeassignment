@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
 const tutorSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -28,6 +27,8 @@ const tutorSchema = new mongoose.Schema(
       },
     ],
     expoPushToken: { type: String, default: "" },
+    resetOtp: { type: String },
+    resetOtpExpiry: { type: Date },
   },
   { timestamps: true }
 );
@@ -41,6 +42,41 @@ tutorSchema.pre("save", async function (next) {
 
 tutorSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+tutorSchema.methods.setResetOtp = function (otp) {
+  console.log(
+    Buffer.from(process.env.OTP_SECRET_KEY, "hex"),
+    Buffer.from(process.env.OTP_SECRET_KEY, "hex").length,
+    "hlloe"
+  );
+    if (
+      Buffer.from(process.env.OTP_SECRET_KEY, "hex").length !== 32 ||
+      Buffer.from(process.env.OTP_IV, "hex").length !== 16
+    ) {
+      throw new Error("Invalid secret key or IV length");
+    }
+
+  // Encrypt the OTP before saving
+  const cipher = crypto.createCipheriv(
+    "aes-256-cbc",
+    Buffer.from(process.env.OTP_SECRET_KEY, "hex"),
+    Buffer.from(process.env.OTP_IV, "hex")
+  );
+  let encryptedOtp = cipher.update(otp, "utf8", "hex");
+  encryptedOtp += cipher.final("hex");
+  this.resetOtp = encryptedOtp;
+};
+
+tutorSchema.methods.verifyResetOtp = function (otp) {
+  // Decrypt the OTP
+  const decipher = crypto.createDecipheriv(
+    "aes-256-cbc",
+    Buffer.from(process.env.OTP_SECRET_KEY, "hex"),
+    Buffer.from(process.env.OTP_IV, "hex")
+  );
+  let decryptedOtp = decipher.update(this.resetOtp, "hex", "utf8");
+  decryptedOtp += decipher.final("utf8");
+  return decryptedOtp === otp;
 };
 
 const Tutor = mongoose.model("Tutor", tutorSchema);

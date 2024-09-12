@@ -12,7 +12,7 @@ const cors = require("cors");
 const { initSocket } = require("./socket/socket");
 const ChatNew = require("./models/newChatModel");
 const { deleteChatsForDeletedUsers } = require("./misc/deleteChat");
-
+require("dotenv").config();
 connectDB();
 
 const app = express();
@@ -35,7 +35,7 @@ app.use("/api", messageRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/country", countryRoutes);
 app.use("/api/subject", subjectRoutes);
-
+console.log(process.env.OTP_SECRET_KEY);
 const http = require("http").createServer(app);
 const getData = async () => {
   await deleteChatsForDeletedUsers();

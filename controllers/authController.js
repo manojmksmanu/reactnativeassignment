@@ -3,11 +3,9 @@ const Admin = require("../models/adminModel");
 const Student = require("../models/studentModel");
 const Tutor = require("../models/tutorModel");
 const { findUserById } = require("../misc/misc");
-const sendVerificationEmail = require("../misc/emailSendFunction");
-const {
-  createChatsForAllUsers,
-  createChatsForLoggedUser,
-} = require("./chatController");
+const crypto = require("crypto");
+const { sendVerificationEmail } = require("../misc/emailSendFunction");
+const { sendEmail } = require("../misc/emailSendFunction");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
@@ -140,7 +138,6 @@ exports.verifyEmail = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, userType, password } = req.body;
-
   // Common logic for checking the userType
   const findUserByType = async (userType) => {
     if (userType === "Admin") return Admin.findOne({ email });
@@ -194,5 +191,92 @@ exports.getLoggedUser = async (req, res) => {
   } catch (error) {
     console.error("Error fetching logged user:", error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    let user =
+      (await Admin.findOne({ email })) ||
+      (await Student.findOne({ email })) ||
+      (await Tutor.findOne({ email }));
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User with this email not found." });
+    }
+
+    // Generate 4-digit OTP
+    const otp = crypto.randomInt(1000, 9999).toString();
+
+    // Set encrypted OTP and expiry
+    user.setResetOtp(otp);
+    console.log("hello");
+    user.resetOtpExpiry = Date.now() + 2 * 60 * 1000; // OTP valid for 2 mins
+    await user.save();
+
+    // Send OTP via email
+    await sendEmail({
+      to: user.email,
+      subject: "Your Password Reset OTP",
+      text: `Your OTP is: ${otp}`,
+    });
+
+    res.status(200).json({ message: "OTP sent to your email." });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.confirmOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    let user =
+      (await Admin.findOne({ email })) ||
+      (await Student.findOne({ email })) ||
+      (await Tutor.findOne({ email }));
+
+    if (
+      !user ||
+      !user.verifyResetOtp(otp)||
+      user.resetOtpExpiry < Date.now()
+    ) {
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "OTP verified. Proceed to reset password." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    let user =
+      (await Admin.findOne({ email })) ||
+      (await Student.findOne({ email })) ||
+      (await Tutor.findOne({ email }));
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Hash the new password and save
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetOtp = undefined; // Clear OTP
+    user.resetOtpExpiry = undefined; // Clear OTP expiry
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

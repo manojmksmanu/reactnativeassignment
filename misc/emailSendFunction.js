@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendVerificationEmail = async ({ email, verificationLink }) => {
+exports.sendVerificationEmail = async ({ email, verificationLink }) => {
   console.log(email, "email");
   try {
     console.log("verificationemail generator");
@@ -40,4 +40,21 @@ const sendVerificationEmail = async ({ email, verificationLink }) => {
   }
 };
 
-module.exports = sendVerificationEmail;
+exports.sendEmail = async ({ to, message, text }) => {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail", // or any other email service
+    auth: {
+      user: "manojforwork2022@gmail.com",
+      pass: "kxvx tnam hiii ptms", // Your email password
+    },
+  });
+
+  const mailOptions = {
+    from: "manojforwork2022@gmail.com",
+    to,
+    message,
+    text,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
