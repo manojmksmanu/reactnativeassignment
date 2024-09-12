@@ -38,13 +38,7 @@ studentSchema.methods.matchPassword = async function (enteredPassword) {
 };
 studentSchema.methods.setResetOtp = function (otp) {
   // Encrypt the OTP before saving
-  console.log(
-    Buffer.from(process.env.OTP_SECRET_KEY, "hex"),
-    Buffer.from(process.env.OTP_SECRET_KEY, "hex").length,
-    "hlloe",
-    Buffer.from(process.env.OTP_IV, "hex"),
-    Buffer.from(process.env.OTP_IV, "hex").length
-  );
+ 
   if (
     Buffer.from(process.env.OTP_SECRET_KEY, "hex").length !== 32 ||
     Buffer.from(process.env.OTP_IV, "hex").length !== 16
@@ -63,7 +57,6 @@ studentSchema.methods.setResetOtp = function (otp) {
 };
 
 studentSchema.methods.verifyResetOtp = function (otp) {
-  console.log('verify',otp)
   // Decrypt the OTP
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
