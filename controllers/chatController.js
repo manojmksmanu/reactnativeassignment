@@ -37,7 +37,6 @@ getAllUsersForChatCreation = async () => {
 exports.createChatsForAllUsers = async () => {
   try {
     const users = await getAllUsersForChatCreation();
-
     for (let i = 0; i < users.length; i++) {
       for (let j = i + 1; j < users.length; j++) {
         const user1 = users[i];
@@ -74,7 +73,7 @@ exports.createChatsForAllUsers = async () => {
             const chatBetween = `Created chat between ${user1.userType} (${user1.name}) and ${user2.userType} (${user2.name})`;
             const newChat = new NewChat({
               chatId: chatId,
-              chatBetween: chatBetween,
+              chatType: "one-to-one",
               users: [
                 {
                   user: user1._id,
@@ -143,10 +142,10 @@ exports.createChatsForLoggedUser = async () => {
 
         // If no existing chat, create a new one
         if (!existingChat) {
-          const chatBetween = `Created chat between ${user1.userType} (${user1.name}) and ${user2.userType} (${user2.name})`;
+          const chatBetween = `Created chat between ${user1.userType} ${user1.name} and ${user2.userType} ${user2.name}`;
           const newChat = new NewChat({
             chatId: chatId,
-            chatBetween: chatBetween,
+            chatType: "one-to-one",
             users: [
               {
                 user: user1._id,

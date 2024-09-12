@@ -1,27 +1,31 @@
 const mongoose = require("mongoose");
 
-const chatSchema = new mongoose.Schema({
-  chatId: { type: String, unique: true, required: true },
-  users: [
-    {
-      user: { type: mongoose.Types.ObjectId, required: true },
-      userType: {
-        type: String,
-        required: true,
-        refPath: "users.refModel",
-      }, // Store the model name here
-      refModel: {
-        type: String,
-        required: true,
-        enum: ["Admin", "Student", "Tutor"], // Ensures the value is valid
+const chatSchema = new mongoose.Schema(
+  {
+    chatId: { type: String, unique: true, required: true },
+    chatType: { type: String },
+    users: [
+      {
+        user: { type: mongoose.Types.ObjectId, required: true },
+        userType: {
+          type: String,
+          required: true,
+          refPath: "users.refModel",
+        }, // Store the model name here
+        refModel: {
+          type: String,
+          required: true,
+          enum: ["Admin", "Student", "Tutor"], // Ensures the value is valid
+        },
       },
+    ],
+    latestMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message", // Reference to the Message model
     },
-  ],
-  latestMessage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Message", // Reference to the Message model
   },
-} ,{ timestamps: true });
+  { timestamps: true }
+);
 
 // Add the refPath to the schema, referencing the refModel field
 chatSchema.path("users.user").options.refPath = "users.refModel";

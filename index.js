@@ -12,6 +12,7 @@ const cors = require("cors");
 const { initSocket } = require("./socket/socket");
 const ChatNew = require("./models/newChatModel");
 const { deleteChatsForDeletedUsers } = require("./misc/deleteChat");
+const { createChatsForAllUsers } = require("./controllers/chatController");
 require("dotenv").config();
 connectDB();
 

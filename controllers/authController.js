@@ -259,17 +259,14 @@ exports.confirmOtp = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   const { email, newPassword } = req.body;
-
   try {
     let user =
       (await Admin.findOne({ email })) ||
       (await Student.findOne({ email })) ||
       (await Tutor.findOne({ email }));
-
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
-
     // Hash the new password and save
     user.password = newPassword;
     user.resetOtp = undefined; // Clear OTP
