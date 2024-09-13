@@ -22,9 +22,9 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "*", // Replace with your Vercel frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allow these HTTP methods
-    credentials: true, // Allow cookies to be sent
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 
@@ -32,8 +32,9 @@ const server = http.createServer(app);
 initSocket(server);
 
 app.get("/", (req, res) => {
-  res.send("API is running", process.env.MONGO_URI);
+  res.send("API is running");
 });
+console.log(process.env.MONGO_URI);
 app.use("/api/auth", authRoutes);
 app.use("/api", messageRoutes);
 app.use("/api/chat", chatRoutes);
