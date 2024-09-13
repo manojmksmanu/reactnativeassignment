@@ -9,8 +9,8 @@ interface User {
   // Add other properties as needed
 }
 
-// const API_URL = 'https://reactnativeassignment.onrender.com';
-const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
 
 export const signup = async (
   name: string,
@@ -44,12 +44,11 @@ export const signup = async (
   } catch (error: any) {
     console.error(
       'Signup failed:',
-      error.response ? error.response.data : error.message,
+      error.response ? error.response.data.message : error.message,
     );
-    console.error(
-      'Signup failed:',
-      error.response ? error.response.data : error.message,
-    ); // Re-throw the error to handle it in the component
+    throw new Error(
+      error.response ? error.response.data.message : error.message,
+    );
   }
 };
 

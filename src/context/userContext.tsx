@@ -63,8 +63,8 @@ type RootStackParamList = {
   ChatWindow: {chatId: string};
   Login: undefined;
 };
-const API_URL = 'http://10.0.2.2:5000';
-// const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

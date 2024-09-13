@@ -171,10 +171,6 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
           type: 'Invalid Credentials',
           text2: 'Please enter the correct username and password.',
         });
-        Alert.alert(
-          'Invalid Credentials',
-          'Please enter the correct username and password.',
-        );
       } else {
         Toast.show({
           type: 'error',
