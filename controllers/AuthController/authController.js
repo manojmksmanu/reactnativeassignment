@@ -96,7 +96,7 @@ exports.signup = async (req, res) => {
 
     // Generate verification link
     const verificationToken = generateToken(user._id);
-    const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
+    const verificationLink = `${process.env.BASE_URL}/api/auth/verify/${verificationToken}`;
     // const verificationLink = `http://localhost:5000/api/users/verify/${verificationToken}`;
 
     // Send verification email
