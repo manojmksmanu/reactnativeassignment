@@ -29,7 +29,6 @@ app.use(
 );
 
 const server = http.createServer(app);
-
 initSocket(server);
 
 app.get("/", (req, res) => {
