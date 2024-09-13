@@ -64,6 +64,7 @@ export const login = async (
       password,
     });
     const {token} = response.data;
+    console.log(token);
     await AsyncStorage.setItem('token', token);
   } catch (error: any) {
     console.error(
@@ -92,10 +93,12 @@ export const getUsers = async (): Promise<any> => {
 
 export const loggeduser = async (): Promise<User | null> => {
   const token = await AsyncStorage.getItem('token');
+  console.log(token, 'on loggeduser');
   try {
     const response = await axios.get(`${API_URL}/api/auth/loggedUser`, {
       headers: {Authorization: `Bearer ${token}`},
     });
+    console.log(response.data, 'data');
     return response.data;
   } catch (error: any) {
     console.error(

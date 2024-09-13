@@ -15,7 +15,8 @@ const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
   const {loggedUser, loadingLoggedUser} = useAuth();
-
+  
+//  await AsyncStorage.getItem('token', token);
   if (loadingLoggedUser) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
