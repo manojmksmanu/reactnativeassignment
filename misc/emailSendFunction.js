@@ -18,7 +18,7 @@ exports.sendVerificationEmail = async ({ email, verificationLink }) => {
     const mailOptions = {
       from: "manojforwork2022@gmail.com",
       to: email,
-      subject: "Verify your email",
+      subject: "Verify your email (MyMegaminds)",
       html: `<p>Click the following link to verify your account:</p>
              <a href="${verificationLink}">Verify Email</a>`,
     };

@@ -10,7 +10,7 @@ const { sendEmail } = require("../../misc/emailSendFunction");
 const { getSocketInstance } = require("../../socket/socket");
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, "your_jwt_secret", {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 };
@@ -96,8 +96,8 @@ exports.signup = async (req, res) => {
 
     // Generate verification link
     const verificationToken = generateToken(user._id);
-    // const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
-    const verificationLink = `http://localhost:5000/api/users/verify/${verificationToken}`;
+    const verificationLink = `${process.env.BASE_URL}/api/users/verify/${verificationToken}`;
+    // const verificationLink = `http://localhost:5000/api/users/verify/${verificationToken}`;
 
     // Send verification email
     await sendVerificationEmail({
