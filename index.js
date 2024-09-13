@@ -33,7 +33,7 @@ const server = http.createServer(app);
 initSocket(server);
 
 app.get("/", (req, res) => {
-  res.send("API is running");
+  res.send("API is running", process.env.MONGO_URI);
 });
 app.use("/api/auth", authRoutes);
 app.use("/api", messageRoutes);
