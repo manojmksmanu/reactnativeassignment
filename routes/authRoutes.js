@@ -13,7 +13,7 @@ const { protect } = require("../middleware/AuthMiddleWare/authMiddleware");
 const router = express.Router();
 
 router.post("/signup", signup);
-router.post("/verify/:token", verifyEmail);
+router.get("/verify/:token", verifyEmail);
 router.post("/login", login);
 router.get("/loggeduser", protect, getLoggedUser);
 router.post("/forgot-password", forgotPassword);
