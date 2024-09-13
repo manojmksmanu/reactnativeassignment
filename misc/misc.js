@@ -1,4 +1,5 @@
 const Admin = require("../models/AdminModel/adminModel");
+const Message = require("../models/MessageModel/messageModel");
 const NewChat = require("../models/NewChatModel/newChatModel");
 const Student = require("../models/StudentModel/studentModel");
 const Tutor = require("../models/TutorModel/tutorModel");
@@ -9,28 +10,6 @@ exports.createChatId = (user1, user2) => {
   return user1._id < user2._id
     ? `${user1._id}-${user2._id}`
     : `${user2._id}-${user1._id}`;
-};
-
-exports.getChatsForUser = async (userId) => {
-  try {
-    const chats = await NewChat.find({ "users.user": userId })
-      .populate({
-        path: "users.user",
-        select: "-password",
-      })
-      .populate({
-        path: "latestMessage",
-        model: "Message",
-      })
-      .sort({ updatedAt: -1 });
-    console.log("updated");
-
-    await deleteChatsForDeletedUsers();
-    return chats;
-  } catch (error) {
-    console.error("Error fetching chats for user:", error);
-    throw error;
-  }
 };
 
 exports.findUserById = async ({ userId }) => {
@@ -51,4 +30,34 @@ exports.findUserById = async ({ userId }) => {
 
   // If no user found in any of the models
   return null;
+};
+
+exports.deleteChatsForUser = async (userId) => {
+  try {
+    // Find all one-to-one chats where the user is part of the chat
+    const chatsToDelete = await NewChat.find({
+      chatType: "one-to-one",
+      "users.user": userId,
+    });
+
+    if (chatsToDelete.length === 0) {
+      console.log("No one-to-one chats found for the user.");
+      return;
+    }
+
+    // Extract chatIds for all found chats
+    const chatIdsToDelete = chatsToDelete.map((chat) => chat.chatId);
+
+    // Delete all found chats
+    await NewChat.deleteMany({ chatId: { $in: chatIdsToDelete } });
+    console.log(`Deleted ${chatsToDelete.length} chats for user: ${userId}`);
+
+    // Delete all messages associated with those chatIds
+    await Message.deleteMany({ chatId: { $in: chatIdsToDelete } });
+    console.log(
+      `Deleted messages for ${chatsToDelete.length} chats associated with user: ${userId}`
+    );
+  } catch (error) {
+    console.error("Error deleting chats and messages for user:", error);
+  }
 };

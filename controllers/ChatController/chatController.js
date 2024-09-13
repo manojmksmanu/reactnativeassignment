@@ -3,7 +3,7 @@ const NewChat = require("../../models/NewChatModel/newChatModel");
 const Student = require("../../models/StudentModel/studentModel");
 const Tutor = require("../../models/TutorModel/tutorModel");
 const { createChatId } = require("../../misc/misc");
-
+const {deleteChatsForDeletedUsers} = require("../../misc/deleteChat")
 const chatPermissions = {
   Admin: ["Super-Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],
   "Super-Admin": ["Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],
@@ -175,5 +175,26 @@ exports.createChatsForLoggedUser = async () => {
     }
   } catch (error) {
     console.error("Error creating chats:", error);
+  }
+};
+exports.getChatsForUser = async (userId) => {
+  try {
+    const chats = await NewChat.find({ "users.user": userId })
+      .populate({
+        path: "users.user",
+        select: "-password",
+      })
+      .populate({
+        path: "latestMessage",
+        model: "Message",
+      })
+      .sort({ updatedAt: -1 });
+    console.log("updated");
+
+    await deleteChatsForDeletedUsers();
+    return chats;
+  } catch (error) {
+    console.error("Error fetching chats for user:", error);
+    throw error;
   }
 };

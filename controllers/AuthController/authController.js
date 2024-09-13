@@ -3,10 +3,11 @@ const Admin = require("../../models/AdminModel/adminModel");
 const Student = require("../../models/StudentModel/studentModel");
 const Tutor = require("../../models/TutorModel/tutorModel");
 const bcrypt = require("bcryptjs");
-const { findUserById } = require("../../misc/misc");
+const { findUserById, deleteChatsForUser } = require("../../misc/misc");
 const crypto = require("crypto");
 const { sendVerificationEmail } = require("../../misc/emailSendFunction");
 const { sendEmail } = require("../../misc/emailSendFunction");
+const { getSocketInstance } = require("../../socket/socket");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {
@@ -276,5 +277,46 @@ exports.resetPassword = async (req, res) => {
     res.status(200).json({ message: "Password reset successfully." });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const { email, password } = req.body;
+  console.log(email, password);
+  try {
+    // Find the user (Admin, Student, or Tutor)
+    let user =
+      (await Admin.findOne({ email })) ||
+      (await Student.findOne({ email })) ||
+      (await Tutor.findOne({ email }));
+
+    if (!user) {
+      console.log("usernot found");
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Verify the password before deletion
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid password." });
+    }
+
+    // Save the userId before deleting the user
+    const userId = user._id;
+
+    // Delete the user
+    const userModel = user.constructor; // Get the model of the user (Admin, Student, or Tutor)
+    await userModel.deleteOne({ _id: userId });
+
+    // After user deletion, delete all chats and messages related to this user
+    await deleteChatsForUser(userId);
+    const io = await getSocketInstance();
+    io.emit("userIsDeleted", { message: "user is deleted socket indicate" });
+    res
+      .status(200)
+      .json({ message: "Account and related chats deleted successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error", error });
   }
 };

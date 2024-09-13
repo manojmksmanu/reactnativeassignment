@@ -5,8 +5,13 @@ let io;
 let onlineUsers = [];
 console.log(onlineUsers);
 function initSocket(server) {
-  io = new Server(server);
-
+  
+  io = new Server(server, {
+    cors: {
+      origin: "*", // Adjust this to match your frontend URL in production
+    },
+  });
+    console.log("Socket.io initialized");
   io.on("connection", (socket) => {
     console.log(onlineUsers, "connection");
     console.log("a user is connected to", socket.id);
@@ -93,9 +98,15 @@ function initSocket(server) {
     });
     // Handle user disconnect
     socket.on("disconnect", () => {
-      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-      console.log(onlineUsers, "disconnect");
-      io.emit("getOnlineUsers", onlineUsers);
+      const user = onlineUsers.find((user) => user.socketId === socket.id);
+      if (user) {
+        onlineUsers = onlineUsers.filter(
+          (u) => u.userId !== user.userId || u.socketId !== socket.id
+        );
+        if (!onlineUsers.some((u) => u.userId === user.userId)) {
+          io.emit("getOnlineUsers", onlineUsers);
+        }
+      }
       console.log("A user disconnected:", socket.id);
     });
   });

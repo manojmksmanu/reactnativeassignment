@@ -1,4 +1,6 @@
-const { getChatsForUser } = require("../misc/misc");
+const {
+  getChatsForUser,
+} = require("../controllers/ChatController/chatController");
 const express = require("express");
 const { protect } = require("../middleware/AuthMiddleWare/authMiddleware");
 const router = express.Router();
