@@ -1,8 +1,8 @@
-const Admin = require("../models/adminModel");
-const NewChat = require("../models/newChatModel");
-const Student = require("../models/studentModel");
-const Tutor = require("../models/tutorModel");
-const { createChatId } = require("../misc/misc");
+const Admin = require("../../models/AdminModel/adminModel");
+const NewChat = require("../../models/NewChatModel/newChatModel");
+const Student = require("../../models/StudentModel/studentModel");
+const Tutor = require("../../models/TutorModel/tutorModel");
+const { createChatId } = require("../../misc/misc");
 
 const chatPermissions = {
   Admin: ["Super-Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],

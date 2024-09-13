@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const Student = require("../models/studentModel");
-const { findUserById } = require("../misc/misc");
+const Student = require("../../models/StudentModel/studentModel");
+const { findUserById } = require("../../misc/misc");
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -10,11 +10,11 @@ exports.protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(" ")[1];
- 
+
       const decoded = jwt.verify(token, "your_jwt_secret");
 
       // req.user = await Student.findById(decoded.id).select("-password");
-      req.user = await findUserById({userId:decoded.id});
+      req.user = await findUserById({ userId: decoded.id });
 
       next();
     } catch (error) {

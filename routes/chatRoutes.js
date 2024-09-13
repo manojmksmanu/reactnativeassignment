@@ -1,6 +1,6 @@
 const { getChatsForUser } = require("../misc/misc");
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/AuthMiddleWare/authMiddleware");
 const router = express.Router();
 //Get all chats
 router.get("/:userId/chats", protect, async (req, res) => {

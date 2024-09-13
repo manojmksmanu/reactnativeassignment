@@ -1,7 +1,7 @@
-const Admin = require("../models/adminModel");
-const NewChat = require("../models/newChatModel");
-const Student = require("../models/studentModel");
-const Tutor = require("../models/tutorModel");
+const Admin = require("../models/AdminModel/adminModel");
+const NewChat = require("../models/NewChatModel/newChatModel");
+const Student = require("../models/StudentModel/studentModel");
+const Tutor = require("../models/TutorModel/tutorModel");
 const { deleteChatsForDeletedUsers } = require("./deleteChat");
 
 exports.createChatId = (user1, user2) => {
@@ -52,4 +52,3 @@ exports.findUserById = async ({ userId }) => {
   // If no user found in any of the models
   return null;
 };
-

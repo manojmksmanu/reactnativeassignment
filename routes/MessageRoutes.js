@@ -4,8 +4,8 @@ const {
   getMessages,
   getUsers,
   forwardMessages,
-} = require("../controllers/messageController");
-const { protect } = require("../middleware/authMiddleware");
+} = require("../controllers/MessageController/messageController");
+const { protect } = require("../middleware/AuthMiddleWare/authMiddleware");
 const { getChatsForUser } = require("../misc/misc");
 const router = express.Router();
 

@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
-const Admin = require("../models/adminModel");
-const Student = require("../models/studentModel");
-const Tutor = require("../models/tutorModel");
+const Admin = require("../../models/AdminModel/adminModel");
+const Student = require("../../models/StudentModel/studentModel");
+const Tutor = require("../../models/TutorModel/tutorModel");
 const bcrypt = require("bcryptjs");
-const { findUserById } = require("../misc/misc");
+const { findUserById } = require("../../misc/misc");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../misc/emailSendFunction");
-const { sendEmail } = require("../misc/emailSendFunction");
+const { sendVerificationEmail } = require("../../misc/emailSendFunction");
+const { sendEmail } = require("../../misc/emailSendFunction");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, "your_jwt_secret", {

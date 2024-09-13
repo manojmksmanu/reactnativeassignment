@@ -1,4 +1,4 @@
-const Country = require("../models/CountryModel/countryModel");
+const Country = require("../../models/CountryModel/countryModel");
 
 exports.getAllCountries = async (req, res) => {
   console.log("hit country route");

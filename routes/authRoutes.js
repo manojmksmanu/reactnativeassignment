@@ -7,8 +7,8 @@ const {
   forgotPassword,
   confirmOtp,
   resetPassword,
-} = require("../controllers/authController");
-const { protect } = require("../middleware/authMiddleware");
+} = require("../controllers/AuthController/authController");
+const { protect } = require("../middleware/AuthMiddleWare/authMiddleware");
 const router = express.Router();
 
 router.post("/signup", signup);

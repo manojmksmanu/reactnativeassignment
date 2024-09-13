@@ -1,5 +1,5 @@
 const { Server } = require("socket.io");
-const Message = require("../models/messageModel");
+const Message = require("../models/MessageModel/messageModel");
 
 let io;
 let onlineUsers = [];
@@ -30,7 +30,7 @@ function initSocket(server) {
       try {
         const { sender, message, replyingMessage, senderName, chatId } =
           messageData;
-          console.log(messageData,'hello')
+        console.log(messageData, "hello");
         // Emit message to the specific room
         io.to(chatId).emit("receiveMessage", messageData);
         console.log("Message emitted to chatId:", chatId);
