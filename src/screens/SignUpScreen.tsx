@@ -15,7 +15,7 @@ import Toast from 'react-native-toast-message';
 import RNPickerSelect from 'react-native-picker-select';
 import {getAllContry, getAllSubjects} from '../services/miscServices';
 import {signup} from '../services/authService';
-import {isValidEmail} from '../services/smallServices';
+import {isValidEmail} from '../misc/misc';
 interface Country {
   _id: string;
   name: string;
@@ -446,7 +446,13 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
         </View>
       )}
       <View>
-        <Text style={{textAlign: 'center', marginTop: 10, fontSize: 16}}>
+        <Text
+          style={{
+            textAlign: 'center',
+            marginTop: 10,
+            fontSize: 16,
+            color: 'grey',
+          }}>
           Already have an account?{' '}
         </Text>
         <View>

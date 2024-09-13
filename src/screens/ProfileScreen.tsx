@@ -72,17 +72,7 @@ const ProfileScreen: React.FC<{navigation: any}> = ({navigation}) => {
     );
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone. But this feature is not working right now ',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {text: 'Delete', onPress: () => deleteUserAccount()},
-      ],
-      {cancelable: false},
-    );
-  };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -105,11 +95,13 @@ const ProfileScreen: React.FC<{navigation: any}> = ({navigation}) => {
         <TouchableOpacity style={styles.button} onPress={handleLogout}>
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.deleteButton]}
-          onPress={handleDeleteAccount}>
-          <Text style={styles.buttonText}>Delete Account</Text>
-        </TouchableOpacity>
+        {loggedUser?.userType !== 'Super-Admin' && (
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={deleteUserAccount}>
+            <Text style={styles.buttonText}>Delete Account</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );

@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from '../context/userContext';
 import {Picker} from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
-import {isValidEmail} from '../services/smallServices';
+import {isValidEmail} from '../misc/misc';
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState<string>('');
@@ -138,7 +138,7 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={{textAlign: 'center', marginTop: 4, fontSize: 16}}>
+        <Text style={{textAlign: 'center', marginTop: 4, fontSize: 16,color:'grey'}}>
           Don't have an account?{' '}
         </Text>
         <View>

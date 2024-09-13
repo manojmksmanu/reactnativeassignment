@@ -15,7 +15,7 @@ import {
   resetPassword,
 } from '../services/authService';
 import Toast from 'react-native-toast-message';
-import {isValidEmail} from '../services/smallServices';
+import {isValidEmail} from '../misc/misc';
 
 const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState<string>('');

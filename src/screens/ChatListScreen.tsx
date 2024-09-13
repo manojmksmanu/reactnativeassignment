@@ -131,6 +131,10 @@ const ChatListScreen: React.FC = () => {
 
   // ---fetch Again active----
   useEffect(() => {
+    // When user is deleted fetch chat again
+    socket?.on('userIsDeleted', data => {
+      FetchChatsAgain();
+    });
     socket?.on('fetchAgain', () => {
       FetchChatsAgain();
     });

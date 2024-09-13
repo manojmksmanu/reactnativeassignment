@@ -63,8 +63,8 @@ type RootStackParamList = {
   ChatWindow: {chatId: string};
   Login: undefined;
 };
-// const API_URL = 'http://10.0.2.2:5000';
-const API_URL = 'https://reactnativeassignment.onrender.com';
+const API_URL = 'http://10.0.2.2:5000';
+// const API_URL = 'https://reactnativeassignment.onrender.com';
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -147,7 +147,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     if (loggedUser) {
       fetchChats(setLoading, setChats, loggedUser);
     }
-  }, [fetchAgain, loggedUser]);
+  }, [fetchAgain, loggedUser, socket]);
   // Fetch Chats end here
 
   return (

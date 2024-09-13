@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useAuth} from '../context/userContext';
 
 interface User {
   _id: string;
@@ -143,5 +144,31 @@ export const resetPassword = async (
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'An error occurred');
+  }
+};
+
+export const deleteUser = async (
+  email: string,
+  password: string,
+): Promise<void> => {
+  console.log(email, password, 'inside delete');
+  const token = await AsyncStorage.getItem('token');
+  console.log(token);
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/auth/delete-account`,
+      {
+        email,
+        password,
+      },
+      {
+        headers: {Authorization: `Bearer ${token}`},
+      },
+    );
+    console.log(response.data, 'deleteuser');
+    return response.data.message;
+  } catch (error: any) {
+    console.error(error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : error.message; // Re-throw the error to handle it in the component
   }
 };

@@ -14,11 +14,10 @@ export const getSender = (loggedUser: any, users: any[]) => {
       chatUser => chatUser.user?._id.toString() !== loggedUser._id.toString(),
     );
 
-    return sender ? sender|| 'Unknown Sender' : 'Unknown Sender';
+    return sender ? sender || 'Unknown Sender' : 'Unknown Sender';
   } else {
     return 'Unknown Sender';
   }
-
 };
 
 export const getSenderName = (loggedUser: User, chatUsers: any[]) => {
@@ -61,4 +60,9 @@ export const getSenderStatus = (
     }
   }
   return 'offline';
+};
+
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 };
