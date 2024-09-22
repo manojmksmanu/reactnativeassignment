@@ -2,7 +2,7 @@ const Message = require("../../models/MessageModel/messageModel");
 const NewChat = require("../../models/NewChatModel/newChatModel");
 
 // Send message
-exports.sendMessage = async (req, res) => {
+exports.sendMessage = async (messageData) => {
   const {
     chatId,
     sender,
@@ -12,37 +12,84 @@ exports.sendMessage = async (req, res) => {
     fileType,
     messageId,
     replyingMessage,
-  } = req.body;
-  try {
-    // Create the new message
-    const newMessage = await Message.create({
-      chatId,
-      sender,
-      senderName,
-      message,
-      fileUrl,
-      fileType,
-      messageId,
-      replyingMessage,
-    });
-    console.log(newMessage);
-    // Update the latest message in the chat and ensure updatedAt is set
-    const updatedChat = await NewChat.findOneAndUpdate(
-      { _id: chatId },
-      {
-        latestMessage: newMessage,
-        updatedAt: Date.now(), // Ensure updatedAt is manually set
-      },
-      { new: true }
-    ).populate("latestMessage");
+    status,
+  } = messageData;
+  // try {
+  // Create the new message
+  const newMessage = await Message.create({
+    chatId,
+    sender,
+    senderName,
+    message,
+    fileUrl,
+    fileType,
+    messageId,
+    replyingMessage,
+    status: "sent",
+  });
+  console.log(newMessage);
+  // Update the latest message in the chat and ensure updatedAt is set
+  const updatedChat = await NewChat.findOneAndUpdate(
+    { _id: chatId },
+    {
+      latestMessage: newMessage,
+      updatedAt: Date.now(), // Ensure updatedAt is manually set
+    },
+    { new: true }
+  ).populate("latestMessage");
 
-    res
-      .status(201)
-      .json({ message: "Message created successfully", newMessage });
-  } catch (error) {
-    console.error("Error creating message:", error);
-    res.status(500).json({ message: "Server Error" });
-  }
+  //   res
+  //     .status(201)
+  //     .json({ message: "Message created successfully", newMessage });
+  // } catch (error) {
+  //   console.error("Error creating message:", error);
+  //   res.status(500).json({ message: "Server Error" });
+  // }
+};
+// Send message
+exports.sendDocument = async (messageData) => {
+  const {
+    chatId,
+    sender,
+    senderName,
+    message,
+    fileUrl,
+    fileType,
+    messageId,
+    replyingMessage,
+    status,
+  } = messageData;
+  // try {
+  // Create the new message
+  const newMessage = await Message.create({
+    chatId,
+    sender,
+    senderName,
+    message,
+    fileUrl,
+    fileType,
+    messageId,
+    replyingMessage,
+    status: "sent",
+  });
+  console.log(newMessage);
+  // Update the latest message in the chat and ensure updatedAt is set
+  const updatedChat = await NewChat.findOneAndUpdate(
+    { _id: chatId },
+    {
+      latestMessage: newMessage,
+      updatedAt: Date.now(), // Ensure updatedAt is manually set
+    },
+    { new: true }
+  ).populate("latestMessage");
+
+  //   res
+  //     .status(201)
+  //     .json({ message: "Message created successfully", newMessage });
+  // } catch (error) {
+  //   console.error("Error creating message:", error);
+  //   res.status(500).json({ message: "Server Error" });
+  // }
 };
 // Get messages
 exports.getMessages = async (req, res) => {
@@ -52,6 +99,7 @@ exports.getMessages = async (req, res) => {
     const messages = await Message.find({ chatId: chatId })
       .populate("sender", "name pic email")
       .populate("chatId");
+    console.log(messages, "messages");
     res.json(messages);
   } catch (error) {
     res.status(400);

@@ -1,17 +1,20 @@
 const { Server } = require("socket.io");
 const Message = require("../models/MessageModel/messageModel");
+const {
+  sendMessage,
+  sendDocument,
+} = require("../controllers/MessageController/messageController");
 
 let io;
 let onlineUsers = [];
 console.log(onlineUsers);
 function initSocket(server) {
-  
   io = new Server(server, {
     cors: {
       origin: "*", // Adjust this to match your frontend URL in production
     },
   });
-    console.log("Socket.io initialized");
+  console.log("Socket.io initialized");
   io.on("connection", (socket) => {
     console.log(onlineUsers, "connection");
     console.log("a user is connected to", socket.id);
@@ -32,15 +35,70 @@ function initSocket(server) {
     });
 
     socket.on("sendMessage", async (messageData) => {
+      const {
+        chatId,
+        sender,
+        senderName,
+        message,
+        fileUrl,
+        fileType,
+        messageId,
+        replyingMessage,
+        status,
+      } = messageData;
+      console.log(messageId);
+      const newMessage = new Message({
+        chatId,
+        sender,
+        senderName,
+        message,
+        fileUrl,
+        fileType,
+        messageId,
+        replyingMessage,
+        status: "sent",
+      });
       try {
-        const { sender, message, replyingMessage, senderName, chatId } =
-          messageData;
-        console.log(messageData, "hello");
+        await sendMessage(messageData);
+        io.to(chatId).emit("receiveMessage", newMessage);
+
         // Emit message to the specific room
-        io.to(chatId).emit("receiveMessage", messageData);
         console.log("Message emitted to chatId:", chatId);
-      } catch (error) {
-        console.error("Error sending message:", error);
+      } catch (err) {
+        console.log(err, "error");
+      }
+    });
+
+    socket.on("sendDocument", async (messageData) => {
+      const {
+        chatId,
+        sender,
+        senderName,
+        message,
+        fileUrl,
+        fileType,
+        messageId,
+        replyingMessage,
+      } = messageData;
+
+      const newMessage = new Message({
+        chatId,
+        sender,
+        senderName,
+        message,
+        fileUrl,
+        fileType,
+        messageId,
+        replyingMessage,
+        status: "sent",
+      });
+      try {
+        await sendDocument(messageData); // Persist message to DB
+        io.to(chatId).emit("receiveDocument", newMessage);
+        console.log("Document emitted to chatId:", chatId);
+      } catch (err) {
+        console.error("Error sending document:", err);
+        // Optionally handle resending logic here
       }
     });
 
