@@ -76,6 +76,18 @@ project.ext.react = [
 ]
 
 android {
+
+// --regarding pdf reader--
+   packagingOptions {
+      pickFirst 'lib/x86/libc++_shared.so'
+      pickFirst 'lib/x86_64/libjsc.so'
+      pickFirst 'lib/arm64-v8a/libjsc.so'
+      pickFirst 'lib/arm64-v8a/libc++_shared.so'
+      pickFirst 'lib/x86_64/libc++_shared.so'
+      pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+    }
+//---regarding pdf reader end ----
+
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion

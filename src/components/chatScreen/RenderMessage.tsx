@@ -28,7 +28,7 @@ import Pdf from 'react-native-pdf'; // Add this import for PDF viewing
 import RNFS from 'react-native-fs';
 import {WebView} from 'react-native-webview';
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
-
+// import DocumentViewer from 'react-native-document-viewer';
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const RenderMessage = ({
@@ -204,9 +204,11 @@ const RenderMessage = ({
       console.error('Storage permission denied');
       return; // Stop further execution
     }
+    const sanitizedMessage = message.replace(/\s+/g, '_'); // Replace spaces with underscores
 
     console.log();
-    const path = `${RNFS.DownloadDirectoryPath}/${message}`;
+    const downloadDir = RNFS.DownloadDirectoryPath; // Use the correct download directory
+    const path = `${downloadDir}/${sanitizedMessage}`;
     console.log('download', path);
 
     const options = {
@@ -340,8 +342,15 @@ const RenderMessage = ({
     // -----pdf message----
     if (fileType === 'application/pdf') {
       return (
-        <TouchableOpacity>
-          <View style={{width: 200, height: 100, padding: 40}}>
+        <TouchableOpacity onPress={() => openFileModal(fileUrl, fileType)}>
+          <View
+            style={{
+              width: 200,
+              height: 100,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
             {item.status === 'uploading' ? (
               <View
                 style={{
@@ -351,25 +360,19 @@ const RenderMessage = ({
                   alignItems: 'center',
                 }}>
                 <ActivityIndicator size="large" />
-                {/* <Text style={{fontSize:20}} >{item.progress}</Text> */}
               </View>
             ) : (
               <>
-                <Text style={{color: 'grey', textAlign: 'center'}}>
-                  {item.message}
-                </Text>
-                {/* <TouchableOpacity
-                  onPress={() => downloadFile(fileUrl, item.fileName)}
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    backgroundColor: '#4CAF50',
-                    padding: 10,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: '#fff'}}>Download</Text>
-                </TouchableOpacity> */}
+                <View>
+                  <Text style={{color: 'grey', textAlign: 'center'}}>
+                    {item.message}
+                  </Text>
+                  <Text
+                    style={{color: 'blue', opacity: 0.5, textAlign: 'center'}}>
+                    {item.fileType}
+                  </Text>
+                </View>
+
                 {isDownloading && (
                   <View style={{position: 'absolute', top: 10, left: 10}}>
                     <Text
@@ -519,6 +522,12 @@ const RenderMessage = ({
         <View style={styles.modalContainer}>
           {selectedFileType === 'application/pdf' && selectedFileUrl ? (
             <Pdf
+              trustAllCerts={false}
+              scale={0.8}
+              minScale={0.5}
+              renderActivityIndicator={() => (
+                <ActivityIndicator color="blue" size="large" />
+              )}
               source={{uri: selectedFileUrl, cache: true}}
               onError={(error: any) => console.log(error)}
               style={styles.pdf}
@@ -581,17 +590,17 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 10,
     maxWidth: '70%',
-    flexDirection: 'column', // Keep the content in a row
-    flexWrap: 'wrap', // Allow wrapping to handle longer texts
+    flexDirection: 'column',
+    flexWrap: 'wrap',
   },
   message: {
-    flexShrink: 1, // Allow message text to shrink when necessary
+    flexShrink: 1,
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
   },
   messageInfoContainer: {
-    marginLeft: 5, // Space between the message and the info container
+    marginLeft: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -599,37 +608,37 @@ const styles = StyleSheet.create({
   timeText: {
     color: '#808080',
     fontSize: 10,
-    marginRight: 3, // Slight margin for separation
+    marginRight: 3,
   },
   tickIcon: {
     width: 12,
     height: 12,
-    marginLeft: 3, // Slight margin for separation
+    marginLeft: 3,
   },
   senderContainer: {
     alignSelf: 'flex-end',
     backgroundColor: '#dcf8c6',
-    shadowColor: '#000', // Shadow color
+    shadowColor: '#000',
     shadowOffset: {
-      width: 0, // Horizontal offset
-      height: 1, // Vertical offset
+      width: 0,
+      height: 1,
     },
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 1, // Shadow blur radius
-    elevation: 1, // Android shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
     maxWidth: '60%',
   },
   receiverContainer: {
     alignSelf: 'flex-start',
     backgroundColor: '#fff',
-    shadowColor: '#000', // Shadow color
+    shadowColor: '#000',
     shadowOffset: {
-      width: 0, // Horizontal offset
-      height: 1, // Vertical offset
+      width: 0,
+      height: 1,
     },
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 1, // Shadow blur radius
-    elevation: 1, // Android shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
   },
   senderMessageText: {
     color: '#000',
@@ -661,8 +670,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   pdf: {
-    width: SCREEN_WIDTH - 40,
-    height: 600,
+    width: SCREEN_WIDTH,
+    height: '100%',
   },
   closeButton: {
     position: 'absolute',
@@ -695,8 +704,6 @@ const styles = StyleSheet.create({
     right: 110,
   },
   closeButtonText: {
-    // color: '#fff',
-    // fontSize: 16,
     width: 25,
     height: 25,
   },
