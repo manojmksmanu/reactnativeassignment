@@ -71,15 +71,17 @@ def enableProguardInReleaseBuilds = false
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
+project.ext.react = [
+    enableHermes: false  // Disable Hermes
+]
 
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
-
-    namespace "com.chatapp"
+    namespace "com.mymegaminds.myapp"
     defaultConfig {
-        applicationId "com.chatapp"
+        applicationId "com.mymegaminds.myapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

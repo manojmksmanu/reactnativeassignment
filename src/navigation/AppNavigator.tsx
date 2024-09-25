@@ -6,17 +6,20 @@ import ChatListScreen from '../screens/ChatListScreen';
 import ChatWindow from '../screens/ChatWindow';
 import ForgotPassword from '../screens/ForgorPassword';
 import ForwardChatScreen from '../screens/ForwardChatScreen';
+
+import ChatWindow2 from '../screens/ChatWindow2';
 import {useAuth} from '../context/userContext';
 import {View, ActivityIndicator, Animated, Text, Easing} from 'react-native';
 import ProfileScreen from '../screens/ProfileScreen';
 import DeleteAccount from '../screens/DeletAccountScreen';
+// import ImageDisplayScreen from '../screens/ImageDisplayScreen';
 
 const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
   const {loggedUser, loadingLoggedUser} = useAuth();
-  
-//  await AsyncStorage.getItem('token', token);
+
+  //  await AsyncStorage.getItem('token', token);
   if (loadingLoggedUser) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -76,7 +79,8 @@ const AppNavigator: React.FC = () => {
             },
           };
         },
-      }}>
+      }}
+      >
       {!loggedUser ? (
         <>
           <Stack.Screen
@@ -106,6 +110,11 @@ const AppNavigator: React.FC = () => {
             name="ForwardChatScreen"
             component={ForwardChatScreen}
           />
+          <Stack.Screen name="ChatWindow2" component={ChatWindow2} />
+          {/* <Stack.Screen
+            name="ImageDisplay"
+            component={ImageDisplayScreen}
+          /> */}
           <Stack.Screen
             name="ChatWindow"
             options={{title: 'Chat'}}

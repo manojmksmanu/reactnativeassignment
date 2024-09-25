@@ -139,7 +139,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       };
     }
   }, [socket, loggedUser]);
-  console.log(onlineUsers);
+  // console.log(onlineUsers, 'onlineusers');
   // -------------------------------------------
 
   // Fetch chats

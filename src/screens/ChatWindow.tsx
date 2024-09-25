@@ -65,7 +65,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
   const [selectedMessages, setSelectedMessages] = useState<any[]>([]);
   const [forwardMode, setForwardMode] = useState<boolean>(false);
   const [currentSender, setCurrentSender] = useState<any>(null);
-  console.log(loggeduser, 'loggeduser');
   // ----socket connection--
   useEffect(() => {
     // Join the chat room

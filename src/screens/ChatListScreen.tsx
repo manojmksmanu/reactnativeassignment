@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
+  SafeAreaView,
 } from 'react-native';
 import {useAuth} from '../context/userContext';
 import {
@@ -19,6 +20,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {format, isToday, isYesterday, parseISO} from 'date-fns';
 import {TextInput} from 'react-native-gesture-handler';
+import BottomNavigation from '../components/listScreen/BottomNavigation';
 const formatMessageDate = (dateString: any) => {
   if (!dateString) {
     return '';
@@ -47,6 +49,7 @@ type RootStackParamList = {
   ChatWindow: {chatId: string};
   Login: undefined;
   Profile: undefined;
+  ChatWindow2: {chatId: string};
 };
 
 interface User {
@@ -80,8 +83,18 @@ const ChatListScreen: React.FC = () => {
   } = useAuth();
   const [searchText, setSearchText] = useState('');
   const [filteredChats, setFilteredChats] = useState<Chat[] | null>(null);
+  const [showType, setShowType] = useState<string>('');
+  console.log(showType);
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
+
+  const items = [
+    {label: 'Home', icon: require('../assets/all.png')},
+    {label: 'Admins', icon: require('../assets/software-engineer.png')},
+    {label: 'Tutor', icon: require('../assets/tutor.png')},
+    {label: 'Student', icon: require('../assets/students.png')},
+    {label: 'Group', icon: require('../assets/meeting.png')},
+  ];
 
   // -----filter chats by sender name ---
   useEffect(() => {
@@ -131,7 +144,6 @@ const ChatListScreen: React.FC = () => {
 
   // ---fetch Again active----
   useEffect(() => {
-    // When user is deleted fetch chat again
     socket?.on('userIsDeleted', data => {
       FetchChatsAgain();
     });
@@ -142,15 +154,23 @@ const ChatListScreen: React.FC = () => {
 
   const chatClicked = useCallback(
     (chat: any) => {
-      navigation.navigate('ChatWindow', {chatId: chat._id});
+      navigation.navigate('ChatWindow2', {chatId: chat._id});
       setSelectedChat(chat);
     },
     [navigation, setSelectedChat],
   );
+  // const chatClicked = useCallback(
+  //   (chat: any) => {
+  //     navigation.navigate('ChatWindow', {chatId: chat._id});
+  //     setSelectedChat(chat);
+  //   },
+  //   [navigation, setSelectedChat],
+  // );
 
   const getUserFirstLetter = (userType: any) => {
     return userType ? userType.charAt(0).toUpperCase() : '';
   };
+
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
       onPress={() => chatClicked(item)}
@@ -199,7 +219,7 @@ const ChatListScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -207,7 +227,7 @@ const ChatListScreen: React.FC = () => {
           style={styles.loadingIndicator}
         />
       ) : (
-        <View>
+        <View style={styles.content}>
           <View style={styles.searchContainer}>
             <Image
               style={styles.icon}
@@ -229,7 +249,10 @@ const ChatListScreen: React.FC = () => {
           />
         </View>
       )}
-    </View>
+      <View style={styles.bottomNavigation}>
+        <BottomNavigation items={items} />
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -253,11 +276,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginVertical: 10,
     margin: 15,
-    // marginBottom: 12,
-    // shadowColor: '#000',
-    // shadowOffset: {width: 0, height: 2},
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
+  },
+  content: {
+    height: '90%',
   },
   input: {
     flex: 1,
@@ -381,6 +402,12 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     color: 'grey',
+  },
+  bottomNavigation: {
+    // position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

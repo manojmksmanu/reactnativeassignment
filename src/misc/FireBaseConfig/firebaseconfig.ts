@@ -18,11 +18,11 @@ const firebaseConfig = {
 const configFirebase = async () => {
   try {
     if (!firebase.apps.length) {
-      console.log('Attempting to initialize Firebase');
+      // console.log('Attempting to initialize Firebase');
       await firebase.initializeApp(firebaseConfig);
-      console.log('Firebase Initialized Successfully');
+      // console.log('Firebase Initialized Successfully');
     } else {
-      console.log('Using Existing Firebase App');
+      // console.log('Using Existing Firebase App');
     }
   } catch (error) {
     console.error('Firebase initialization error:', error);
