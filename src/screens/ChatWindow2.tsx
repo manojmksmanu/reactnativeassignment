@@ -279,6 +279,7 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   // ---fetchMessages function --
   useEffect(() => {
     const fetchMessages = async () => {
+      console.log('hello');
       setLoading(true); // Start loading
       try {
         // Fetch messages from the API

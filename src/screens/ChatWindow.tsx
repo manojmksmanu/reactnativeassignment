@@ -326,7 +326,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             style={styles.loadingIndicator}
           />
         ) : (
-         
           <FlatList
             data={messages.slice().reverse()}
             inverted
@@ -354,7 +353,6 @@ const ChatWindow: React.FC<{route: any; navigation: any}> = ({
             }}
             contentContainerStyle={{flexGrow: 0}}
           />
-        
         )}
         <View>
           {/* ---Input bottom container--  */}

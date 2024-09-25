@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import moment from 'moment';
 import {
   Image,
@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {
   PanGestureHandler,
@@ -24,6 +26,8 @@ import Animated, {
 import Pdf from 'react-native-pdf'; // Add this import for PDF viewing
 // import Video from 'react-native-video';
 import RNFS from 'react-native-fs';
+import {WebView} from 'react-native-webview';
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -42,6 +46,8 @@ const RenderMessage = ({
   const {fileType, fileUrl, message} = item;
   const translateX = useSharedValue(0);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null); // Allow null or string
+  const [selectedFileType, setSelectedFileType] = useState<string | null>(null); // Allow null or string
   const [selectedImage, setSelectedImage] = useState(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -83,211 +89,125 @@ const RenderMessage = ({
     transform: [{translateX: translateX.value}],
   }));
 
-  const openFullImage = (url: any) => {
-    setSelectedImage(url);
+  const openFileModal = (url: string, type: string) => {
+    setSelectedFileUrl(url);
+    setSelectedFileType(type);
     setModalVisible(true);
   };
 
-  const renderFileContent = (
-    fileType: string,
-    fileUrl: string,
-    message: string,
-    isSender: boolean,
-  ) => {
-    if (
-      fileType === 'image/png' ||
-      fileType === 'image/jpeg' ||
-      fileType === 'image/jpg'
-    ) {
-      return (
-        <TouchableOpacity>
-          <View style={{width: 200, height: 200}}>
-            {item.status === 'uploading' ? (
-              <View
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <>
-                  <ActivityIndicator size="large" />
-                  <Text>{item.fileName}</Text>
-                </>
-                {/* <Text style={{fontSize:20}} >{item.progress}</Text> */}
-              </View>
-            ) : fileUrl ? (
-              <>
-                <Image
-                  source={{uri: fileUrl}}
-                  style={{width: 200, height: 200, resizeMode: 'contain'}}
-                />
-                <TouchableOpacity
-                  onPress={() => downloadFile(fileUrl, message)}
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 10,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: '#fff'}}>Download</Text>
-                </TouchableOpacity>
-                {isDownloading && (
-                  <View style={{position: 'absolute', top: 10, left: 10}}>
-                    <Text
-                      style={{
-                        color: '#fff',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 5,
-                        borderRadius: 20,
-                      }}>
-                      {Math.round(downloadProgress)}%
-                    </Text>
-                    <ActivityIndicator size="small" />
-                  </View>
-                )}
-              </>
-            ) : null}
-          </View>
-        </TouchableOpacity>
-      );
-    }
-
-    if (fileType === 'application/pdf') {
-      return (
-        <TouchableOpacity>
-          <View style={{width: 200, height: 100, padding: 40}}>
-            {item.status === 'uploading' ? (
-              <View
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <ActivityIndicator size="large" />
-                {/* <Text style={{fontSize:20}} >{item.progress}</Text> */}
-              </View>
-            ) : (
-              <>
-                <Text style={{color: 'grey', textAlign: 'center'}}>
-                  {item.message}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => downloadFile(fileUrl, item.fileName)}
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 10,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: '#fff'}}>Download</Text>
-                </TouchableOpacity>
-                {isDownloading && (
-                  <View style={{position: 'absolute', top: 10, left: 10}}>
-                    <Text
-                      style={{
-                        color: '#fff',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 5,
-                        borderRadius: 20,
-                      }}>
-                      {Math.round(downloadProgress)}%
-                    </Text>
-                    <ActivityIndicator size="small" />
-                  </View>
-                )}
-              </>
-            )}
-          </View>
-          {item.status === 'uploading' && (
-            <>
-              <Text style={{fontSize: 20}}>{item.progress}</Text>
-              <Text style={styles.documentText}>{item.fileType}</Text>
-            </>
-          )}
-        </TouchableOpacity>
-      );
-    }
-
-    // ------video message -----
-    // if (fileType === 'video/mp4' || String(fileType).startsWith('video/')) {
-    //   return (
-    //     <TouchableOpacity onPress={() => openFile(fileUrl, fileType)}>
-    //       <View style={{width: 200, height: 200}}>
-    //         {item.status === 'uploading' ? (
-    //           <View
-    //             style={{
-    //               width: '100%',
-    //               height: '100%',
-    //               justifyContent: 'center',
-    //               alignItems: 'center',
-    //             }}>
-    //             <ActivityIndicator size="large" />
-    //             <Text>{item.fileName}</Text>
-    //           </View>
-    //         ) : fileUrl ? (
-    //           <>
-    //             <Video
-    //               source={{uri: fileUrl}} // The video file URL
-    //               style={{width: '100%', height: '100%'}}
-    //               resizeMode="contain"
-    //               controls={true} // Show video controls
-    //             />
-    //             <TouchableOpacity
-    //               onPress={() => downloadFile(fileUrl, item.fileName)}
-    //               style={{
-    //                 position: 'absolute',
-    //                 top: 10,
-    //                 right: 10,
-    //                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    //                 padding: 10,
-    //                 borderRadius: 5,
-    //               }}>
-    //               <Text style={{color: '#fff'}}>Download</Text>
-    //             </TouchableOpacity>
-    //             {isDownloading && (
-    //               <View style={{position: 'absolute', top: 10, left: 10}}>
-    //                 <Text
-    //                   style={{
-    //                     color: '#fff',
-    //                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    //                     padding: 5,
-    //                     borderRadius: 20,
-    //                   }}>
-    //                   {Math.round(downloadProgress)}%
-    //                 </Text>
-    //                 <ActivityIndicator size="small" />
-    //               </View>
-    //             )}
-    //           </>
-    //         ) : null}
-    //       </View>
-    //     </TouchableOpacity>
-    //   );
-    // }
-
-    // --------- text message ---
-    if (fileType === 'text') {
-      return (
-        <Text
-          style={
-            isSender ? styles.senderMessageText : styles.receiverMessageText
-          }>
-          {message}
-        </Text>
-      );
-    }
-
-    return null; // Return null for unsupported file types
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedFileUrl(null);
+    setSelectedFileType(null);
   };
 
-  const downloadFile = async (url: any, fileName: any) => {
-    const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+  const requestStoragePermission = async () => {
+    console.log('Permission request triggered');
+    if (Platform.OS === 'android') {
+      const androidVersion = parseInt(Platform.Version.toString(), 10);
+
+      try {
+        if (androidVersion >= 33) {
+          // Android 13 and above
+          const mediaPermissions = [
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+          ];
+
+          // Check if permissions are already granted
+          const alreadyGranted = await Promise.all(
+            mediaPermissions.map(permission =>
+              PermissionsAndroid.check(permission),
+            ),
+          );
+
+          const allPermissionsGranted = alreadyGranted.every(
+            granted => granted,
+          );
+
+          if (allPermissionsGranted) {
+            console.log('All permissions are already granted');
+            return true;
+          } else {
+            // Request permissions if not granted
+            const grantedResults = await Promise.all(
+              mediaPermissions.map(permission =>
+                PermissionsAndroid.request(permission),
+              ),
+            );
+
+            const anyGranted = grantedResults.some(
+              result => result === PermissionsAndroid.RESULTS.GRANTED,
+            );
+
+            if (anyGranted) {
+              console.log('At least one media access granted');
+              return true;
+            } else {
+              console.log('All media access denied');
+              return false;
+            }
+          }
+        } else {
+          // Below Android 13
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            {
+              title: 'External Storage Permission',
+              message:
+                'This app needs access to your external storage to upload files',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('You can send documents');
+            return true;
+          } else {
+            console.log('Permission denied');
+            return false;
+          }
+        }
+      } catch (err) {
+        console.warn('Error requesting permissions', err);
+        return false;
+      }
+    } else if (Platform.OS === 'ios') {
+      try {
+        const result = await check(PERMISSIONS.IOS.PHOTO_LIBRARY);
+        if (result === RESULTS.GRANTED) {
+          console.log('Photo library access granted');
+          return true;
+        } else {
+          const requestResult = await request(PERMISSIONS.IOS.PHOTO_LIBRARY);
+          if (requestResult === RESULTS.GRANTED) {
+            console.log('Photo library access granted');
+            return true;
+          } else {
+            console.log('Photo library access denied');
+            return false;
+          }
+        }
+      } catch (err) {
+        console.warn('Error requesting iOS permissions', err);
+        return false;
+      }
+    }
+  };
+
+  const downloadFile = async (url: any, message: any) => {
+    const permissionGranted = await requestStoragePermission();
+    if (!permissionGranted) {
+      console.error('Storage permission denied');
+      return; // Stop further execution
+    }
+
+    console.log();
+    const path = `${RNFS.DownloadDirectoryPath}/${message}`;
+    console.log('download', path);
 
     const options = {
       fromUrl: url,
@@ -302,6 +222,15 @@ const RenderMessage = ({
     try {
       setIsDownloading(true); // Start downloading
       const response = await RNFS.downloadFile(options).promise;
+      if (response.statusCode === 200) {
+        console.log('File downloaded successfully to:', path);
+
+        // Check if file exists
+        const fileExists = await RNFS.exists(path);
+        console.log('File exists:', fileExists); // This should log true if the file exists
+      } else {
+        console.error('Download failed:', response.statusCode);
+      }
       setIsDownloading(false); // Download complete
 
       if (response.statusCode === 200) {
@@ -313,14 +242,6 @@ const RenderMessage = ({
     } catch (error) {
       setIsDownloading(false); // Download failed
       console.error('Download error:', error);
-    }
-  };
-
-  const openFile = (fileUrl: string, fileType: string) => {
-    if (fileType === 'application/pdf') {
-      setModalVisible(true);
-    } else {
-      // Handle other file types if needed
     }
   };
 
@@ -352,6 +273,198 @@ const RenderMessage = ({
     );
   };
 
+  const renderFileContent = (
+    fileType: string,
+    fileUrl: string,
+    message: string,
+    isSender: boolean,
+  ) => {
+    // -----Image Message----
+    if (fileType.startsWith('image/')) {
+      return (
+        <TouchableOpacity onPress={() => openFileModal(fileUrl, fileType)}>
+          <View style={{width: 200, height: 200}}>
+            {item.status === 'uploading' ? (
+              <View
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <>
+                  <ActivityIndicator size="large" />
+                  <Text>{item.fileName}</Text>
+                </>
+                {/* <Text style={{fontSize:20}} >{item.progress}</Text> */}
+              </View>
+            ) : fileUrl ? (
+              <>
+                <Image
+                  source={{uri: fileUrl}}
+                  style={{width: 200, height: 200, resizeMode: 'contain'}}
+                />
+                {/* <TouchableOpacity
+                  onPress={() => downloadFile(fileUrl, message)}
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    backgroundColor: '#4CAF50',
+                    padding: 10,
+                    borderRadius: 5,
+                  }}>
+                  <Text style={{color: '#fff'}}>Download</Text>
+                </TouchableOpacity> */}
+                {isDownloading && (
+                  <View style={{position: 'absolute', top: 10, left: 10}}>
+                    <Text
+                      style={{
+                        color: '#fff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 5,
+                        borderRadius: 20,
+                      }}>
+                      {Math.round(downloadProgress)}%
+                    </Text>
+                    <ActivityIndicator size="small" />
+                  </View>
+                )}
+              </>
+            ) : null}
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    // -----pdf message----
+    if (fileType === 'application/pdf') {
+      return (
+        <TouchableOpacity>
+          <View style={{width: 200, height: 100, padding: 40}}>
+            {item.status === 'uploading' ? (
+              <View
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="large" />
+                {/* <Text style={{fontSize:20}} >{item.progress}</Text> */}
+              </View>
+            ) : (
+              <>
+                <Text style={{color: 'grey', textAlign: 'center'}}>
+                  {item.message}
+                </Text>
+                {/* <TouchableOpacity
+                  onPress={() => downloadFile(fileUrl, item.fileName)}
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    backgroundColor: '#4CAF50',
+                    padding: 10,
+                    borderRadius: 5,
+                  }}>
+                  <Text style={{color: '#fff'}}>Download</Text>
+                </TouchableOpacity> */}
+                {isDownloading && (
+                  <View style={{position: 'absolute', top: 10, left: 10}}>
+                    <Text
+                      style={{
+                        color: '#fff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 5,
+                        borderRadius: 20,
+                      }}>
+                      {Math.round(downloadProgress)}%
+                    </Text>
+                    <ActivityIndicator size="small" />
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+          {item.status === 'uploading' && (
+            <>
+              <Text style={{fontSize: 20}}>{item.progress}</Text>
+              <Text style={styles.documentText}>{item.fileType}</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      );
+    }
+
+    // ------video message ------
+    if (fileType === 'video/mp4' || String(fileType).startsWith('video/')) {
+      return (
+        <TouchableOpacity onPress={() => openFileModal(fileUrl, fileType)}>
+          <View style={{width: 200, height: 200}}>
+            {item.status === 'uploading' ? (
+              <View
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="large" />
+                <Text>{item.fileName}</Text>
+              </View>
+            ) : fileUrl ? (
+              <>
+                <WebView
+                  source={{
+                    html: `
+              <video controls autoplay style="width:100%;height:100%;" playsinline muted="false">
+                <source src="${fileUrl}" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            `,
+                  }}
+                  style={{width: '100%', height: '100%'}}
+                  allowsInlineMediaPlayback={true}
+                  javaScriptEnabled={true}
+                />
+
+                {isDownloading && (
+                  <View style={{position: 'absolute', top: 10, left: 10}}>
+                    <Text
+                      style={{
+                        color: '#fff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 5,
+                        borderRadius: 20,
+                      }}>
+                      {Math.round(downloadProgress)}%
+                    </Text>
+                    <ActivityIndicator size="small" />
+                  </View>
+                )}
+              </>
+            ) : null}
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    // --------- text message ------
+    if (fileType === 'text') {
+      return (
+        <Text
+          style={
+            isSender ? styles.senderMessageText : styles.receiverMessageText
+          }>
+          {message}
+        </Text>
+      );
+    }
+
+    return null; // Return null for unsupported file types
+  };
+
   return (
     <GestureHandlerRootView>
       <PanGestureHandler
@@ -367,7 +480,6 @@ const RenderMessage = ({
           <View style={styles.message}>
             {renderFileContent(fileType, fileUrl, message, isSender)}
           </View>
-
           <View style={styles.messageInfoContainer}>
             <Text style={styles.timeText}>
               {moment(item.createdAt).format('hh:mm A')}
@@ -378,7 +490,6 @@ const RenderMessage = ({
                 style={styles.tickIcon}
               />
             )} */}
-
             {isSender && item.status === 'uploading' && (
               <Image
                 source={require('../../assets/time.png')}
@@ -400,33 +511,63 @@ const RenderMessage = ({
           </View>
         </Animated.View>
       </PanGestureHandler>
-
-      {/* Modal for viewing documents */}
+      {/* Modal for viewing PDFs, images, or videos */}
       <Modal
         visible={isModalVisible}
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
-          <Pdf
-            source={{uri: fileUrl, cache: true}}
-            onLoadComplete={(numberOfPages: number) => {
-              console.log(`number of pages: ${numberOfPages}`);
-            }}
-            onPageChanged={(page: number) => {
-              console.log(`current page: ${page}`);
-            }}
-            onError={(error: any) => {
-              console.log(error);
-            }}
-            onPressLink={(uri: string) => {
-              console.log(`Link pressed: ${uri}`);
-            }}
-            style={styles.pdf}
-          />
+          {selectedFileType === 'application/pdf' && selectedFileUrl ? (
+            <Pdf
+              source={{uri: selectedFileUrl, cache: true}}
+              onError={(error: any) => console.log(error)}
+              style={styles.pdf}
+            />
+          ) : selectedFileType?.startsWith('image/') && selectedFileUrl ? (
+            <Image source={{uri: selectedFileUrl}} style={styles.fullImage} />
+          ) : selectedFileType?.startsWith('video/') && selectedFileUrl ? (
+            <WebView
+              source={{uri: selectedFileUrl}}
+              style={styles.fullVideo}
+              allowsInlineMediaPlayback={true}
+              javaScriptEnabled={true}
+            />
+          ) : null}
+          {isDownloading && (
+            <TouchableOpacity
+              onPress={closeModal}
+              style={styles.modalDownloadProgress}>
+              <View style={{display: 'flex', flexDirection: 'row'}}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 5,
+                    borderRadius: 20,
+                  }}>
+                  {Math.round(downloadProgress)}%
+                </Text>
+                <ActivityIndicator size="small" />
+              </View>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.closeButtonText}>Close</Text>
+            onPress={closeModal}
+            style={styles.modalDownloadButton}>
+            {/* <Text style={styles.closeButtonText}>Close</Text> */}
+            <Image
+              style={styles.closeButtonText}
+              source={require('../../assets/close1.png')}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => downloadFile(fileUrl, item.message)}
+            style={styles.closeButton}>
+            {/* <Text style={styles.closeButtonText}>Close</Text> */}
+            <Image
+              style={styles.closeButtonText}
+              source={require('../../assets/cloud-computing.png')}
+            />
           </TouchableOpacity>
         </View>
       </Modal>
@@ -524,14 +665,51 @@ const styles = StyleSheet.create({
     height: 600,
   },
   closeButton: {
+    position: 'absolute',
     marginTop: 20,
-    padding: 10,
+    padding: 5,
     backgroundColor: '#007bff',
     borderRadius: 5,
+    zIndex: 1000,
+    top: 10,
+    right: 60,
+  },
+  modalDownloadButton: {
+    position: 'absolute',
+    marginTop: 20,
+    padding: 5,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+    zIndex: 1000,
+    top: 10,
+    right: 10,
+  },
+  modalDownloadProgress: {
+    position: 'absolute',
+    marginTop: 20,
+    padding: 5,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+    zIndex: 1000,
+    top: 10,
+    right: 110,
   },
   closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    // color: '#fff',
+    // fontSize: 16,
+    width: 25,
+    height: 25,
+  },
+  fullImage: {
+    backgroundColor: 'black',
+    width: SCREEN_WIDTH,
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  fullVideo: {
+    backgroundColor: 'black',
+    width: SCREEN_WIDTH,
+    height: '100%',
   },
 });
 
