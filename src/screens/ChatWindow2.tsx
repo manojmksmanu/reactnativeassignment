@@ -58,47 +58,47 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   const [sending, setSending] = useState<any[]>([]);
   const [sendingPercentage, setSendingPercentage] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
-  const [unsentMessages, setUnsentMessages] = useState([]); //after
+  const [unsentMessages, setUnsentMessages] = useState([]); 
 
   // ----socket connection--
   useEffect(() => {
-    // Join the chat room
-    if (!socket) return;
-    socket.emit('joinRoom', chatId);
-    loadMessages(); //after
+    loadMessages();
 
-    // Define message handlers
+    if (!socket) return;
+
+    socket.emit('joinRoom', chatId);
+
     const handleReceiveMessage = (messageData: MessageData) => {
       updateMessageStatusInStorage(messageData);
       if (messageData.sender !== loggedUser._id) {
         saveMessageLocally(messageData);
       }
     };
+
     const handleReceiveDocuments = (messageData: MessageData) => {
       updateMessageStatusInStorage(messageData);
       if (messageData.sender !== loggedUser._id) {
         saveMessageLocally(messageData);
       }
     };
+
     const handleForwardMessageReceived = (newMessages: MessageData[]) => {
       console.log(newMessages, 'forward messages');
       setMessages(prevMessages => [...prevMessages, ...newMessages]);
     };
 
-    // Attach event listeners
     socket.on('receiveMessage', handleReceiveMessage);
     socket.on('receiveDocument', handleReceiveDocuments);
     socket.on('forwarMessageReceived', handleForwardMessageReceived);
 
-    // Cleanup function to remove event listeners
     return () => {
       socket.off('receiveMessage', handleReceiveMessage);
+      socket.off('receiveDocument', handleReceiveDocuments);
       socket.off('forwarMessageReceived', handleForwardMessageReceived);
     };
   }, []);
   // --socket connection end--
 
-  // Update message status in local storage 👀👀👀👀👀👀
   const updateMessageStatusInStorage = async (messageData: any) => {
     const storedMessages = await AsyncStorage.getItem(`messages-${chatId}`);
     if (storedMessages) {
@@ -124,7 +124,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
     }
   };
 
-  //update message status in local storage end 👀👀👀👀👀👀👀
   // -----loadMessage--- 👀👀👀👀👀👀👀👀--
   const loadMessages = async () => {
     const storedMessages = await AsyncStorage.getItem(`messages-${chatId}`);
@@ -140,12 +139,9 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   };
   // -----loadMessage--- 👀👀👀👀👀👀👀👀--end
 
-  // --------👀👀👀👀👀👀👀👀--------
-
   const saveMessageLocally = async (message: any) => {
     const updatedMessages = [...messages, message];
     setMessages(prevMessages => [...prevMessages, message]);
-    // setMessages(updatedMessages);
     await AsyncStorage.setItem(
       `messages-${chatId}`,
       JSON.stringify(updatedMessages),
@@ -153,32 +149,22 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   };
 
   const checkAndSaveMessageLocally = async (message: any) => {
-    // Get existing messages from AsyncStorage
     const storedMessages = await AsyncStorage.getItem(`messages-${chatId}`);
     let messagesData = storedMessages ? JSON.parse(storedMessages) : [];
-
-    // Check if the message with the given messageId already exists
     const existingMessageIndex = messagesData.findIndex(
       (msg: any) => msg.messageId === message.messageId,
     );
-
     if (existingMessageIndex !== -1) {
-      // If the message exists, update it with the new message data
       messagesData[existingMessageIndex] = {
         ...messagesData[existingMessageIndex],
         ...message,
       };
-      console.log('Message updated in local storage:', message);
+      // console.log('Message updated in local storage:', message);
     } else {
-      // If the message does not exist, add it to the list
       messagesData.push(message);
-      console.log('Message saved locally:', message, 'pudh');
+      // console.log('Message saved locally:', message, 'pudh');
     }
-
-    // Update state
     setMessages(messagesData);
-
-    // Save the updated list to AsyncStorage
     await AsyncStorage.setItem(
       `messages-${chatId}`,
       JSON.stringify(messagesData),
@@ -193,8 +179,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   //     JSON.stringify(updatedUnsentMessages),
   //   );
   // };
-
-  // --------👀👀👀👀👀👀👀👀--------
 
   const getUserFirstAlphabet = (userType: any) => {
     return userType ? userType.charAt(0).toUpperCase() : '';
@@ -276,144 +260,54 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
     console.log('More options icon pressed');
   };
 
-  // ---fetchMessages function --
-  useEffect(() => {
-    const fetchMessages = async () => {
-      console.log('hello');
-      setLoading(true); // Start loading
-      try {
-        // Fetch messages from the API
-        const response = await getMessages(chatId);
-        // console.log(response);
-        // Get existing messages from AsyncStorage
-        const storedMessages = await AsyncStorage.getItem(`messages-${chatId}`);
-        const storedMessagesData = storedMessages
-          ? JSON.parse(storedMessages)
-          : [];
-        console.log(
-          JSON.stringify(response) !== JSON.stringify(storedMessagesData),
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const response = await getMessages(chatId);
+      const storedMessages = await AsyncStorage.getItem(`messages-${chatId}`);
+      const storedMessagesData = storedMessages
+        ? JSON.parse(storedMessages)
+        : [];
+      console.log(
+        JSON.stringify(response) !== JSON.stringify(storedMessagesData),
+      );
+      if (JSON.stringify(response) !== JSON.stringify(storedMessagesData)) {
+        console.log('set value');
+        await AsyncStorage.setItem(
+          `messages-${chatId}`,
+          JSON.stringify(response),
         );
-        // Compare and update AsyncStorage if needed
-        if (JSON.stringify(response) !== JSON.stringify(storedMessagesData)) {
-          await AsyncStorage.setItem(
-            `messages-${chatId}`,
-            JSON.stringify(response),
-          );
-        }
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
-      } finally {
-        setLoading(false); // Stop loading
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMessages();
-  }, [chatId, messages]);
-  // ---fetch messages function end --
+  }, [messages]);
 
-  //----send message function--
-  // const handleSendMessage = async () => {
-  //   if (!message.trim()) return;
-  //   setReplyingMessage('');
-  //   setMessage('');
-  //   const messageId = Date.now().toString();
-  //   const messageData = {
-  //     chatId,
-  //     sender: loggedUser._id,
-  //     senderName: loggedUser ? loggedUser.name : 'Unknown',
-  //     message,
-  //     fileUrl: null,
-  //     fileType: 'text',
-  //     messageId,
-  //     replyingMessage,
-  //   };
-  //   if (socket) {
-  //     socket.emit('fetch', 'fetchAgain');
-  //     socket.emit('sendMessage', messageData);
-  //     setMessages(prevMessages => [...prevMessages, messageData]);
-  //     saveMessageLocally(message);
-  //   }
-  //   try {
-  //     await sendMessage(messageData);
-  //   } catch (error) {
-  //     console.error('Error sending message: ', error);
-  //   }
-  // };
-  // --send message function ends here--
-
-  //----send document function--
-  const handleSendDocuments = async (
-    downloadURL: string,
-    fileType: any,
-    fileName: string,
-  ) => {
-    console.log(downloadURL, fileType, fileName);
-    setReplyingMessage('');
-    setMessage('');
-    const messageId = Date.now().toString();
-    const messageData = {
-      chatId: chatId,
-      sender: loggedUser._id,
-      senderName: loggedUser ? loggedUser.name : 'Unknown',
-      message: 'image',
-      fileUrl: downloadURL,
-      fileType,
-      messageId,
-      replyingMessage,
+  useEffect(() => {
+    console.log(1);
+    const renderMessagesonOpnen = async () => {
+      await fetchMessages();
+      console.log(2);
+      loadMessages();
     };
-    setSending([]);
-    setIsSending(false);
-    if (socket) {
-      saveMessageLocally(messageData);
-      socket.emit('sendMessage', messageData);
-      socket.emit('fetch', 'fetchAgain');
-    }
-    await sendMessage(messageData);
-  };
-  // --send document function ends here--
+    renderMessagesonOpnen();
+  }, [chatId, navigation]);
 
-  //----send document function--
-  const handleSendCameraFile = async (
-    downloadURL: string,
-    fileType: any,
-    fileName: string,
-  ) => {
-    console.log(downloadURL, fileType, fileName);
-    setReplyingMessage('');
-    setMessage('');
-    const messageId = Date.now().toString(); // Unique ID for the message
-    const messageData = {
-      chatId: chatId,
-      sender: loggedUser._id,
-      senderName: loggedUser ? loggedUser.name : 'Unknown',
-      message: 'cameraFile',
-      fileUrl: downloadURL,
-      fileType,
-      messageId,
-      replyingMessage,
-    };
-    setSending([]);
-    setIsSending(false);
-    console.log(messageData);
-    if (socket) {
-      setMessages(prevMessages => [...prevMessages, messageData]);
-      socket.emit('sendMessage', messageData);
-      socket.emit('fetch', 'fetchAgain');
-    }
-    await sendMessage(messageData);
-  };
-  // --send document function ends here--
-
-  // ----function for handleswipeLefat and swipeRight ----
   const handleSwipeLeft = (item: any) => {
     setReplyingMessage(item);
     setIsReplying(true);
   };
+
   const handleSwipeRight = (item: any) => {
     setReplyingMessage(item);
     setIsReplying(true);
   };
-  // ----function for handleswipeLeft and swipeRight ends here ----
 
   const handleRemoveReplying = () => {
     setReplyingMessage('');
@@ -455,14 +349,11 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
     }
   };
 
-  // here I send document to firebase and I get the url
   const sendDocument = async () => {
     const sender = loggedUser._id;
     const senderName = loggedUser ? loggedUser.name : 'Unknown';
     const messageId = Date.now().toString();
     await openDocumentPicker(
-      setMessage,
-      handleSendDocuments,
       setSending,
       setIsSending,
       setSendingPercentage,
@@ -481,8 +372,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
     const senderName = loggedUser ? loggedUser.name : 'Unknown';
     const messageId = Date.now().toString();
     await openCamera(
-      setMessage,
-      handleSendDocuments,
       setSending,
       setIsSending,
       setSendingPercentage,

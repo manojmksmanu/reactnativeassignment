@@ -149,8 +149,6 @@ const getRealPathFromUri = async (
   return null;
 };
 export const openDocumentPicker = async (
-  setMessage: any,
-  handleSendDocuments: any,
   setSending: any,
   setIsSending: React.Dispatch<React.SetStateAction<boolean>>,
   setSendingPercentage: any,
@@ -198,8 +196,6 @@ export const openDocumentPicker = async (
           await uploadFileToFirebase(
             decodedUri,
             fileType,
-            handleSendDocuments,
-            setMessage,
             fileName,
             setSending,
             setIsSending,
@@ -290,8 +286,6 @@ const requestCameraPermission = async () => {
 };
 
 export const openCamera = async (
-  setMessage: any,
-  handleSendDocuments: any,
   setSending: any,
   setIsSending: React.Dispatch<React.SetStateAction<boolean>>,
   setSendingPercentage: any,
@@ -322,8 +316,6 @@ export const openCamera = async (
           await uploadFileToFirebase(
             decodedUri,
             fileType,
-            handleSendDocuments,
-            setMessage, // Pass setMessage for live progress
             fileName, // Pass the fileName to display in the message
             setSending,
             setIsSending,
@@ -349,8 +341,6 @@ export const openCamera = async (
 const uploadFileToFirebase = async (
   fileUri: string,
   fileType: any,
-  handleSendDocuments: any,
-  setMessage: any,
   fileName: string,
   setSending: any,
   setIsSending: React.Dispatch<React.SetStateAction<boolean>>,
