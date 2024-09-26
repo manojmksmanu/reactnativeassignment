@@ -404,12 +404,17 @@ const RenderMessage = ({
     if (fileType === 'video/mp4' || String(fileType).startsWith('video/')) {
       return (
         <TouchableOpacity onPress={() => openFileModal(fileUrl, fileType)}>
-          <View style={{width: 200, height: 200}}>
+          <View
+            style={{
+              width: 200,
+              height: 200,
+            }}>
             {item.status === 'uploading' ? (
               <View
                 style={{
                   width: '100%',
                   height: '100%',
+                  display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
@@ -421,13 +426,13 @@ const RenderMessage = ({
                 <WebView
                   source={{
                     html: `
-              <video controls autoplay style="width:100%;height:100%;" playsinline muted="false">
+              <video controls autoplay style="width:85%;height:80%;" playsinline muted="false">
                 <source src="${fileUrl}" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             `,
                   }}
-                  style={{width: '100%', height: '100%'}}
+                  style={{width: '100%', height: '90%'}}
                   allowsInlineMediaPlayback={true}
                   javaScriptEnabled={true}
                 />

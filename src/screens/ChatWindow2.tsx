@@ -58,7 +58,7 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   const [sending, setSending] = useState<any[]>([]);
   const [sendingPercentage, setSendingPercentage] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
-  const [unsentMessages, setUnsentMessages] = useState([]); 
+  const [unsentMessages, setUnsentMessages] = useState([]);
 
   // ----socket connection--
   useEffect(() => {
@@ -385,8 +385,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
     );
   };
 
-  // ------send Message---- 👀👀👀👀👀👀👀👀👀
-
   const sendMessageNew = async () => {
     if (!message) return;
     setReplyingMessage('');
@@ -414,7 +412,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
       }
     }
   };
-  // ------send Message---- 👀👀👀👀👀👀👀👀👀 end
 
   return (
     <View style={styles.container}>
