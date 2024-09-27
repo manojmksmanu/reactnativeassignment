@@ -1,42 +1,127 @@
 import React, {useState} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, Image} from 'react-native';
+import {useAuth} from '../../context/userContext';
 
 interface BottomNavigationProps {
-  items: Array<{label: string; icon: any}>;
+  setShowType: any;
+  handleShowUsertype: any;
+  showType: string;
 }
 
-const BottomNavigation: React.FC<BottomNavigationProps> = ({items}) => {
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-
-  const handleButtonPress = (index: number) => {
-    setActiveIndex(index);
+const BottomNavigation: React.FC<BottomNavigationProps> = ({
+  setShowType,
+  showType,
+  handleShowUsertype,
+}) => {
+  const handleButtonPress = async (item: string) => {
+    await setShowType(item);
+    await handleShowUsertype(item);
   };
-
+  const {loggedUser} = useAuth();
+  console.log(loggedUser);
   return (
     <View style={styles.bottomNavigation}>
-      {items.map((item, index) => (
-        <TouchableOpacity
-          key={index}
+      <TouchableOpacity
+        style={[
+          styles.navButton,
+          showType === 'Home' ? styles.activeButton : null,
+        ]}
+        onPress={() => handleButtonPress('Home')}>
+        <Image
+          source={require('../../assets/all.png')}
+          style={{width: 25, height: 25}}
+        />
+        <Text
           style={[
-            styles.navButton,
-            activeIndex === index ? styles.activeButton : null,
-          ]}
-          onPress={() => handleButtonPress(index)}>
-          <Image
-            source={
-              typeof item.icon === 'string' ? {uri: item.icon} : item.icon
-            }
-            style={{width: 25, height: 25}}
-          />
-          <Text
+            styles.label,
+            {color: showType === 'Home' ? '#007bff' : '#888'},
+          ]}>
+          Home
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.navButton,
+          showType === 'Admins' ? styles.activeButton : null,
+        ]}
+        onPress={() => handleButtonPress('Admins')}>
+        <Image
+          source={require('../../assets/software-engineer.png')}
+          style={{width: 25, height: 25}}
+        />
+        <Text
+          style={[
+            styles.label,
+            {color: showType === 'Admins' ? '#007bff' : '#888'},
+          ]}>
+          Admins
+        </Text>
+      </TouchableOpacity>
+
+      {loggedUser?.userType === 'Super-Admin' ||
+        loggedUser?.userType === 'Admin' ||
+        (loggedUser?.userType === 'Co-Admin' && (
+          <TouchableOpacity
             style={[
-              styles.label,
-              {color: activeIndex === index ? '#007bff' : '#888'},
-            ]}>
-            {item.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+              styles.navButton,
+              showType === 'Tutor' ? styles.activeButton : null,
+            ]}
+            onPress={() => handleButtonPress('Tutor')}>
+            <Image
+              source={require('../../assets/tutor.png')}
+              style={{width: 25, height: 25}}
+            />
+            <Text
+              style={[
+                styles.label,
+                {color: showType === 'Tutor' ? '#007bff' : '#888'},
+              ]}>
+              Tutor
+            </Text>
+          </TouchableOpacity>
+        ))}
+
+      {loggedUser?.userType === 'Super-Admin' ||
+        loggedUser?.userType === 'Admin' ||
+        (loggedUser?.userType === 'Sub-Admin' && (
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              showType === 'Student' ? styles.activeButton : null,
+            ]}
+            onPress={() => handleButtonPress('Student')}>
+            <Image
+              source={require('../../assets/students.png')}
+              style={{width: 25, height: 25}}
+            />
+            <Text
+              style={[
+                styles.label,
+                {color: showType === 'Student' ? '#007bff' : '#888'},
+              ]}>
+              Student
+            </Text>
+          </TouchableOpacity>
+        ))}
+
+      <TouchableOpacity
+        style={[
+          styles.navButton,
+          showType === 'Group' ? styles.activeButton : null,
+        ]}
+        onPress={() => handleButtonPress('Group')}>
+        <Image
+          source={require('../../assets/meeting.png')}
+          style={{width: 25, height: 25}}
+        />
+        <Text
+          style={[
+            styles.label,
+            {color: showType === 'Group' ? '#007bff' : '#888'},
+          ]}>
+          Group
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };

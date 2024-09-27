@@ -139,8 +139,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       };
     }
   }, [socket, loggedUser]);
-  // console.log(onlineUsers, 'onlineusers');
-  // -------------------------------------------
+
+  // AsyncStorage.removeItem('chats')
 
   // Fetch chats
   useEffect(() => {

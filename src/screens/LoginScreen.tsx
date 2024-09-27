@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,6 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
       });
       return;
     }
-
     try {
       setLoading(true);
       await login(email, userType, password);
@@ -138,7 +137,13 @@ const LoginScreen: React.FC<{navigation: any}> = ({navigation}) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={{textAlign: 'center', marginTop: 4, fontSize: 16,color:'grey'}}>
+        <Text
+          style={{
+            textAlign: 'center',
+            marginTop: 4,
+            fontSize: 16,
+            color: 'grey',
+          }}>
           Don't have an account?{' '}
         </Text>
         <View>

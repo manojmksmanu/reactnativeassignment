@@ -8,6 +8,7 @@ interface User {
 }
 const API_URL = 'https://reactnativeassignment.onrender.com/api';
 // const API_URL = 'http://10.0.2.2:5000/api';
+
 export const getAllChats = async (userId: string): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
   try {

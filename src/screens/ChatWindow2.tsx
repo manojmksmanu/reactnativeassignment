@@ -450,7 +450,6 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
       />
       {/* )} */}
       <View>
-        {/* ---Input bottom container--  */}
         <View style={styles.inputMainContainer}>
           <TouchableOpacity onPress={sendDocument}>
             <Image
@@ -527,15 +526,14 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
 
 const styles = StyleSheet.create({
   backButton: {
-    marginLeft: 10, // Adjust margin if needed
+    marginLeft: 10,
     padding: 5,
   },
   backIcon: {
     width: 24,
     height: 24,
-    tintColor: '#555', // Customize icon color if needed
+    tintColor: '#555',
   },
-
   headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -51,7 +51,6 @@ type RootStackParamList = {
   Profile: undefined;
   ChatWindow2: {chatId: string};
 };
-
 interface User {
   _id: string;
   name: string;
@@ -59,14 +58,10 @@ interface User {
   email: string;
   phoneNumber: string;
   whatsappNumber: string;
-  // Add other properties as needed
 }
-
 interface Chat {
   _id: string;
   users: User[];
-
-  // Add other properties as needed
 }
 
 const ChatListScreen: React.FC = () => {
@@ -81,23 +76,16 @@ const ChatListScreen: React.FC = () => {
     loading,
     FetchChatsAgain,
   } = useAuth();
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState<string>('');
   const [filteredChats, setFilteredChats] = useState<Chat[] | null>(null);
-  const [showType, setShowType] = useState<string>('');
-  console.log(showType);
+  const [showType, setShowType] = useState<string>('Home');
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
 
-  const items = [
-    {label: 'Home', icon: require('../assets/all.png')},
-    {label: 'Admins', icon: require('../assets/software-engineer.png')},
-    {label: 'Tutor', icon: require('../assets/tutor.png')},
-    {label: 'Student', icon: require('../assets/students.png')},
-    {label: 'Group', icon: require('../assets/meeting.png')},
-  ];
-
+  console.log(showType, 'hdf');
   // -----filter chats by sender name ---
   useEffect(() => {
+    setShowType('Home');
     const searchChats = () => {
       if (searchText.trim() === '') {
         setFilteredChats(chats || null);
@@ -116,6 +104,54 @@ const ChatListScreen: React.FC = () => {
     };
     searchChats();
   }, [searchText, chats, loggedUser]);
+
+  const handleShowUsertype = async (itemType: string) => {
+    console.log(itemType);
+
+    if (itemType === 'Home') {
+      setFilteredChats(chats);
+    }
+
+    if (
+      itemType === 'Admins' ||
+      itemType === 'Tutor' ||
+      itemType === 'Student'
+    ) {
+      const updateChatsByChatType = chats?.filter((chat: any) => {
+        return chat.chatType === 'one-to-one';
+      });
+
+      const updateChats = updateChatsByChatType?.filter((chat: any) => {
+        if (loggedUser) {
+          const sender = getSender(loggedUser, chat.users);
+          if (itemType === 'Admins') {
+            return (
+              (sender && sender.user.userType === 'Admin') ||
+              sender.user.userType === 'Super-Admin' ||
+              sender.user.userType === 'Co-Admin' ||
+              sender.user.userType === 'Sub-Admin' ||
+              sender.user.userType === 'Admin'
+            );
+          }
+          if (itemType === 'Tutor') {
+            return sender && sender.user.userType === 'Tutor';
+          }
+          if (itemType === 'Student') {
+            return sender && sender.user.userType === 'Student';
+          }
+        }
+      });
+
+      setFilteredChats(updateChats || null);
+    }
+
+    if (itemType === 'Group') {
+      const updateChatsByChatType = chats?.filter((chat: any) => {
+        return chat.chatType === 'group';
+      });
+      setFilteredChats(updateChatsByChatType || null);
+    }
+  };
 
   //------header-------
   useEffect(() => {
@@ -159,13 +195,6 @@ const ChatListScreen: React.FC = () => {
     },
     [navigation, setSelectedChat],
   );
-  // const chatClicked = useCallback(
-  //   (chat: any) => {
-  //     navigation.navigate('ChatWindow', {chatId: chat._id});
-  //     setSelectedChat(chat);
-  //   },
-  //   [navigation, setSelectedChat],
-  // );
 
   const getUserFirstLetter = (userType: any) => {
     return userType ? userType.charAt(0).toUpperCase() : '';
@@ -242,6 +271,21 @@ const ChatListScreen: React.FC = () => {
               autoCapitalize="none"
             />
           </View>
+          {showType === 'Group' && (
+            <View>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#187afa',
+                  marginHorizontal: 18,
+                  borderRadius: 10,
+                }}>
+                <Text
+                  style={{textAlign: 'center', padding: 10, color: 'white'}}>
+                  Create New Group
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
           <FlatList
             data={filteredChats}
             keyExtractor={item => item._id}
@@ -250,7 +294,11 @@ const ChatListScreen: React.FC = () => {
         </View>
       )}
       <View style={styles.bottomNavigation}>
-        <BottomNavigation items={items} />
+        <BottomNavigation
+          handleShowUsertype={handleShowUsertype}
+          showType={showType}
+          setShowType={setShowType}
+        />
       </View>
     </SafeAreaView>
   );
@@ -312,16 +360,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    // borderBottomColor:'grey',
-    // borderBottomWidth:0.4,
-    // backgroundColor: '#FFFFFF',
-    // borderRadius: 8,
-    // marginBottom: 12,
-    // shadowColor: '#000',
-    // shadowOffset: {width: 0, height: 2},
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
-    // elevation: 2,
   },
   profileCircle: {
     width: 48,
@@ -404,7 +442,6 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   bottomNavigation: {
-    // position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
