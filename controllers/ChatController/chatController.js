@@ -1,5 +1,6 @@
 const Admin = require("../../models/AdminModel/adminModel");
 const NewChat = require("../../models/NewChatModel/newChatModel");
+const Message = require("../../models/MessageModel/messageModel");
 const Student = require("../../models/StudentModel/studentModel");
 const Tutor = require("../../models/TutorModel/tutorModel");
 const { createChatId } = require("../../misc/misc");
@@ -379,7 +380,7 @@ exports.removeUserFromGroupChat = async (req, res) => {
   }
 };
 
-exports.deleteChat = async (req, res) => {
+exports.deleteGroupChat = async (req, res) => {
   const { chatId } = req.body;
 
   try {
