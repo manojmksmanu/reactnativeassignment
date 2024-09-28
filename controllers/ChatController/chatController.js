@@ -211,7 +211,23 @@ function createChatIdByDateTime() {
 exports.createGroupChat = async (req, res) => {
   const { users, groupName } = req.body;
   console.log(users, groupName);
+
+  // Check for minimum users requirement
+  if (!users || users.length < 2) {
+    return res.status(400).json({
+      message: "Minimum of 2 users are required to create a group chat",
+    });
+  }
+
   try {
+    // Check if group name already exists
+    const existingGroupChat = await NewChat.findOne({ groupName });
+    if (existingGroupChat) {
+      return res.status(400).json({
+        message: "Group name already exists. Please choose a different name.",
+      });
+    }
+
     const newGroupChat = new NewChat({
       chatId: createChatIdByDateTime(),
       chatType: "group",
@@ -227,25 +243,59 @@ exports.createGroupChat = async (req, res) => {
       })),
     });
 
-    console.log("hello world");
     await newGroupChat.save();
-    console.log(`Created group chat: ${groupName} `);
+    console.log(`Created group chat: ${groupName}`);
 
-    // Send a success response with the newly created group chat
     res.status(201).json({
       message: "Group chat created successfully",
       chat: newGroupChat,
     });
   } catch (error) {
     console.error("Error creating group chat:", error);
-
-    // Send an error response
     res.status(500).json({
       message: "Error creating group chat",
       error: error.message,
     });
   }
 };
+// exports.createGroupChat = async (req, res) => {
+//   const { users, groupName } = req.body;
+//   console.log(users, groupName);
+//   try {
+//     const newGroupChat = new NewChat({
+//       chatId: createChatIdByDateTime(),
+//       chatType: "group",
+//       groupName: groupName,
+//       users: users.map((user) => ({
+//         user: user._id,
+//         userType: user.userType,
+//         refModel: ["Admin", "Super-Admin", "Sub-Admin", "Co-Admin"].includes(
+//           user.userType
+//         )
+//           ? "Admin"
+//           : user.userType,
+//       })),
+//     });
+
+//     console.log("hello world");
+//     await newGroupChat.save();
+//     console.log(`Created group chat: ${groupName} `);
+
+//     // Send a success response with the newly created group chat
+//     res.status(201).json({
+//       message: "Group chat created successfully",
+//       chat: newGroupChat,
+//     });
+//   } catch (error) {
+//     console.error("Error creating group chat:", error);
+
+//     // Send an error response
+//     res.status(500).json({
+//       message: "Error creating group chat",
+//       error: error.message,
+//     });
+//   }
+// };
 exports.addUserToGroupChat = async (req, res) => {
   const { chatId, users } = req.body;
   console.log(users, chatId);
@@ -290,6 +340,7 @@ exports.addUserToGroupChat = async (req, res) => {
     });
   }
 };
+
 exports.removeUserFromGroupChat = async (req, res) => {
   const { chatId, userId } = req.body;
   try {
@@ -317,6 +368,7 @@ exports.removeUserFromGroupChat = async (req, res) => {
     });
   }
 };
+
 exports.deleteChat = async (req, res) => {
   const { chatId } = req.body;
 
