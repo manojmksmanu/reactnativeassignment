@@ -258,7 +258,7 @@ exports.createGroupChat = async (req, res) => {
     });
   }
 };
-// exports.createGroupChat = async (req, res) => {
+
 //   const { users, groupName } = req.body;
 //   console.log(users, groupName);
 //   try {
@@ -341,34 +341,6 @@ exports.addUserToGroupChat = async (req, res) => {
   }
 };
 
-// exports.removeUserFromGroupChat = async (req, res) => {
-//   const { chatId, userId } = req.body;
-//   try {
-//     const groupChat = await NewChat.findById(chatId);
-//     if (!groupChat) {
-//       return res.status(404).json({ message: "Group chat not found" });
-//     }
-//     const userIndex = groupChat.users.findIndex(
-//       (u) => u.user.toString() === userId
-//     );
-//     if (userIndex === -1) {
-//       return res.status(400).json({ message: "User not found in the group" });
-//     }
-//     groupChat.users.splice(userIndex, 1);
-//     await groupChat.save();
-//     res.status(200).json({
-//       message: "User removed from group chat successfully",
-//       chat: groupChat,
-//     });
-//   } catch (error) {
-//     console.error("Error removing user from group chat:", error);
-//     res.status(500).json({
-//       message: "Error removing user from group chat",
-//       error: error.message,
-//     });
-//   }
-// };
-
 exports.removeUserFromGroupChat = async (req, res) => {
   const { chatId, userId } = req.body;
   try {
@@ -379,11 +351,9 @@ exports.removeUserFromGroupChat = async (req, res) => {
 
     // Check if removing this user would leave the group empty
     if (groupChat.users.length <= 1) {
-      return res
-        .status(400)
-        .json({
-          message: "Group chat cannot be empty. At least one user must remain.",
-        });
+      return res.status(400).json({
+        message: "Group chat cannot be empty. At least one user must remain.",
+      });
     }
 
     const userIndex = groupChat.users.findIndex(
@@ -408,7 +378,6 @@ exports.removeUserFromGroupChat = async (req, res) => {
     });
   }
 };
-
 
 exports.deleteChat = async (req, res) => {
   const { chatId } = req.body;
