@@ -4,6 +4,7 @@ const chatSchema = new mongoose.Schema(
   {
     chatId: { type: String, unique: true, required: true },
     chatType: { type: String },
+    groupName: { type: String },
     users: [
       {
         user: { type: mongoose.Types.ObjectId, required: true },

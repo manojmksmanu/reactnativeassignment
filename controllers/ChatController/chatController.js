@@ -3,7 +3,8 @@ const NewChat = require("../../models/NewChatModel/newChatModel");
 const Student = require("../../models/StudentModel/studentModel");
 const Tutor = require("../../models/TutorModel/tutorModel");
 const { createChatId } = require("../../misc/misc");
-const {deleteChatsForDeletedUsers} = require("../../misc/deleteChat")
+const { deleteChatsForDeletedUsers } = require("../../misc/deleteChat");
+const crypto = require("crypto");
 const chatPermissions = {
   Admin: ["Super-Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],
   "Super-Admin": ["Admin", "Sub-Admin", "Co-Admin", "Student", "Tutor"],
@@ -106,6 +107,7 @@ exports.createChatsForAllUsers = async () => {
     console.error("Error creating chats:", error);
   }
 };
+
 exports.createChatsForLoggedUser = async () => {
   try {
     const users = await getAllUsersForChatCreation();
@@ -177,6 +179,7 @@ exports.createChatsForLoggedUser = async () => {
     console.error("Error creating chats:", error);
   }
 };
+
 exports.getChatsForUser = async (userId) => {
   try {
     const chats = await NewChat.find({ "users.user": userId })
@@ -196,5 +199,161 @@ exports.getChatsForUser = async (userId) => {
   } catch (error) {
     console.error("Error fetching chats for user:", error);
     throw error;
+  }
+};
+
+function createChatIdByDateTime() {
+  const dateTime = new Date().toISOString();
+  console.log(dateTime, "dateTime");
+  return crypto.createHash("md5").update(dateTime).digest("hex");
+}
+
+exports.createGroupChat = async (req, res) => {
+  const { users, groupName } = req.body;
+  console.log(users, groupName);
+  try {
+    const newGroupChat = new NewChat({
+      chatId: createChatIdByDateTime(),
+      chatType: "group",
+      groupName: groupName,
+      users: users.map((user) => ({
+        user: user._id,
+        userType: user.userType,
+        refModel: ["Admin", "Super-Admin", "Sub-Admin", "Co-Admin"].includes(
+          user.userType
+        )
+          ? "Admin"
+          : user.userType,
+      })),
+    });
+
+    console.log("hello world");
+    await newGroupChat.save();
+    console.log(`Created group chat: ${groupName} `);
+
+    // Send a success response with the newly created group chat
+    res.status(201).json({
+      message: "Group chat created successfully",
+      chat: newGroupChat,
+    });
+  } catch (error) {
+    console.error("Error creating group chat:", error);
+
+    // Send an error response
+    res.status(500).json({
+      message: "Error creating group chat",
+      error: error.message,
+    });
+  }
+};
+// exports.addUserToGroupChat = async (req, res) => {
+//   const { chatId, user } = req.body;
+
+//   try {
+//     const groupChat = await NewChat.findById(chatId);
+
+//     if (!groupChat) {
+//       return res.status(404).json({ message: "Group chat not found" });
+//     }
+
+//     const userExists = groupChat.users.some(
+//       (u) => u.user.toString() === user._id
+//     );
+//     if (userExists) {
+//       return res.status(400).json({ message: "User already in the group" });
+//     }
+
+//     groupChat.users.push({
+//       user: user._id,
+//       userType: user.userType,
+//       refModel: ["Admin", "Super-Admin", "Sub-Admin", "Co-Admin"].includes(
+//         user.userType
+//       )
+//         ? "Admin"
+//         : user.userType,
+//     });
+
+//     await groupChat.save();
+
+//     res.status(200).json({
+//       message: "User added to group chat successfully",
+//       chat: groupChat,
+//     });
+//   } catch (error) {
+//     console.error("Error adding user to group chat:", error);
+//     res.status(500).json({
+//       message: "Error adding user to group chat",
+//       error: error.message,
+//     });
+//   }
+// };
+
+exports.addUserToGroupChat = async (req, res) => {
+  const { chatId, users } = req.body;
+  try {
+    const groupChat = await NewChat.findById(chatId);
+
+    if (!groupChat) {
+      return res.status(404).json({ message: "Group chat not found" });
+    }
+    const alreadyInGroup = [];
+    for (const user of users) {
+      const userExists = groupChat.users.some(
+        (u) => u.user.toString() === user._id
+      );
+      if (userExists) {
+        alreadyInGroup.push(`User ${user._id} is already in the group`);
+      } else {
+        groupChat.users.push({
+          user: user._id,
+          userType: user.userType,
+          refModel: ["Admin", "Super-Admin", "Sub-Admin", "Co-Admin"].includes(
+            user.userType
+          )
+            ? "Admin"
+            : user.userType,
+        });
+      }
+    }
+    await groupChat.save();
+    res.status(200).json({
+      message: "Users added to group chat successfully",
+      alreadyInGroupMessages,
+      chat: groupChat,
+    });
+  } catch (error) {
+    console.error("Error adding user to group chat:", error);
+    res.status(500).json({
+      message: "Error adding user to group chat",
+      error: error.message,
+    });
+  }
+};
+
+exports.removeUserFromGroupChat = async (req, res) => {
+  const { chatId, userId } = req.body;
+  try {
+    const groupChat = await NewChat.findById(chatId);
+    if (!groupChat) {
+      return res.status(404).json({ message: "Group chat not found" });
+    }
+    const userIndex = groupChat.users.findIndex(
+      (u) => u.user.toString() === userId
+    );
+    if (userIndex === -1) {
+      return res.status(400).json({ message: "User not found in the group" });
+    }
+    groupChat.users.splice(userIndex, 1);
+    await groupChat.save();
+    res.status(200).json({
+      message: "User removed from group chat successfully",
+      chat: groupChat,
+    });
+  } catch (error) {
+    console.error("Error removing user from group chat:", error);
+    res.status(500).json({
+      message: "Error removing user from group chat",
+      error: error.message,
+    });
   }
 };

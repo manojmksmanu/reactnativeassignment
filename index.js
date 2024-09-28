@@ -7,6 +7,7 @@ const messageRoutes = require("./routes/MessageRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const countryRoutes = require("./routes/countryRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
+const userRoutes = require("./routes/userRoutes");
 const cors = require("cors");
 const { initSocket } = require("./socket/socket");
 const ChatNew = require("./models/NewChatModel/newChatModel");
@@ -40,6 +41,7 @@ app.use("/api", messageRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/country", countryRoutes);
 app.use("/api/subject", subjectRoutes);
+app.use("/api", userRoutes);
 console.log(process.env.OTP_SECRET_KEY);
 
 const getData = async () => {

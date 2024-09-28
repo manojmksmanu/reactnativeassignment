@@ -107,31 +107,6 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-// Get all users (only for admin)
-// Get users (admins get all, normal users get only admins, exclude current user)
-exports.getUsers = async (req, res) => {
-  try {
-    const user = req.user;
-
-    if (user.isAdmin) {
-      // Admins can see all users except themselves
-      const users = await User.find({ _id: { $ne: user._id } }).select(
-        "-password"
-      );
-      res.json(users);
-    } else {
-      // Normal users can only see admins except themselves
-      const admins = await User.find({
-        isAdmin: true,
-        _id: { $ne: user._id },
-      }).select("-password");
-      res.json(admins);
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
 exports.forwardMessages = async (req, res) => {
   const { chatId, messages, loggedUserId, loggedUserName } = req.body;
   try {
