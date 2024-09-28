@@ -1,6 +1,9 @@
 const {
   getChatsForUser,
   createGroupChat,
+  addUserToGroupChat,
+  removeUserFromGroupChat,
+  deleteChat,
 } = require("../controllers/ChatController/chatController");
 
 const express = require("express");
@@ -13,4 +16,8 @@ router.get("/:userId/chats", protect, async (req, res) => {
 });
 
 router.post("/creategroup", protect, createGroupChat);
+router.post("/adduserstogroup", protect, addUserToGroupChat);
+router.post("/removeuserfromgroup", protect, removeUserFromGroupChat);
+router.post("/deletegroupchat", protect, deleteChat);
+
 module.exports = router;

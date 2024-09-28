@@ -248,17 +248,15 @@ exports.createGroupChat = async (req, res) => {
 };
 // exports.addUserToGroupChat = async (req, res) => {
 //   const { chatId, user } = req.body;
-
+//   console.log(chatId, user);
 //   try {
-//     const groupChat = await NewChat.findById(chatId);
-
+//     const groupChat = await NewChat.findOne(chatId);
+//     console.log(grouChat, "groushdf");
 //     if (!groupChat) {
 //       return res.status(404).json({ message: "Group chat not found" });
 //     }
 
-//     const userExists = groupChat.users.some(
-//       (u) => u.user.toString() === user._id
-//     );
+//     const userExists = groupChat.users.some((u) => u.user._id === user._id);
 //     if (userExists) {
 //       return res.status(400).json({ message: "User already in the group" });
 //     }
@@ -290,19 +288,22 @@ exports.createGroupChat = async (req, res) => {
 
 exports.addUserToGroupChat = async (req, res) => {
   const { chatId, users } = req.body;
+  console.log(users, chatId);
   try {
     const groupChat = await NewChat.findById(chatId);
 
     if (!groupChat) {
       return res.status(404).json({ message: "Group chat not found" });
     }
+
     const alreadyInGroup = [];
     for (const user of users) {
       const userExists = groupChat.users.some(
-        (u) => u.user.toString() === user._id
+        (u) => u.user.toString() === user._id.toString()
       );
       if (userExists) {
         alreadyInGroup.push(`User ${user._id} is already in the group`);
+        return res.status(404).json({ message: "User is already in group" });
       } else {
         groupChat.users.push({
           user: user._id,
@@ -318,7 +319,7 @@ exports.addUserToGroupChat = async (req, res) => {
     await groupChat.save();
     res.status(200).json({
       message: "Users added to group chat successfully",
-      alreadyInGroupMessages,
+      alreadyInGroup,
       chat: groupChat,
     });
   } catch (error) {
@@ -353,6 +354,27 @@ exports.removeUserFromGroupChat = async (req, res) => {
     console.error("Error removing user from group chat:", error);
     res.status(500).json({
       message: "Error removing user from group chat",
+      error: error.message,
+    });
+  }
+};
+exports.deleteChat = async (req, res) => {
+  const { chatId } = req.body;
+
+  try {
+    const groupChat = await NewChat.findById(chatId);
+    if (!groupChat) {
+      return res.status(404).json({ message: "Group chat not found" });
+    }
+    await NewChat.deleteOne({ _id: chatId });
+    await Message.deleteMany({ chatId: chatId });
+    res.status(200).json({
+      message: "Chat deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+    res.status(500).json({
+      message: "Error deleting chat",
       error: error.message,
     });
   }
