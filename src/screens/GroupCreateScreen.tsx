@@ -308,30 +308,36 @@ const GroupCreateScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       )}
-      {selectedUsers.length > 1 && showNextStep && (
-        <View style={{display: 'flex', justifyContent: 'center'}}>
-          {groupName && groupName?.length > 1 && (
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#187afa',
-                borderRadius: 10,
-                paddingHorizontal: 20,
-                marginHorizontal: 15,
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 20,
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  marginVertical: 10,
-                }}>
-                Create Group
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+      {showNextStep && groupName && groupName?.length < 5 && (
+        <Text>Enter Atleast 5 Character For The Group Name</Text>
       )}
+      {selectedUsers.length > 1 &&
+        groupName &&
+        groupName?.length >= 5 &&
+        showNextStep && (
+          <View style={{display: 'flex', justifyContent: 'center'}}>
+            {groupName && groupName?.length >= 5 && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#187afa',
+                  borderRadius: 10,
+                  paddingHorizontal: 20,
+                  marginHorizontal: 15,
+                }}>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 20,
+                    fontWeight: '700',
+                    textAlign: 'center',
+                    marginVertical: 10,
+                  }}>
+                  Create Group
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       {error && <Text>Error: {error}</Text>}
     </View>
   );
