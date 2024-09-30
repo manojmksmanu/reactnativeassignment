@@ -3,7 +3,6 @@ import {createStackNavigator} from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ChatListScreen from '../screens/ChatListScreen';
-import ChatWindow from '../screens/ChatWindow';
 import ForgotPassword from '../screens/ForgorPassword';
 import ForwardChatScreen from '../screens/ForwardChatScreen';
 
@@ -12,6 +11,7 @@ import {useAuth} from '../context/userContext';
 import {View, ActivityIndicator, Animated, Text, Easing} from 'react-native';
 import ProfileScreen from '../screens/ProfileScreen';
 import DeleteAccount from '../screens/DeletAccountScreen';
+import GroupCreateScreen from '../screens/GroupCreateScreen';
 // import ImageDisplayScreen from '../screens/ImageDisplayScreen';
 
 const Stack = createStackNavigator();
@@ -79,8 +79,7 @@ const AppNavigator: React.FC = () => {
             },
           };
         },
-      }}
-      >
+      }}>
       {!loggedUser ? (
         <>
           <Stack.Screen
@@ -111,15 +110,7 @@ const AppNavigator: React.FC = () => {
             component={ForwardChatScreen}
           />
           <Stack.Screen name="ChatWindow2" component={ChatWindow2} />
-          {/* <Stack.Screen
-            name="ImageDisplay"
-            component={ImageDisplayScreen}
-          /> */}
-          <Stack.Screen
-            name="ChatWindow"
-            options={{title: 'Chat'}}
-            component={ChatWindow}
-          />
+          <Stack.Screen name="GroupCreate" component={GroupCreateScreen} />
         </>
       )}
     </Stack.Navigator>

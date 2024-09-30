@@ -50,6 +50,7 @@ type RootStackParamList = {
   Login: undefined;
   Profile: undefined;
   ChatWindow2: {chatId: string};
+  GroupCreate: undefined;
 };
 interface User {
   _id: string;
@@ -79,10 +80,10 @@ const ChatListScreen: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [filteredChats, setFilteredChats] = useState<Chat[] | null>(null);
   const [showType, setShowType] = useState<string>('Home');
+ 
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
 
-  console.log(showType, 'hdf');
   // -----filter chats by sender name ---
   useEffect(() => {
     setShowType('Home');
@@ -106,8 +107,6 @@ const ChatListScreen: React.FC = () => {
   }, [searchText, chats, loggedUser]);
 
   const handleShowUsertype = async (itemType: string) => {
-    console.log(itemType);
-
     if (itemType === 'Home') {
       setFilteredChats(chats);
     }
@@ -120,17 +119,17 @@ const ChatListScreen: React.FC = () => {
       const updateChatsByChatType = chats?.filter((chat: any) => {
         return chat.chatType === 'one-to-one';
       });
-
       const updateChats = updateChatsByChatType?.filter((chat: any) => {
         if (loggedUser) {
           const sender = getSender(loggedUser, chat.users);
           if (itemType === 'Admins') {
             return (
-              (sender && sender.user.userType === 'Admin') ||
-              sender.user.userType === 'Super-Admin' ||
-              sender.user.userType === 'Co-Admin' ||
-              sender.user.userType === 'Sub-Admin' ||
-              sender.user.userType === 'Admin'
+              sender &&
+              (sender.user.userType === 'Admin' ||
+                sender.user.userType === 'Super-Admin' ||
+                sender.user.userType === 'Co-Admin' ||
+                sender.user.userType === 'Sub-Admin' ||
+                sender.user.userType === 'Admin')
             );
           }
           if (itemType === 'Tutor') {
@@ -196,6 +195,10 @@ const ChatListScreen: React.FC = () => {
     [navigation, setSelectedChat],
   );
 
+  const clickCreateGroup = () => {
+    navigation.navigate('GroupCreate');
+  };
+
   const getUserFirstLetter = (userType: any) => {
     return userType ? userType.charAt(0).toUpperCase() : '';
   };
@@ -255,7 +258,7 @@ const ChatListScreen: React.FC = () => {
           color="#007bff"
           style={styles.loadingIndicator}
         />
-      ) : (
+      ) : (      
         <View style={styles.content}>
           <View style={styles.searchContainer}>
             <Image
@@ -270,10 +273,23 @@ const ChatListScreen: React.FC = () => {
               placeholderTextColor="#888"
               autoCapitalize="none"
             />
+            <TouchableOpacity
+              style={{position: 'absolute', right: 10, top: 22}}
+              onPress={() => setSearchText('')}>
+              <Image
+                style={{
+                  width: 20,
+                  height: 20,
+                  opacity: 0.5,
+                }}
+                source={require('../assets/remove.png')}
+              />
+            </TouchableOpacity>
           </View>
           {showType === 'Group' && (
             <View>
               <TouchableOpacity
+                onPress={clickCreateGroup}
                 style={{
                   backgroundColor: '#187afa',
                   marginHorizontal: 18,

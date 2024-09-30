@@ -18,7 +18,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     await handleShowUsertype(item);
   };
   const {loggedUser} = useAuth();
-  console.log(loggedUser);
   return (
     <View style={styles.bottomNavigation}>
       <TouchableOpacity
@@ -58,51 +57,51 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
         </Text>
       </TouchableOpacity>
 
-      {loggedUser?.userType === 'Super-Admin' ||
+      {(loggedUser?.userType === 'Super-Admin' ||
         loggedUser?.userType === 'Admin' ||
-        (loggedUser?.userType === 'Co-Admin' && (
-          <TouchableOpacity
+        loggedUser?.userType === 'Co-Admin') && (
+        <TouchableOpacity
+          style={[
+            styles.navButton,
+            showType === 'Tutor' ? styles.activeButton : null,
+          ]}
+          onPress={() => handleButtonPress('Tutor')}>
+          <Image
+            source={require('../../assets/tutor.png')}
+            style={{width: 25, height: 25}}
+          />
+          <Text
             style={[
-              styles.navButton,
-              showType === 'Tutor' ? styles.activeButton : null,
-            ]}
-            onPress={() => handleButtonPress('Tutor')}>
-            <Image
-              source={require('../../assets/tutor.png')}
-              style={{width: 25, height: 25}}
-            />
-            <Text
-              style={[
-                styles.label,
-                {color: showType === 'Tutor' ? '#007bff' : '#888'},
-              ]}>
-              Tutor
-            </Text>
-          </TouchableOpacity>
-        ))}
+              styles.label,
+              {color: showType === 'Tutor' ? '#007bff' : '#888'},
+            ]}>
+            Tutor
+          </Text>
+        </TouchableOpacity>
+      )}
 
-      {loggedUser?.userType === 'Super-Admin' ||
+      {(loggedUser?.userType === 'Super-Admin' ||
         loggedUser?.userType === 'Admin' ||
-        (loggedUser?.userType === 'Sub-Admin' && (
-          <TouchableOpacity
+        loggedUser?.userType === 'Sub-Admin') && (
+        <TouchableOpacity
+          style={[
+            styles.navButton,
+            showType === 'Student' ? styles.activeButton : null,
+          ]}
+          onPress={() => handleButtonPress('Student')}>
+          <Image
+            source={require('../../assets/students.png')}
+            style={{width: 25, height: 25}}
+          />
+          <Text
             style={[
-              styles.navButton,
-              showType === 'Student' ? styles.activeButton : null,
-            ]}
-            onPress={() => handleButtonPress('Student')}>
-            <Image
-              source={require('../../assets/students.png')}
-              style={{width: 25, height: 25}}
-            />
-            <Text
-              style={[
-                styles.label,
-                {color: showType === 'Student' ? '#007bff' : '#888'},
-              ]}>
-              Student
-            </Text>
-          </TouchableOpacity>
-        ))}
+              styles.label,
+              {color: showType === 'Student' ? '#007bff' : '#888'},
+            ]}>
+            Student
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={[
