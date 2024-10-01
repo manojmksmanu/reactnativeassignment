@@ -28,6 +28,7 @@ import Pdf from 'react-native-pdf'; // Add this import for PDF viewing
 import RNFS from 'react-native-fs';
 import {WebView} from 'react-native-webview';
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import {useAuth} from '../../context/userContext';
 // import DocumentViewer from 'react-native-document-viewer';
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -46,12 +47,15 @@ const RenderMessage = ({
   const {fileType, fileUrl, message} = item;
   const translateX = useSharedValue(0);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null); // Allow null or string
-  const [selectedFileType, setSelectedFileType] = useState<string | null>(null); // Allow null or string
+  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+  const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
-  // Gesture handler for pan gestures
+  const {selectedChat} = useAuth() as {
+    selectedChat: any;
+  };
+
   const onGestureEvent = (event: PanGestureHandlerGestureEvent) => {
     if (isSender) {
       // Sender's message:
@@ -484,6 +488,22 @@ const RenderMessage = ({
             isSender ? styles.senderContainer : styles.receiverContainer,
             animatedStyle,
           ]}>
+          {selectedChat?.chatType === 'group' && !isSender && (
+            <Text
+              style={{
+                color: 'grey',
+                backgroundColor: 'white',
+                position: 'absolute',
+                fontSize: 10,
+                padding: 2,
+                top: -7,
+                paddingHorizontal: 4,
+                borderRadius: 10,
+              }}>
+              {item.senderName}
+            </Text>
+          )}
+
           {item.replyingMessage && renderRepyingMessage(item.replyingMessage)}
           <View style={styles.message}>
             {renderFileContent(fileType, fileUrl, message, isSender)}

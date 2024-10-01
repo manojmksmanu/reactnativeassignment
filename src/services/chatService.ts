@@ -1,13 +1,14 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Alert} from 'react-native';
 
 interface User {
   _id: string;
   name: string;
   userType: any;
 }
-// const API_URL = 'https://reactnativeassignment.onrender.com/api';
-const API_URL = 'http://10.0.2.2:5000/api';
+const API_URL = 'https://reactnativeassignment.onrender.com/api';
+// const API_URL = 'http://10.0.2.2:5000/api';
 
 export const getAllChats = async (userId: string): Promise<any> => {
   const token = await AsyncStorage.getItem('token');
@@ -38,6 +39,33 @@ export const getAllUsers = async (currentUserType: string) => {
 
     const users = response.data;
     return users;
+  } catch (error: any) {
+    console.error('Error fetching users for chat:', error);
+    const errorMessage =
+      error.response?.data?.error || 'Failed to fetch users.';
+    throw new Error(errorMessage);
+  }
+};
+
+export const createGroupChat = async (users: any, groupName: string) => {
+  const token = await AsyncStorage.getItem('token');
+  if (!token) {
+    console.error('No token found');
+    return;
+  }
+  try {
+    const response = await axios.post(
+      `${API_URL}/chat/creategroup`,
+      {
+        users,
+        groupName,
+      },
+      {
+        headers: {Authorization: `Bearer ${token}`},
+      },
+    );
+    const data = response.data;
+    return data;
   } catch (error: any) {
     console.error('Error fetching users for chat:', error);
     const errorMessage =

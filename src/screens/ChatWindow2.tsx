@@ -193,7 +193,7 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
           onPress={() => navigation.goBack()}
           style={styles.backButton}>
           <Image
-            source={require('../assets/back.png')} // Your custom back icon image
+            source={require('../assets/back.png')}
             style={styles.backIcon}
           />
         </TouchableOpacity>
@@ -201,35 +201,53 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
       headerTitle: () => (
         <View style={styles.headerTitleContainer}>
           <View style={styles.profileCircle}>
-            {loggedUser ? (
-              <Text style={styles.profileText}>
-                {getUserFirstAlphabet(
-                  getSendedType(loggedUser, selectedChat.users),
+            {loggedUser && (
+              <>
+                {selectedChat.chatType === 'one-to-one' && (
+                  <Text style={styles.profileText}>
+                    {getUserFirstAlphabet(
+                      getSendedType(loggedUser, selectedChat.users),
+                    )}
+                  </Text>
                 )}
-              </Text>
-            ) : null}
-            <View style={styles.statusContainer}>
-              {loggedUser &&
-              getSenderStatus(
-                loggedUser,
-                selectedChat.users,
-                onlineUsers || [],
-              ) === 'online' ? (
-                <View style={styles.statusDotgreen}></View>
-              ) : (
-                <View style={styles.statusDotgrey}></View>
-              )}
-            </View>
+                {selectedChat.chatType === 'group' && (
+                  <Text style={styles.profileText}>
+                    {getUserFirstAlphabet(selectedChat.groupName)}
+                  </Text>
+                )}
+              </>
+            )}
+            {selectedChat.chatType === 'one-to-one' && (
+              <View style={styles.statusContainer}>
+                {loggedUser &&
+                getSenderStatus(
+                  loggedUser,
+                  selectedChat.users,
+                  onlineUsers || [],
+                ) === 'online' ? (
+                  <View style={styles.statusDotgreen}></View>
+                ) : (
+                  <View style={styles.statusDotgrey}></View>
+                )}
+              </View>
+            )}
           </View>
 
           <View style={styles.textContainer}>
-            <Text style={styles.usernameText}>
-              {loggedUser && getSenderName(loggedUser, selectedChat.users)}
-            </Text>
-            <Text style={styles.statusText}>
-              {loggedUser &&
-                getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
-            </Text>
+            {selectedChat.chatType === 'one-to-one' ? (
+              <Text style={styles.usernameText}>
+                {loggedUser && getSenderName(loggedUser, selectedChat.users)}
+              </Text>
+            ) : (
+              <Text style={styles.usernameText}>{selectedChat.groupName}</Text>
+            )}
+
+            {selectedChat.chatType === 'one-to-one' && (
+              <Text style={styles.statusText}>
+                {loggedUser &&
+                  getSenderStatus(loggedUser, selectedChat.users, onlineUsers)}
+              </Text>
+            )}
           </View>
         </View>
       ),

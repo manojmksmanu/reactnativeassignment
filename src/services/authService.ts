@@ -9,8 +9,8 @@ interface User {
   // Add other properties as needed
 }
 
-// const API_URL = 'https://reactnativeassignment.onrender.com';
-const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
 
 export const signup = async (
   name: string,

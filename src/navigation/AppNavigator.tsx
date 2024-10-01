@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
@@ -12,14 +12,14 @@ import {View, ActivityIndicator, Animated, Text, Easing} from 'react-native';
 import ProfileScreen from '../screens/ProfileScreen';
 import DeleteAccount from '../screens/DeletAccountScreen';
 import GroupCreateScreen from '../screens/GroupCreateScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // import ImageDisplayScreen from '../screens/ImageDisplayScreen';
 
 const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
   const {loggedUser, loadingLoggedUser} = useAuth();
-
-  //  await AsyncStorage.getItem('token', token);
+  console.log(loadingLoggedUser);
   if (loadingLoggedUser) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

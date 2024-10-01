@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from 'react-native';
-import {getAllUsers} from '../services/chatService';
+import {createGroupChat, getAllUsers} from '../services/chatService';
 import {useAuth} from '../context/userContext';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {useNavigation} from '@react-navigation/native'; // Import the useNavigation hook
 
-// Define the structure of a user object
 interface User {
   id: string;
   name: string;
@@ -22,13 +23,15 @@ const GroupCreateScreen: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [creteGroupLoading, setCreateGroupLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const {loggedUser} = useAuth();
   const [filteredUsers, setFilteredUsers] = useState<any[] | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [showNextStep, setShowNextStep] = useState<boolean>(false);
-  const [groupName, setGroupName] = useState<string | undefined>();
-
+  const [groupName, setGroupName] = useState<string>(String);
+  const {FetchChatsAgain} = useAuth();
+  const navigation = useNavigation(); // Initialize navigation
   useEffect(() => {
     const searchUsers = () => {
       if (searchText.trim() === '') {
@@ -42,6 +45,21 @@ const GroupCreateScreen: React.FC = () => {
     };
     searchUsers();
   }, [searchText]);
+
+  const handleCreateGroup = async () => {
+    const allUsersForGroup = [...selectedUsers, loggedUser];
+    setCreateGroupLoading(true);
+    setError(null);
+    try {
+      const data = await createGroupChat(allUsersForGroup, groupName);
+      FetchChatsAgain();
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setCreateGroupLoading(false);
+      navigation.goBack();
+    }
+  };
 
   const handleGetUsers = async () => {
     setLoading(true);
@@ -198,7 +216,16 @@ const GroupCreateScreen: React.FC = () => {
       )}
 
       {loading ? (
-        <ActivityIndicator size="large" />
+        <View
+          style={{
+            height: '80%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <ActivityIndicator size="large" />
+          <Text style={{color: 'grey'}}>Loading Wait.....</Text>
+          <Text style={{color: 'grey'}}>It depends on your internet speed</Text>
+        </View>
       ) : (
         !showNextStep && (
           <View style={{flex: 1}}>
@@ -309,15 +336,18 @@ const GroupCreateScreen: React.FC = () => {
         </View>
       )}
       {showNextStep && groupName && groupName?.length < 5 && (
-        <Text>Enter Atleast 5 Character For The Group Name</Text>
+        <Text style={{textAlign: 'center'}}>
+          Enter Atleast 5 Character For The Group Name
+        </Text>
       )}
       {selectedUsers.length > 1 &&
         groupName &&
         groupName?.length >= 5 &&
         showNextStep && (
           <View style={{display: 'flex', justifyContent: 'center'}}>
-            {groupName && groupName?.length >= 5 && (
+            {!creteGroupLoading && groupName && groupName?.length >= 5 && (
               <TouchableOpacity
+                onPress={handleCreateGroup}
                 style={{
                   backgroundColor: '#187afa',
                   borderRadius: 10,
@@ -335,6 +365,11 @@ const GroupCreateScreen: React.FC = () => {
                   Create Group
                 </Text>
               </TouchableOpacity>
+            )}
+            {creteGroupLoading && (
+              <View>
+                <ActivityIndicator size="large" />
+              </View>
             )}
           </View>
         )}

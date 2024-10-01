@@ -21,6 +21,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {format, isToday, isYesterday, parseISO} from 'date-fns';
 import {TextInput} from 'react-native-gesture-handler';
 import BottomNavigation from '../components/listScreen/BottomNavigation';
+
 const formatMessageDate = (dateString: any) => {
   if (!dateString) {
     return '';
@@ -80,7 +81,7 @@ const ChatListScreen: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [filteredChats, setFilteredChats] = useState<Chat[] | null>(null);
   const [showType, setShowType] = useState<string>('Home');
- 
+
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ChatList'>>();
 
@@ -203,52 +204,82 @@ const ChatListScreen: React.FC = () => {
     return userType ? userType.charAt(0).toUpperCase() : '';
   };
 
-  const renderItem = ({item}: {item: any}) => (
-    <TouchableOpacity
-      onPress={() => chatClicked(item)}
-      style={styles.userContainer}>
-      <View style={styles.profileCircle}>
-        {loggedUser ? (
-          <Text style={styles.profileText}>
-            {getUserFirstLetter(getSenderName(loggedUser, item.users))}
-          </Text>
-        ) : null}
-        <View style={styles.statusContainer}>
-          {loggedUser &&
-          getSenderStatus(loggedUser, item.users, onlineUsers || []) ===
-            'online' ? (
-            <View style={styles.statusDotgreen}></View>
+  const renderItem = ({item}: {item: any}) =>
+    item.chatType === 'one-to-one' ? (
+      <TouchableOpacity
+        onPress={() => chatClicked(item)}
+        style={styles.userContainer}>
+        <View style={styles.profileCircle}>
+          {loggedUser ? (
+            <Text style={styles.profileText}>
+              {getUserFirstLetter(getSenderName(loggedUser, item.users))}
+            </Text>
+          ) : null}
+          <View style={styles.statusContainer}>
+            {loggedUser &&
+            getSenderStatus(loggedUser, item.users, onlineUsers || []) ===
+              'online' ? (
+              <View style={styles.statusDotgreen}></View>
+            ) : (
+              <View style={styles.statusDotgrey}></View>
+            )}
+          </View>
+        </View>
+        <View style={styles.userInfo}>
+          <View style={styles.userHeader}>
+            <Text style={styles.username}>
+              {loggedUser ? getSenderName(loggedUser, item.users) : 'Unknown'}
+            </Text>
+            {loggedUser ? (
+              <Text style={styles.userTypeText}>
+                {getSendedType(loggedUser, item.users)}
+              </Text>
+            ) : null}
+          </View>
+          {loggedUser && item.latestMessage ? (
+            <View style={styles.userHeader}>
+              <Text style={styles.message}>
+                {loggedUser ? item.latestMessage?.message : ''}
+              </Text>
+              <Text style={styles.time}>
+                {loggedUser && formatMessageDate(item.latestMessage?.createdAt)}
+              </Text>
+            </View>
           ) : (
-            <View style={styles.statusDotgrey}></View>
+            ''
           )}
         </View>
-      </View>
-      <View style={styles.userInfo}>
-        <View style={styles.userHeader}>
-          <Text style={styles.username}>
-            {loggedUser ? getSenderName(loggedUser, item.users) : 'Unknown'}
-          </Text>
+      </TouchableOpacity>
+    ) : (
+      <TouchableOpacity
+        onPress={() => chatClicked(item)}
+        style={styles.userContainer}>
+        <View style={styles.profileCircle}>
           {loggedUser ? (
-            <Text style={styles.userTypeText}>
-              {getSendedType(loggedUser, item.users)}
+            <Text style={styles.profileText}>
+              {getUserFirstLetter(item.groupName)}
             </Text>
           ) : null}
         </View>
-        {loggedUser && item.latestMessage ? (
+        <View style={styles.userInfo}>
           <View style={styles.userHeader}>
-            <Text style={styles.message}>
-              {loggedUser ? item.latestMessage?.message : ''}
-            </Text>
-            <Text style={styles.time}>
-              {loggedUser && formatMessageDate(item.latestMessage?.createdAt)}
-            </Text>
+            <Text style={styles.username}>{item.groupName}</Text>
           </View>
-        ) : (
-          ''
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+          {loggedUser && item.latestMessage ? (
+            <View style={styles.userHeader}>
+              <Text style={styles.message}>
+                {loggedUser ? item.latestMessage?.message : ''}
+              </Text>
+              <Text style={styles.time}>
+                {loggedUser && formatMessageDate(item.latestMessage?.createdAt)}
+              </Text>
+            </View>
+          ) : (
+            ''
+          )}
+        </View>
+      </TouchableOpacity>
+    );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -258,7 +289,7 @@ const ChatListScreen: React.FC = () => {
           color="#007bff"
           style={styles.loadingIndicator}
         />
-      ) : (      
+      ) : (
         <View style={styles.content}>
           <View style={styles.searchContainer}>
             <Image

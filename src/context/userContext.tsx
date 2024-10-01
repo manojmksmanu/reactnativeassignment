@@ -63,13 +63,11 @@ type RootStackParamList = {
   ChatWindow: {chatId: string};
   Login: undefined;
 };
-const API_URL = 'http://10.0.2.2:5000';
-// const API_URL = 'https://reactnativeassignment.onrender.com';
+// const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://reactnativeassignment.onrender.com';
 
-// Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create a provider component
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [loggedUserId, setLoggedUserId] = useState<string | null>(null);
   const [loggedUser, setLoggedUser] = useState<User | null>(null);
@@ -92,10 +90,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         const storedUserInfo = await AsyncStorage.getItem('userInfo');
         if (storedUserInfo) {
           const user = JSON.parse(storedUserInfo);
-          setLoggedUser(user);
-        } else {
-          const user: any = await loggeduser();
-          await AsyncStorage.setItem('userInfo', JSON.stringify(user));
           setLoggedUser(user);
         }
       } catch (error) {
