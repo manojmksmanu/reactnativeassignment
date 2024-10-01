@@ -210,10 +210,9 @@ function createChatIdByDateTime() {
 }
 
 exports.createGroupChat = async (req, res) => {
+  console.log('hitcreategroup')
   const { users, groupName } = req.body;
-  console.log(users, groupName);
-
-  // Check for minimum users requirement
+  console.log(users,'users',groupName)
   if (!users || users.length < 2) {
     return res.status(400).json({
       message: "Minimum of 2 users are required to create a group chat",
@@ -222,12 +221,12 @@ exports.createGroupChat = async (req, res) => {
 
   try {
     // Check if group name already exists
-    const existingGroupChat = await NewChat.findOne({ groupName });
-    if (existingGroupChat) {
-      return res.status(400).json({
-        message: "Group name already exists. Please choose a different name.",
-      });
-    }
+    // const existingGroupChat = await NewChat.findOne({ groupName });
+    // if (existingGroupChat) {
+    //   return res.status(400).json({
+    //     message: "Group name already exists. Please choose a different name.",
+    //   });
+    // }
 
     const newGroupChat = new NewChat({
       chatId: createChatIdByDateTime(),

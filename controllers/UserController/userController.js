@@ -42,30 +42,23 @@ const getAllUsersForChatCreation = async () => {
 
 // Function to get the list of users allowed to chat with the current user type
 exports.getUsersForChat = async (req, res) => {
+  console.log("hello");
   try {
-    console.log("hit it");
-    console.log(req.body);
-
-    const { currentUserType } = req.body;
-
+    console.log("hitapi");
+    const { currentUserType } = req.query;
     if (!currentUserType) {
       return res.status(400).json({ error: "currentUserType is required" });
     }
-
     const allUsers = await getAllUsersForChatCreation();
-
     const allowedUserTypes = chatPermissions[currentUserType];
-
     if (!allowedUserTypes) {
       return res
         .status(400)
         .json({ error: `Invalid user type: ${currentUserType}` });
     }
-
     const usersAllowedToChat = allUsers.filter((user) =>
       allowedUserTypes.includes(user.userType)
     );
-
     return res.json(usersAllowedToChat);
   } catch (error) {
     console.error("Error getting users for chat:", error);

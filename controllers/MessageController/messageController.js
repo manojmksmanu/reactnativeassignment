@@ -99,7 +99,6 @@ exports.getMessages = async (req, res) => {
     const messages = await Message.find({ chatId: chatId })
       .populate("sender", "name pic email")
       .populate("chatId");
-    console.log(messages, "messages");
     res.json(messages);
   } catch (error) {
     res.status(400);
