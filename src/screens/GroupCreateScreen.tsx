@@ -11,7 +11,8 @@ import {
 import {createGroupChat, getAllUsers} from '../services/chatService';
 import {useAuth} from '../context/userContext';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native'; // Import the useNavigation hook
+import {useNavigation} from '@react-navigation/native';
+import {getUserFirstLetter} from '../misc/misc';
 
 interface User {
   id: string;
@@ -31,7 +32,8 @@ const GroupCreateScreen: React.FC = () => {
   const [showNextStep, setShowNextStep] = useState<boolean>(false);
   const [groupName, setGroupName] = useState<string>(String);
   const {FetchChatsAgain} = useAuth();
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
+
   useEffect(() => {
     const searchUsers = () => {
       if (searchText.trim() === '') {
@@ -47,7 +49,7 @@ const GroupCreateScreen: React.FC = () => {
   }, [searchText]);
 
   const handleCreateGroup = async () => {
-    const allUsersForGroup = [...selectedUsers, loggedUser];
+    const allUsersForGroup = [loggedUser, ...selectedUsers];
     setCreateGroupLoading(true);
     setError(null);
     try {
@@ -88,10 +90,6 @@ const GroupCreateScreen: React.FC = () => {
   useEffect(() => {
     handleGetUsers();
   }, []);
-
-  const getUserFirstLetter = (userName: any) => {
-    return userName ? userName.charAt(0).toUpperCase() : '';
-  };
 
   const filterAndShowTick = (item: any) => {
     return selectedUsers.some(user => user._id === item._id);
@@ -315,6 +313,7 @@ const GroupCreateScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       )}
+
       {selectedUsers.length > 1 && showNextStep && (
         <View style={{position: 'absolute', zIndex: 20, right: 20, bottom: 20}}>
           <TouchableOpacity
@@ -335,11 +334,13 @@ const GroupCreateScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       )}
+
       {showNextStep && groupName && groupName?.length < 5 && (
         <Text style={{textAlign: 'center'}}>
           Enter Atleast 5 Character For The Group Name
         </Text>
       )}
+
       {selectedUsers.length > 1 &&
         groupName &&
         groupName?.length >= 5 &&

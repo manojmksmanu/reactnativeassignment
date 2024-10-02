@@ -276,6 +276,9 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
 
   const handleMoreOptions = () => {
     console.log('More options icon pressed');
+    if (selectedChat.chatType === 'group') {
+      navigation.navigate('GroupInfo');
+    }
   };
 
   const fetchMessages = async () => {
@@ -308,10 +311,8 @@ const ChatWindow2: React.FC<{route: any; navigation: any}> = ({
   }, [messages]);
 
   useEffect(() => {
-    console.log(1);
     const renderMessagesonOpnen = async () => {
       await fetchMessages();
-      console.log(2);
       loadMessages();
     };
     renderMessagesonOpnen();
@@ -636,14 +637,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000', // Shadow color
+    shadowColor: '#000',
     shadowOffset: {
-      width: 0, // Horizontal offset
-      height: 1, // Vertical offset
+      width: 0,
+      height: 1,
     },
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 1, // Shadow blur radius
-    elevation: 1, // Android shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
   },
   image: {
     width: 20,

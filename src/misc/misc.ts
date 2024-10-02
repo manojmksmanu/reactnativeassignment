@@ -66,3 +66,7 @@ export const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
+export const getUserFirstLetter = (userName: any) => {
+  return userName ? userName.charAt(0).toUpperCase() : '';
+};

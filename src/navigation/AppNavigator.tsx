@@ -13,6 +13,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import DeleteAccount from '../screens/DeletAccountScreen';
 import GroupCreateScreen from '../screens/GroupCreateScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GroupInfoScreen from '../screens/GroupInfoScreen';
+import UserInfoScreen from '../screens/UserInfoScreen';
 // import ImageDisplayScreen from '../screens/ImageDisplayScreen';
 
 const Stack = createStackNavigator();
@@ -111,6 +113,8 @@ const AppNavigator: React.FC = () => {
           />
           <Stack.Screen name="ChatWindow2" component={ChatWindow2} />
           <Stack.Screen name="GroupCreate" component={GroupCreateScreen} />
+          <Stack.Screen name="GroupInfo" component={GroupInfoScreen} />
+          <Stack.Screen name="UserInfo" component={UserInfoScreen} />
         </>
       )}
     </Stack.Navigator>

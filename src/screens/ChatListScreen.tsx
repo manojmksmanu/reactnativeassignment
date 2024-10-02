@@ -268,7 +268,10 @@ const ChatListScreen: React.FC = () => {
           {loggedUser && item.latestMessage ? (
             <View style={styles.userHeader}>
               <Text style={styles.message}>
-                {loggedUser ? item.latestMessage?.message : ''}
+                {loggedUser
+                  ? item.latestMessage?.message.slice(0, 30) +
+                    (item.latestMessage?.message.length > 30 ? '...' : '')
+                  : ''}
               </Text>
               <Text style={styles.time}>
                 {loggedUser && formatMessageDate(item.latestMessage?.createdAt)}
