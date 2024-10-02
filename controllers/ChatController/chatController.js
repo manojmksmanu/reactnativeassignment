@@ -343,6 +343,7 @@ exports.addUserToGroupChat = async (req, res) => {
 
 exports.removeUserFromGroupChat = async (req, res) => {
   const { chatId, userId } = req.body;
+  console.log(chatId, userId);
   try {
     const groupChat = await NewChat.findById(chatId);
     if (!groupChat) {
@@ -360,12 +361,13 @@ exports.removeUserFromGroupChat = async (req, res) => {
       (u) => u.user.toString() === userId
     );
     if (userIndex === -1) {
+      console.log("User not found in the group");
       return res.status(400).json({ message: "User not found in the group" });
     }
 
     groupChat.users.splice(userIndex, 1);
     await groupChat.save();
-
+    await groupChat.populate("users.user");
     res.status(200).json({
       message: "User removed from group chat successfully",
       chat: groupChat,
