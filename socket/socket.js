@@ -17,10 +17,6 @@ function initSocket(server) {
   console.log("Socket.io initialized");
   io.on("connection", (socket) => {
     console.log(onlineUsers, "connection");
-    console.log("a user is connected to", socket.id);
-    // Initialize onlineUsers as an empty array
-
-    // Listen for 'userOnline' event
     socket.on("userOnline", (userId) => {
       if (!onlineUsers.some((user) => user.userId === userId)) {
         onlineUsers.push({ userId, socketId: socket.id });

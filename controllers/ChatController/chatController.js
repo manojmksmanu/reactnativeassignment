@@ -210,9 +210,9 @@ function createChatIdByDateTime() {
 }
 
 exports.createGroupChat = async (req, res) => {
-  console.log('hitcreategroup')
+  console.log("hitcreategroup");
   const { users, groupName } = req.body;
-  console.log(users,'users',groupName)
+  console.log(users, "users", groupName);
   if (!users || users.length < 2) {
     return res.status(400).json({
       message: "Minimum of 2 users are required to create a group chat",
@@ -396,6 +396,41 @@ exports.deleteGroupChat = async (req, res) => {
     console.error("Error deleting chat:", error);
     res.status(500).json({
       message: "Error deleting chat",
+      error: error.message,
+    });
+  }
+};
+exports.renameGroupChat = async (req, res) => {
+  console.log("hitRenameGroup");
+  const { _id, newGroupName } = req.body;
+
+  if (!_id || !newGroupName) {
+    return res.status(400).json({
+      message: "Chat ID and new group name are required",
+    });
+  }
+
+  try {
+    // Find the group chat by chatId
+    const groupChat = await NewChat.findOne({ _id });
+    if (!groupChat) {
+      return res.status(404).json({
+        message: "Group chat not found",
+      });
+    }
+
+    // Update the group name
+    groupChat.groupName = newGroupName;
+    await groupChat.save();
+
+    res.status(200).json({
+      message: "Group chat renamed successfully",
+      chat: groupChat,
+    });
+  } catch (error) {
+    console.error("Error renaming group chat:", error);
+    res.status(500).json({
+      message: "Error renaming group chat",
       error: error.message,
     });
   }

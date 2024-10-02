@@ -163,9 +163,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check password
     if (await user.matchPassword(password)) {
-      // await createChatsForLoggedUser();
       res.json({
         _id: user._id,
         name: user.name,

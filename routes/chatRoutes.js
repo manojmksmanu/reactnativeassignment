@@ -4,6 +4,7 @@ const {
   addUserToGroupChat,
   removeUserFromGroupChat,
   deleteGroupChat,
+  renameGroupChat,
 } = require("../controllers/ChatController/chatController");
 
 const express = require("express");
@@ -16,6 +17,7 @@ router.get("/:userId/chats", protect, async (req, res) => {
 });
 
 router.post("/creategroup", protect, createGroupChat);
+router.post("/grouprename", protect, renameGroupChat);
 router.post("/adduserstogroup", protect, addUserToGroupChat);
 router.post("/removeuserfromgroup", protect, removeUserFromGroupChat);
 router.post("/deletegroupchat", protect, deleteGroupChat);
