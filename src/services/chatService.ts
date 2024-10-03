@@ -123,3 +123,29 @@ export const addUserToGroupChat = async (chatId: any, users: any) => {
     throw new Error(errorMessage);
   }
 };
+
+export const renameGroupName = async (chatId: any, newGroupName: string) => {
+  console.log(chatId, newGroupName);
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const response = await axios.patch(
+      `${API_URL}/chat/grouprename`,
+      {
+        chatId,
+        newGroupName,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+        },
+      },
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error, 'errorrrr');
+    console.error(error, 'error');
+    const errorMessage = error.response?.data?.error || 'something went wrong';
+    throw new Error(errorMessage);
+  }
+};

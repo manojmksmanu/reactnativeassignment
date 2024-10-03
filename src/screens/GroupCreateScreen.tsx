@@ -114,7 +114,7 @@ const GroupCreateScreen: React.FC = () => {
               right: -2,
               bottom: -2,
             }}
-            source={require('../assets/check-lists.png')}
+            source={require('../assets/check.png')}
           />
         )}
       </View>

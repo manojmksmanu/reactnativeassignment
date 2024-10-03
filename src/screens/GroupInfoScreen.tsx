@@ -8,13 +8,16 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  Modal,
+  TextInput,
 } from 'react-native';
 import {useAuth} from '../context/userContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getUserFirstLetter} from '../misc/misc';
 import GroupInfoProfilePhoto from '../components/smallComponents/GroupInfoProfilePhoto';
 import Toast from 'react-native-toast-message';
-import {removeUserFromGroup} from '../services/chatService';
+import {removeUserFromGroup, renameGroupName} from '../services/chatService';
 
 const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
   route,
@@ -27,8 +30,9 @@ const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
       FetchChatsAgain: any;
       setSelectedChat: any;
     };
-  const [groupName, setGroupName] = useState(selectedChat.groupName);
-  const [renameGroup, setRenameGroup] = useState();
+  const [renameGroup, setRenameGroup] = useState('');
+  const [openRenameModal, setOpenRenameModal] = useState<boolean>(false);
+  const [renameLoading, setRenameLoading] = useState<boolean>(false);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState(null);
@@ -78,12 +82,36 @@ const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
     }
   };
 
-  const handleRenameGroup = () => {};
+  const handleRenameGroup = async () => {
+    setRenameLoading(true);
+    setError(null);
+    try {
+      const data = await renameGroupName(selectedChat._id, renameGroup);
+      FetchChatsAgain();
+      setSelectedChat(data.chat);
+      Toast.show({
+        type: 'success',
+        text2: `New name of group is ${data.chat.groupName}`,
+      });
+      setOpenRenameModal(false);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text2: `${error.message}`,
+      });
+      setError(error.message);
+    } finally {
+      FetchChatsAgain();
+      setRenameLoading(false);
+    }
+  };
 
   const handleAddUserToGroup = () => {
     navigation.navigate('AddUserToGroup');
   };
-
+  const handleModalClose = () => {
+    setOpenRenameModal(false);
+  };
   const renderItem = (item: any) => (
     <>
       {console.log(item.name)}
@@ -153,7 +181,7 @@ const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
               {selectedChat.groupName}
             </Text>
           )}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setOpenRenameModal(true)}>
             <Image
               style={{width: 30, height: 30}}
               source={require('../assets/edit.png')}
@@ -255,6 +283,73 @@ const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
           <Text style={{color: 'grey', fontSize: 18}}>Exit Group</Text>
         </View>
       </View>
+
+      {/* ----modal for groupRename processs */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={openRenameModal}
+        onRequestClose={handleModalClose} // Prevent closing modal manually
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            renameLoading !== true ? handleModalClose() : '';
+          }}>
+          <View style={styles.modalBackground}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                {!renameLoading && (
+                  <View>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        placeholder="Enter New Group Name"
+                        placeholderTextColor="grey"
+                        value={renameGroup}
+                        onChangeText={setRenameGroup}
+                        style={styles.textInput}
+                      />
+                    </View>
+                    {renameGroup.length < 5 && renameGroup.length > 0 && (
+                      <Text>minimum 5 character</Text>
+                    )}
+                    {renameGroup.length >= 5 && (
+                      <View>
+                        <TouchableOpacity
+                          onPress={handleRenameGroup}
+                          style={{
+                            width: '100%',
+                            marginHorizontal: 2,
+                            marginVertical: 4,
+                            paddingHorizontal: 8,
+                            backgroundColor: '#187afa',
+                            borderRadius: 10,
+                          }}>
+                          <Text
+                            style={{
+                              textAlign: 'center',
+                              color: 'white',
+                              margin: 10,
+                              fontWeight: 700,
+                            }}>
+                            Rename
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {renameLoading && (
+                  <>
+                    <ActivityIndicator size="large" color="grey" />
+                    <Text style={styles.loadingText}>Processing...</Text>
+                  </>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ScrollView>
   );
 };
@@ -321,6 +416,37 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 14,
     fontWeight: '400',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: 'grey',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  inputContainer: {
+    borderColor: 'grey',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    // marginTop: 10,
+    width: '100%', // Adjust width as per your layout
+  },
+  textInput: {
+    color: 'grey', // Color for the entered text
+    fontSize: 16,
   },
 });
 
