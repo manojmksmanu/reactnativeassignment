@@ -11,14 +11,15 @@ import {
 } from 'react-native';
 import {useAuth} from '../context/userContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {getUserFirstLetter} from '../misc/misc';
 import GroupInfoProfilePhoto from '../components/smallComponents/GroupInfoProfilePhoto';
 import Toast from 'react-native-toast-message';
 import {removeUserFromGroup} from '../services/chatService';
 
-const GroupInfoScreen: React.FC = ({}) => {
+const GroupInfoScreen: React.FC<{route: any; navigation: any}> = ({
+  route,
+  navigation,
+}) => {
   const {selectedChat, loggedUser, FetchChatsAgain, setSelectedChat} =
     useAuth() as {
       selectedChat: any;
@@ -28,13 +29,13 @@ const GroupInfoScreen: React.FC = ({}) => {
     };
   const [groupName, setGroupName] = useState(selectedChat.groupName);
   const [renameGroup, setRenameGroup] = useState();
-  const [expanded, setExpanded] = useState(false); // To manage expanded state
+  const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState(null);
   const toggleExpand = () => {
-    setExpanded(!expanded); // Toggle between expanded and collapsed
+    setExpanded(!expanded);
   };
-  console.log(loading, 'loading');
+
   const handleRemoveUser = async (item: any) => {
     Alert.alert(
       `Remove ${item.name}`, // Title of the alert
@@ -61,6 +62,10 @@ const GroupInfoScreen: React.FC = ({}) => {
       const data = await removeUserFromGroup(selectedChat._id, item._id);
       FetchChatsAgain();
       setSelectedChat(data.chat);
+      Toast.show({
+        type: 'success',
+        text2: `${item.name} removed from ${selectedChat.groupName}`,
+      });
     } catch (error: any) {
       Toast.show({
         type: 'error',
@@ -74,6 +79,10 @@ const GroupInfoScreen: React.FC = ({}) => {
   };
 
   const handleRenameGroup = () => {};
+
+  const handleAddUserToGroup = () => {
+    navigation.navigate('AddUserToGroup');
+  };
 
   const renderItem = (item: any) => (
     <>
@@ -217,7 +226,8 @@ const GroupInfoScreen: React.FC = ({}) => {
           paddingBottom: 30,
           paddingHorizontal: 40,
         }}>
-        <View
+        <TouchableOpacity
+          onPress={handleAddUserToGroup}
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -230,7 +240,7 @@ const GroupInfoScreen: React.FC = ({}) => {
             source={require('../assets/user.png')}
           />
           <Text style={{color: 'grey', fontSize: 18}}>Add Users</Text>
-        </View>
+        </TouchableOpacity>
         <View
           style={{
             display: 'flex',
@@ -252,7 +262,6 @@ const GroupInfoScreen: React.FC = ({}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // display:'flex'
   },
   allUserContainer: {minHeight: 200, overflow: 'hidden'},
   userContainer: {

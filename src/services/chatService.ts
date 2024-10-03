@@ -92,8 +92,33 @@ export const removeUserFromGroup = async (chatId: any, userId: any) => {
     console.log(response.data);
     return response.data;
   } catch (error: any) {
-    console.log(error,'errorrrr')
-    console.error(error,'error');
+    console.log(error, 'errorrrr');
+    console.error(error, 'error');
+    const errorMessage = error.response?.data?.error || 'something went wrong';
+    throw new Error(errorMessage);
+  }
+};
+export const addUserToGroupChat = async (chatId: any, users: any) => {
+  console.log(chatId, users);
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const response = await axios.patch(
+      `${API_URL}/chat/adduserstogroup`,
+      {
+        chatId,
+        users,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+        },
+      },
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error, 'errorrrr');
+    console.error(error, 'error');
     const errorMessage = error.response?.data?.error || 'something went wrong';
     throw new Error(errorMessage);
   }
