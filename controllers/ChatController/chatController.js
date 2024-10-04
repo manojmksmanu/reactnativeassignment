@@ -327,6 +327,7 @@ exports.addUserToGroupChat = async (req, res) => {
       }
     }
     await groupChat.save();
+    await groupChat.populate("users.user");
     res.status(200).json({
       message: "Users added to group chat successfully",
       alreadyInGroup,
@@ -404,26 +405,35 @@ exports.deleteGroupChat = async (req, res) => {
 };
 exports.renameGroupChat = async (req, res) => {
   console.log("hitRenameGroup");
-  const { _id, newGroupName } = req.body;
 
-  if (!_id || !newGroupName) {
+  const { chatId, newGroupName } = req.body;
+  console.log(chatId, newGroupName);
+
+  if (!chatId || !newGroupName) {
     return res.status(400).json({
       message: "Chat ID and new group name are required",
     });
   }
 
   try {
-    // Find the group chat by chatId
-    const groupChat = await NewChat.findOne({ _id });
+    // Check if group exists
+    const groupChat = await NewChat.findOne({ _id: chatId });
     if (!groupChat) {
+      console.log("Group chat not found");
       return res.status(404).json({
         message: "Group chat not found",
       });
     }
 
+    // Log before updating
+    console.log(
+      `Renaming group chat from ${groupChat.groupName} to ${newGroupName}`
+    );
+
     // Update the group name
     groupChat.groupName = newGroupName;
     await groupChat.save();
+    await groupChat.populate("users.user");
 
     res.status(200).json({
       message: "Group chat renamed successfully",

@@ -141,11 +141,11 @@ exports.login = async (req, res) => {
   const { email, userType, password } = req.body;
   // Common logic for checking the userType
   const findUserByType = async (userType) => {
-    if (userType === "Admin") return Admin.findOne({ email });
-    if (userType === "Student") return Student.findOne({ email });
-    if (userType === "Tutor") return Tutor.findOne({ email });
+    const emailRegex = new RegExp(`^${email}$`, "i"); // Create case-insensitive regex for email
+    if (userType === "Admin") return Admin.findOne({ email: emailRegex });
+    if (userType === "Student") return Student.findOne({ email: emailRegex });
+    if (userType === "Tutor") return Tutor.findOne({ email: emailRegex });
   };
-
   try {
     const user = await findUserByType(userType);
 
@@ -195,12 +195,12 @@ exports.getLoggedUser = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
-
+  const emailRegex = new RegExp(`^${email}$`, "i");
   try {
     let user =
-      (await Admin.findOne({ email })) ||
-      (await Student.findOne({ email })) ||
-      (await Tutor.findOne({ email }));
+      (await Admin.findOne({ email: emailRegex })) ||
+      (await Student.findOne({ email: emailRegex })) ||
+      (await Tutor.findOne({ email: emailRegex }));
 
     if (!user) {
       return res
@@ -233,11 +233,12 @@ exports.forgotPassword = async (req, res) => {
 
 exports.confirmOtp = async (req, res) => {
   const { email, otp } = req.body;
+  const emailRegex = new RegExp(`^${email}$`, "i");
   try {
     let user =
-      (await Admin.findOne({ email })) ||
-      (await Student.findOne({ email })) ||
-      (await Tutor.findOne({ email }));
+      (await Admin.findOne({ email: emailRegex })) ||
+      (await Student.findOne({ email: emailRegex })) ||
+      (await Tutor.findOne({ email: emailRegex }));
 
     if (
       !user ||
@@ -257,11 +258,12 @@ exports.confirmOtp = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   const { email, newPassword } = req.body;
+  const emailRegex = new RegExp(`^${email}$`, "i");
   try {
     let user =
-      (await Admin.findOne({ email })) ||
-      (await Student.findOne({ email })) ||
-      (await Tutor.findOne({ email }));
+      (await Admin.findOne({ email: emailRegex })) ||
+      (await Student.findOne({ email: emailRegex })) ||
+      (await Tutor.findOne({ email: emailRegex }));
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }

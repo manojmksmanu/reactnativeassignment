@@ -17,8 +17,8 @@ router.get("/:userId/chats", protect, async (req, res) => {
 });
 
 router.post("/creategroup", protect, createGroupChat);
-router.post("/grouprename", protect, renameGroupChat);
-router.post("/adduserstogroup", protect, addUserToGroupChat);
+router.patch("/grouprename", protect, renameGroupChat);
+router.patch("/adduserstogroup", protect, addUserToGroupChat);
 router.patch("/removeuserfromgroup", protect, removeUserFromGroupChat);
 router.post("/deletegroupchat", protect, deleteGroupChat);
 
